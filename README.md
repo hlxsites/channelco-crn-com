@@ -1,9 +1,9 @@
-# Your Project's Title...
-Your project's description...
+# AEM Franklin - crn.com
+crn.com on AEM Franklin
 
 ## Environments
-- Preview: https://main--{repo}--{owner}.hlx.page/
-- Live: https://main--{repo}--{owner}.hlx.live/
+- Preview: https://main--channelco-crn-com--hlxsites.hlx.page/
+- Live: https://main--channelco-crn-com--hlxsites.hlx.live/
 
 ## Installation
 
