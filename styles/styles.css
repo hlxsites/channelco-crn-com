@@ -10,25 +10,18 @@
  * governing permissions and limitations under the License.
  */
 
-
-
-
-
-
-
-
  :root {
   /* colors */
   --text-color: #1b1b1b;
   --link-color: #1b1b1b;
   --link-hover-color: #1b1b1b;
-  --background-color: #ffffff;
-  --overlay-background-color: #eeeeee;
-  --highlight-background-color: #cccccc;
+  --background-color: #fff;
+  --overlay-background-color: #eee;
+  --highlight-background-color: #ccc;
   
   /* fonts */
-  --heading-font-family: Arial, Verdana, "sans serif";
-  --body-font-family: Arial, Verdana, "sans serif";
+  --heading-font-family: arial, verdana, "sans serif";
+  --body-font-family: arial, verdana, "sans serif";
   --fixed-font-family: "Roboto Mono", menlo, consolas, "Liberation Mono", monospace;
 
   /* body sizes */
@@ -92,10 +85,8 @@ h1, h2, h3,
 h4, h5, h6 {
   font-family: var(--heading-font-family);
   font-weight: 600;
-  line-height: 1.25;
-  margin-top: 1em;
-  margin-bottom: .5em;
-  scroll-margin: calc(var(--nav-height) + 1em);
+  line-height: 1.2;
+  margin-bottom: 1.75rem;
 }
 
 h1 { font-size: var(--heading-font-size-xxl) }
@@ -143,82 +134,7 @@ a.button:hover, a.button:focus, button:hover, button:focus  {
 
 button:disabled, button:disabled:hover {
   background-color: var(--overlay-background-color);
-  cursor: unset;
-}
-
-a.button.secondary, button.secondary {
-  background-color: unset;
-  border: 2px solid currentcolor;
-  color: var(--text-color)
-}
-
-main input {
-  font-size: 1.25rem;
-  width: 100%;
-  max-width: 50rem;
-  display: block;
-  margin-bottom: 1rem;
-  padding: 0.75rem 0.6rem;
-  border-radius: 0.25rem;
-  box-sizing: border-box;
-  border: 1px solid var(--text-color);
-  color: var(--text-color);
-  background-color: var(--background-color);
-}
-
-main input:hover {
-  border: 1px solid var(--text-color);
-}
-
-main blockquote {
-  font-style: italic;
-  margin: 3rem;
-  text-indent: -1rem;
-  hanging-punctuation: first;
-}
-
-main blockquote p::before {
-  content: "“";
-  line-height: 0;
-}
-
-main blockquote p::after {
-  content: "”";
-  line-height: 0;
-}
-
-main img {
-  max-width: 100%;
-  width: auto;
-  height: auto;
-}
-
-.icon {
-  display: inline-block;
-  height: 24px;
-  width: 24px;
-}
-
-.icon svg {
-  height: 100%;
-  width: 100%;
-}
-
-main .section {
-  padding: 64px 16px;
-}
-
-@media (min-width: 600px) {
-  main .section {
-    padding: 64px 32px;
-  }
-}
-
-@media (min-width: 900px) {
-  .section > div {
-    max-width: 1200px;
-    margin: auto;
-  }
+  cursor: pointer;
 }
 
 /* section metadata */
