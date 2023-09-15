@@ -10,36 +10,46 @@
  * governing permissions and limitations under the License.
  */
 
+
+
+
+
+
+
+
  :root {
   /* colors */
-  --link-color: #035fe6;
-  --link-hover-color: #136ff6;
-  --background-color: #fff;
-  --overlay-background-color: #eee;
-  --highlight-background-color: #ccc;
-  --text-color: #000;
-
+  --text-color: #1b1b1b;
+  --link-color: #1b1b1b;
+  --link-hover-color: #1b1b1b;
+  --background-color: #ffffff;
+  --overlay-background-color: #eeeeee;
+  --highlight-background-color: #cccccc;
+  
   /* fonts */
-  --body-font-family: roboto, roboto-fallback;
-  --heading-font-family: var(--body-font-family);
-  --fixed-font-family: 'Roboto Mono', menlo, consolas, 'Liberation Mono', monospace;
+  --heading-font-family: Arial, Verdana, "sans serif";
+  --body-font-family: Arial, Verdana, "sans serif";
+  --fixed-font-family: "Roboto Mono", menlo, consolas, "Liberation Mono", monospace;
 
   /* body sizes */
-  --body-font-size-m: 22px;
+  --body-font-size-m: 20px;
   --body-font-size-s: 18px;
   --body-font-size-xs: 16px;
-
-  /* heading sizes */
-  --heading-font-size-xxl: 48px;
-  --heading-font-size-xl: 40px;
-  --heading-font-size-l: 32px;
-  --heading-font-size-m: 24px;
-  --heading-font-size-s: 20px;
+  
+  /* sizes */
+  --heading-font-size-xxl: 45px;
+  --heading-font-size-xl: 36px;
+  --heading-font-size-l: 31.5px;
+  --heading-font-size-m: 27px;
+  --heading-font-size-s: 22.5px;
   --heading-font-size-xs: 18px;
 
   /* nav height */
-  --nav-height: 64px;
+  --nav-height: 100px;
 
+  /* crn variables */
+  --bs-gutter-x: 1.5rem;
+  --bs-gutter-y: 0;
 }
 
 @font-face {
@@ -52,12 +62,12 @@
 
 @media (min-width: 900px) {
   :root {
-    --heading-font-size-xxl: 60px;
-    --heading-font-size-xl: 48px;
-    --heading-font-size-l: 36px;
-    --heading-font-size-m: 30px;
-    --heading-font-size-s: 24px;
-    --heading-font-size-xs: 22px;
+    --heading-font-size-xxl: 45px;
+    --heading-font-size-xl: 36px;
+    --heading-font-size-l: 31.5px;
+    --heading-font-size-m: 27px;
+    --heading-font-size-s: 22.5px;
+    --heading-font-size-xs: 18px;
   }
 }
 
@@ -65,14 +75,13 @@ body {
   font-size: var(--body-font-size-m);
   margin: 0;
   font-family: var(--body-font-family);
-  line-height: 1.6;
+  line-height: 1.5;
   color: var(--text-color);
   background-color: var(--background-color);
   display: none;
-}
-
-body.appear {
-  display: block;
+  max-width: 1140px;
+  margin-left: 150px;
+  margin-right: 150px;
 }
 
 header {
@@ -95,39 +104,6 @@ h3 { font-size: var(--heading-font-size-l) }
 h4 { font-size: var(--heading-font-size-m) }
 h5 { font-size: var(--heading-font-size-s) }
 h6 { font-size: var(--heading-font-size-xs) }
-
-p, dl, ol, ul, pre, blockquote {
-  margin-top: 1em;
-  margin-bottom: 1em;
-}
-
-hr {
-  margin-top: 1.5em;
-  margin-bottom: 1.5em;
-  border: 0;
-  border-bottom: 1px solid var(--overlay-background-color);
-}
-
-code, pre, samp {
-  font-family: var(--fixed-font-family);
-  font-size: var(--body-font-size-s);
-}
-
-code, samp {
-  padding: .125em;
-}
-
-pre {
-  overflow: scroll;
-}
-
-main pre {
-  background-color: var(--overlay-background-color);
-  padding: 1em;
-  border-radius: .25em;
-  overflow-x: auto;
-  white-space: pre;
-}
 
 a:any-link {
   color: var(--link-color);
