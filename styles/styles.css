@@ -17,9 +17,9 @@
   --link-hover-color: #1b1b1b;
   --primary-button-color: #1b1b1b;
   --secondary-button-color: #ed1c24;
-  --background-color: #ffffff;
-  --overlay-background-color: #eeeeee;
-  --highlight-background-color: #cccccc;
+  --background-color: #fff;
+  --overlay-background-color: #eee;
+  --highlight-background-color: #ccc;
   
   /* fonts */
   --heading-font-family: arial, verdana, "sans serif";
