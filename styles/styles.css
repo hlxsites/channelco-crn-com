@@ -15,9 +15,11 @@
   --text-color: #1b1b1b;
   --link-color: #1b1b1b;
   --link-hover-color: #1b1b1b;
-  --background-color: #fff;
-  --overlay-background-color: #eee;
-  --highlight-background-color: #ccc;
+  --primary-button-color: #1b1b1b;
+  --secondary-button-color: #ed1c24;
+  --background-color: #ffffff;
+  --overlay-background-color: #eeeeee;
+  --highlight-background-color: #cccccc;
   
   /* fonts */
   --heading-font-family: arial, verdana, "sans serif";
@@ -45,14 +47,6 @@
   --bs-gutter-y: 0;
 }
 
-@font-face {
-  font-family: roboto-fallback;
-  size-adjust: 100.06%;
-  ascent-override: 95%;
-  src: local('Arial');
-}
-
-
 @media (min-width: 900px) {
   :root {
     --heading-font-size-xxl: 45px;
@@ -77,6 +71,10 @@ body {
   margin-right: 150px;
 }
 
+body.appear {
+  display: block;
+}
+
 header {
   height: var(--nav-height);
 }
@@ -85,8 +83,10 @@ h1, h2, h3,
 h4, h5, h6 {
   font-family: var(--heading-font-family);
   font-weight: 600;
-  line-height: 1.2;
-  margin-bottom: 1.75rem;
+  line-height: 1.25;
+  margin-top: 1em;
+  margin-bottom: .5em;
+  scroll-margin: calc(var(--nav-height) + 1em);
 }
 
 h1 { font-size: var(--heading-font-size-xxl) }
@@ -95,6 +95,39 @@ h3 { font-size: var(--heading-font-size-l) }
 h4 { font-size: var(--heading-font-size-m) }
 h5 { font-size: var(--heading-font-size-s) }
 h6 { font-size: var(--heading-font-size-xs) }
+
+p, dl, ol, ul, pre, blockquote {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+hr {
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+  border: 0;
+  border-bottom: 1px solid var(--overlay-background-color);
+}
+
+code, pre, samp {
+  font-family: var(--fixed-font-family);
+  font-size: var(--body-font-size-s);
+}
+
+code, samp {
+  padding: .125em;
+}
+
+pre {
+  overflow: scroll;
+}
+
+main pre {
+  background-color: var(--overlay-background-color);
+  padding: 1em;
+  border-radius: .25em;
+  overflow-x: auto;
+  white-space: pre;
+}
 
 a:any-link {
   color: var(--link-color);
@@ -109,32 +142,97 @@ a:hover {
 /* buttons */
 a.button:any-link, button {
   font-family: var(--body-font-family);
+  color: var(--primary-button-color);
   display: inline-block;
-  box-sizing: border-box;
   text-decoration: none;
-  border: 2px solid transparent;
-  padding: 5px 30px;
-  text-align: center;
   font-style: normal;
-  font-weight: 600;
+  font-weight: normal;
   cursor: pointer;
-  color: var(--background-color);
-  background-color: var(--link-color);
-  margin: 16px 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  border-radius: 30px;
+  text-transform: uppercase;
 }
 
 a.button:hover, a.button:focus, button:hover, button:focus  {
-  background-color: var(--link-hover-color);
+  text-decoration: none;
   cursor: pointer;
 }
 
 button:disabled, button:disabled:hover {
   background-color: var(--overlay-background-color);
-  cursor: pointer;
+  cursor: unset;
+}
+
+a.button.secondary, button.secondary {
+  background-color: unset;
+  color: var(--secondary-button-color)
+}
+
+main input {
+  font-size: 1.25rem;
+  width: 100%;
+  max-width: 50rem;
+  display: block;
+  margin-bottom: 1rem;
+  padding: 0.75rem 0.6rem;
+  border-radius: 0.25rem;
+  box-sizing: border-box;
+  border: 1px solid var(--text-color);
+  color: var(--text-color);
+  background-color: var(--background-color);
+}
+
+main input:hover {
+  border: 1px solid var(--text-color);
+}
+
+main blockquote {
+  font-style: italic;
+  margin: 3rem;
+  text-indent: -1rem;
+  hanging-punctuation: first;
+}
+
+main blockquote p::before {
+  content: "“";
+  line-height: 0;
+}
+
+main blockquote p::after {
+  content: "”";
+  line-height: 0;
+}
+
+main img {
+  max-width: 100%;
+  width: auto;
+  height: auto;
+}
+
+.icon {
+  display: inline-block;
+  height: 24px;
+  width: 24px;
+}
+
+.icon svg {
+  height: 100%;
+  width: 100%;
+}
+
+main .section {
+  padding: 64px 16px;
+}
+
+@media (min-width: 600px) {
+  main .section {
+    padding: 64px 32px;
+  }
+}
+
+@media (min-width: 900px) {
+  .section > div {
+    max-width: 1200px;
+    margin: auto;
+  }
 }
 
 /* section metadata */
