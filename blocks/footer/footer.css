@@ -1,14 +1,114 @@
+/* Footer Base Styles */
 footer {
-  padding: 2rem;
-  background-color: var(--overlay-background-color);
+  background-color: #b7b7b7;
   font-size: var(--body-font-size-s);
+  max-width: 1140px;
+  margin: auto;
+  margin-bottom: 100px;
+  border-top: 10px solid red;
 }
 
 footer .footer {
-  max-width: 1200px;
-  margin: auto;
+display: flex;
+width: 100%;
 }
 
 footer .footer p {
   margin: 0;
+}
+
+.footer-row {
+  align-items: center;
+}
+
+/* Footer List Styles */
+.footer li {
+  list-style-type: none;
+}
+
+.footer a {
+  color: black;
+  text-decoration: none;
+}
+
+/* Footer Social Styles */
+.footer-social img {
+  width: 30px;
+  height: 30px;
+}
+
+/* Footer Brand Styles */
+.footer-brand {
+  padding-left: 30px;
+}
+
+
+.footer-brand img {
+  margin: 10px 0;
+  width: 100px;
+  height: 55px;
+}
+
+.footer-brand p {
+  font-size: 10px;
+  text-align: center;
+}
+
+/* Footer Navigation Styles */
+.footer-main {
+  padding-left: 20px;
+  font-family: var(--body-font-family);
+  text-transform: uppercase;
+}
+
+.footer-main > div > div > ul {
+  display: flex;
+  flex-direction: row;
+  text-align: left;
+  font-size: 1rem;
+  padding: 0 12px;
+  font-weight: 600;
+  text-decoration: none;
+  color: black;
+}
+
+.footer-main > div > div > ul > li {
+  padding: 0 30px;
+}
+
+/* Footer Sublinks Styles */
+.footer-sublinks {
+  font-size: 12px;
+}
+
+.footer-sublinks ul {
+  display: flex;
+}
+
+.footer-sublinks li {
+  padding-right: 5px;
+  padding-left: 5px;
+}
+
+/* Footer Social */
+.footer-social {
+  display: flex;
+  flex-direction: row;
+}
+
+.social-icons {
+  display: flex;
+  flex-direction: row;
+}
+
+
+/* Footer Nav */
+.footer-nav {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Footer borders */
+.footer-border {
+  border-top: 10px solid black;
 }
