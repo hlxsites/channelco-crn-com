@@ -11,7 +11,8 @@
   <meta property="og:title" content="Page not found">
   <script src="/scripts/scripts.js" type="module" crossorigin="use-credentials"></script>
   <script type="module">
-    import { sampleRUM } from '/scripts/lib-franklin.js';
+    import { decorateMain } from '../../scripts/scripts.js';
+    import { sampleRUM, loadBlocks } from '/scripts/lib-franklin.js';
 
     window.addEventListener('load', () => {
       if (document.referrer) {
@@ -28,22 +29,71 @@
       }
       sampleRUM('404', { source: document.referrer, target: window.location.href });
     });
+
+    async function loadFragment() {
+            const fragmentContainer = document.getElementById('fragment-container');
+            if (fragmentContainer) {
+                const path = '/fragments/404-fragment';
+                const resp = await fetch(`${path}.plain.html`);
+                if (resp.ok) {
+                    const fragmentHTML = await resp.text();
+                    fragmentContainer.innerHTML = fragmentHTML;
+                    decorateMain(fragmentContainer);
+                    await loadBlocks(fragmentContainer);
+                } else {
+                    fragmentContainer.innerHTML = '<p>Error loading content</p>';
+                }
+            }
+        }
+
+        // Call the load404Fragment function when your 404 page loads
+        document.addEventListener('DOMContentLoaded', loadFragment);
   </script>
   <link rel="stylesheet" href="/styles/styles.css">
   <style>
-    main.error {
-      min-height: calc(100vh - var(--nav-height));
-      display: flex;
-      align-items: center;
-    }
 
     main.error .error-number {
       width: 100%;
     }
 
-    main.error .error-number text {
-      font-family: var(--fixed-font-family);
+    main.error .error-message h1 {
+    font-family: inherit;
+    font-size: 32px;
+    font-weight: 600;
+    color: #ed1c24;
+    margin-left: 0rem;
     }
+
+    main.error .error-message h2 {
+    font-family: Arial Narrow, Arial, sans-serif;
+    font-size: 24px;
+    font-weight: bold;
+    font-style: italic;
+    color: #1b1b1b;
+    margin: 20px 0px;
+    }
+
+
+    main.error .error-message .subheading {
+      font-family: Arial Narrow, Arial, sans-serif;
+    font-size: 24px;
+    font-weight: bold;
+    font-style: italic;
+    color: #1b1b1b;
+    margin: 20px 0px;
+    }
+
+    main.error .error-message .error-button-home {
+    font-family: Arial Narrow, Arial, sans-serif;
+    font-size: 24px;
+    font-weight: bold;
+    font-style: italic;
+    color: #ed1c24;
+    margin: 20px 0px;
+    }
+
+ 
+    
   </style>
   <link rel="stylesheet" href="/styles/lazy-styles.css">
 </head>
@@ -51,14 +101,16 @@
 <body>
   <header></header>
   <main class="error">
-    <div class="section">
-      <svg viewBox="1 0 38 18" class="error-number">
-        <text x="0" y="17">404</text>
-      </svg>
-      <h2 class="error-message">Page Not Found</h2>
-      <p class="button-container">
-        <a href="/" class="button secondary error-button-home">Go home</a>
-      </p>
+    <div class="error-message">
+      <h1>404</h1>
+      <span class="subheading">
+        <p>You've got a 404.  We're sorry, but we cannot find the page that you are looking for. 
+       </p>
+      </span>
+      <div id="fragment-container"></div>
+      <h2>Or, You may return to the
+        <a href="/" class="error-button-home">Homepage</a>
+      </h2>
     </div>
   </main>
   <footer></footer>
