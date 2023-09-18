@@ -167,7 +167,7 @@ a.button.secondary, button.secondary {
   color: var(--secondary-button-color)
 }
 
-a.button.secondary::after, button.secondary::after {
+/* a.button.secondary::after, button.secondary::after {
   content: '';
   display: inline-block;
   width: var(--body-font-size-m);
@@ -177,7 +177,7 @@ a.button.secondary::after, button.secondary::after {
   margin-left: 2px;
   position: relative;
   transform: translateY(12%);
-}
+} */
 
 main {
   width: 100%;
