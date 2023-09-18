@@ -12,7 +12,7 @@ export default async function decorate(block) {
   const footerPath = cfg.footer || '/footer';
   const resp = await fetch(
     `${footerPath}.plain.html`,
-    window.location.pathname.endsWith('/footer') ? { cache: 'reload' } : {}
+    window.location.pathname.endsWith('/footer') ? { cache: 'reload' } : {},
   );
 
   if (resp.ok) {
@@ -41,8 +41,7 @@ export default async function decorate(block) {
     footerSocial.querySelectorAll('p').forEach((p, index) => {
       if (p.querySelector('picture')) {
         const anchorTag = footerSocial
-          .querySelectorAll('p')
-          [index + 1]?.querySelector('a');
+          .querySelectorAll('p')[index + 1]?.querySelector('a');
         if (anchorTag) {
           anchorTag.appendChild(p.querySelector('picture'));
 
@@ -91,7 +90,5 @@ export default async function decorate(block) {
     followCRN.appendChild(p);
 
     footerSocials.appendChild(socialIcons);
-
-
   }
 }
