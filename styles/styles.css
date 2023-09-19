@@ -129,6 +129,8 @@ main pre {
   border-radius: .25em;
   overflow-x: auto;
   white-space: pre;
+  height: 100%;
+  width: 100%;
 }
 
 a:any-link {
@@ -178,11 +180,6 @@ a.button.secondary::after, button.secondary::after {
   margin-left: 2px;
   position: relative;
   transform: translateY(12%);
-}
-
-main {
-  width: 100%;
-  height: 100%;
 }
 
 main input {
