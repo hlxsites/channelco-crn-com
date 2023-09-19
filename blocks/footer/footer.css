@@ -1,15 +1,15 @@
 /* footer base styles */
 footer {
   background-color: #b7b7b7;
-  border-top: 10px solid red;
-  font-size: var(--footer-base-font-size);
+  border-top: 10px solid var(--clr-red);
+  font-size: var(--body-font-size-m);
   margin: auto;
   max-width: 1140px;
   margin-bottom: 100px;
 }
 
 .footer {
-  border-top: 10px solid black;
+  border-top: 10px solid var(--clr-black);
   display: flex;
   padding: 20px 0 50px;
   width: 100%;
@@ -27,13 +27,13 @@ footer {
 }
 
 .footer a {
-  color: black;
+  color: var(--clr-black);
   text-decoration: none;
 }
 
 /* sublink styles */
 .footer-sublinks {
-  font-size: 12px;
+  font-size: var(--heading-font-size-s);
   padding-left: 160px;
 }
 
@@ -62,7 +62,7 @@ footer {
 }
 
 .footer-brand p {
-  font-size: 10px;
+  font-size: var(--heading-font-size-xs);
   margin: 0;
   text-align: center;
 }
@@ -74,7 +74,7 @@ footer {
   padding-left: 35px;
 }
 
-.footer-social img {
+.footer-social svg {
   height: 30px;
   width: 30px;
 }
@@ -85,11 +85,11 @@ footer {
 }
 
 .social-icons p {
-  padding-right: 15px;
+  padding-right: 20px;
 }
 
 .follow-crn {
-  font-size: 12px;
+  font-size: var(--heading-font-size-s);
   padding: 12px 0 8px;
 }
 
@@ -99,7 +99,7 @@ footer {
 }
 
 .footer-border {
-  border-top: 10px solid black;
+  border-top: 10px solid var(--clr-black);
 }
 
 .footer p {
@@ -108,23 +108,22 @@ footer {
 
 /* main footer styles */
 .footer-main {
-  font-family: var(--footer-base-font-family);
-  padding-left: 20px;
+  font-family: var(--body-font-size-m);
   text-transform: uppercase;
 }
 
 .footer-main ul {
-  color: black;
+  color: var(--clr-black);
   display: flex;
   flex-direction: row;
-  font-size: 1rem;
+  font-size: var(--body-font-size-s);
   font-weight: 600;
   padding: 0 12px;
   text-align: left;
 }
 
 .footer-main ul > li {
-  padding: 0 30px;
+  padding: 0 25px;
 }
 
 @media (max-width: 375px) {
@@ -150,7 +149,7 @@ footer {
   .footer-main ul {
     align-items: center;
     flex-direction: column;
-    font-size: 17px;
+    font-size: var(--body-font-size-m);
     line-height: 35px;
     padding: 0;
   }
@@ -186,7 +185,7 @@ footer {
   .footer-main ul {
     align-items: center;
     flex-direction: column;
-    font-size: 17px;
+    font-size: var(--body-font-size-m);
     line-height: 40px;
     padding: 0;
     margin: 0;
