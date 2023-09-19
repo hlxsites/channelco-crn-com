@@ -12,12 +12,15 @@
 
  :root {
   /* colors */
-  --text-color: #1b1b1b;
-  --link-color: #ed1c24;
-  --link-hover-color: #ed1c24;
-  --primary-button-color: #1b1b1b;
-  --secondary-button-color: #ed1c24;
-  --background-color: #fff;
+  --clr-red: #ed1c24;
+  --clr-black: #1b1b1b;
+  --clr-white: #fff;
+  --text-color: var(--clr-black);
+  --link-color: var(--clr-red);
+  --link-hover-color: var(--clr-red);
+  --primary-button-color: var(--clr-black);
+  --secondary-button-color: var(--clr-red);
+  --background-color: var(--clr-white);
   --overlay-background-color: #eee;
   --highlight-background-color: #ccc;
   
