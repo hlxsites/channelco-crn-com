@@ -1,4 +1,5 @@
 import { readBlockConfig, decorateIcons } from '../../scripts/lib-franklin.js';
+import { decorateLinkedPictures } from '../../scripts/scripts.js';
 
 /**
  * loads and decorates the footer
@@ -23,37 +24,8 @@ export default async function decorate(block) {
     footer.innerHTML = html;
 
     decorateIcons(footer);
+    decorateLinkedPictures(footer);
     block.append(footer);
-
-    // wrap brand logo inside anchor tag
-    const pictureElement = document.querySelector('.footer-brand picture');
-    const anchorElement = document.querySelector('.footer-brand a');
-    const { childNodes } = anchorElement;
-    childNodes.forEach((node) => {
-      if (node.nodeType === 3) {
-        anchorElement.removeChild(node);
-      }
-    });
-
-    // wrap the social icons inside their anchor tags
-    const footerSocial = document.querySelector('.footer-social');
-
-    footerSocial.querySelectorAll('p').forEach((p, index) => {
-      if (p.querySelector('picture')) {
-        const anchorTag = footerSocial
-          .querySelectorAll('p')[index + 1]?.querySelector('a');
-        if (anchorTag) {
-          anchorTag.appendChild(p.querySelector('picture'));
-
-          const anchorChildNodes = anchorTag.childNodes;
-          anchorChildNodes.forEach((node) => {
-            if (node.nodeType === 3) {
-              anchorTag.removeChild(node);
-            }
-          });
-        }
-      }
-    });
 
     // create two footer rows
     const row1 = document.createElement('div');
@@ -76,9 +48,7 @@ export default async function decorate(block) {
 
     footerNavContainer.appendChild(row1);
     footerNavContainer.appendChild(row2);
-
     footerContainer.appendChild(footerNavContainer);
-    anchorElement.appendChild(pictureElement);
 
     // wrap social icons in own container
     const socialIcons = document.querySelector('.footer-social > div > div');
