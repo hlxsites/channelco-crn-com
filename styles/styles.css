@@ -32,6 +32,7 @@
   /* body sizes */
   --body-font-size-m: 1.115rem;
   --body-font-size-s: 1.025rem;
+  --body-font-size-xs: 0.75rem;
   
   /* sizes */
   --heading-font-size-xxl: 1.75rem;
@@ -39,6 +40,7 @@
   --heading-font-size-l: 1rem;
   --heading-font-size-m: 0.825rem;
   --heading-font-size-s: 0.750rem;
+  --heading-font-size-xs: 0.625rem;
 
   /* nav height */
   --nav-height: 100px;
