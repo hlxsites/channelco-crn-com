@@ -12,63 +12,61 @@
 
  :root {
   /* colors */
-  --link-color: #035fe6;
-  --link-hover-color: #136ff6;
+  --text-color: #1b1b1b;
+  --link-color: #ed1c24;
+  --link-hover-color: #ed1c24;
+  --primary-button-color: #1b1b1b;
+  --secondary-button-color: #ed1c24;
   --background-color: #fff;
   --overlay-background-color: #eee;
   --highlight-background-color: #ccc;
-  --text-color: #000;
-
+  
   /* fonts */
-  --body-font-family: roboto, roboto-fallback;
-  --heading-font-family: var(--body-font-family);
-  --fixed-font-family: 'Roboto Mono', menlo, consolas, 'Liberation Mono', monospace;
+  --heading-font-family: arial, verdana, "sans serif";
+  --body-font-family: arial, verdana, "sans serif";
+  --fixed-font-family: "Roboto Mono", menlo, consolas, "Liberation Mono", monospace;
 
   /* body sizes */
-  --body-font-size-m: 22px;
-  --body-font-size-s: 18px;
-  --body-font-size-xs: 16px;
-
-  /* heading sizes */
-  --heading-font-size-xxl: 48px;
-  --heading-font-size-xl: 40px;
-  --heading-font-size-l: 32px;
-  --heading-font-size-m: 24px;
-  --heading-font-size-s: 20px;
-  --heading-font-size-xs: 18px;
+  --body-font-size-m: 1.115rem;
+  --body-font-size-s: 1.025rem;
+  
+  /* sizes */
+  --heading-font-size-xxl: 1.75rem;
+  --heading-font-size-xl: 1.25rem;
+  --heading-font-size-l: 1rem;
+  --heading-font-size-m: 0.825rem;
+  --heading-font-size-s: 0.750rem;
 
   /* nav height */
-  --nav-height: 64px;
+  --nav-height: 100px;
 
+  /* crn variables */
+  --padding-spacer-x: 1.5rem;
+  --padding-spacer-y: 0;
 }
-
-@font-face {
-  font-family: roboto-fallback;
-  size-adjust: 100.06%;
-  ascent-override: 95%;
-  src: local('Arial');
-}
-
 
 @media (min-width: 900px) {
   :root {
-    --heading-font-size-xxl: 60px;
-    --heading-font-size-xl: 48px;
-    --heading-font-size-l: 36px;
-    --heading-font-size-m: 30px;
-    --heading-font-size-s: 24px;
-    --heading-font-size-xs: 22px;
+    --heading-font-size-xxl: 1.75rem;
+    --heading-font-size-xl: 1.25rem;
+    --heading-font-size-l: 1rem;
+    --heading-font-size-m: 0.825rem;
+    --heading-font-size-s: 0.750rem;
   }
 }
 
 body {
   font-size: var(--body-font-size-m);
-  margin: 0;
+  margin-left: auto;
+  margin-right: auto;
   font-family: var(--body-font-family);
-  line-height: 1.6;
+  line-height: 1.5;
   color: var(--text-color);
   background-color: var(--background-color);
   display: none;
+  height: 100%;
+  width: 100%;
+  max-width: 1140px;
 }
 
 body.appear {
@@ -94,11 +92,15 @@ h2 { font-size: var(--heading-font-size-xl) }
 h3 { font-size: var(--heading-font-size-l) }
 h4 { font-size: var(--heading-font-size-m) }
 h5 { font-size: var(--heading-font-size-s) }
-h6 { font-size: var(--heading-font-size-xs) }
 
 p, dl, ol, ul, pre, blockquote {
   margin-top: 1em;
   margin-bottom: 1em;
+}
+
+b {
+  font-weight: bolder;
+  font-size: var(--body-font-size-m)
 }
 
 hr {
@@ -127,6 +129,8 @@ main pre {
   border-radius: .25em;
   overflow-x: auto;
   white-space: pre;
+  height: 100%;
+  width: 100%;
 }
 
 a:any-link {
@@ -135,33 +139,24 @@ a:any-link {
 }
 
 a:hover {
-  text-decoration: underline;
   color: var(--link-hover-color);
+  text-decoration: none;
 }
 
 /* buttons */
 a.button:any-link, button {
   font-family: var(--body-font-family);
+  color: var(--primary-button-color);
   display: inline-block;
-  box-sizing: border-box;
   text-decoration: none;
-  border: 2px solid transparent;
-  padding: 5px 30px;
-  text-align: center;
   font-style: normal;
-  font-weight: 600;
+  font-weight: normal;
   cursor: pointer;
-  color: var(--background-color);
-  background-color: var(--link-color);
-  margin: 16px 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  border-radius: 30px;
+  text-transform: uppercase;
 }
 
 a.button:hover, a.button:focus, button:hover, button:focus  {
-  background-color: var(--link-hover-color);
+  text-decoration: none;
   cursor: pointer;
 }
 
@@ -172,8 +167,19 @@ button:disabled, button:disabled:hover {
 
 a.button.secondary, button.secondary {
   background-color: unset;
-  border: 2px solid currentcolor;
-  color: var(--text-color)
+  color: var(--secondary-button-color)
+}
+
+a.button.secondary::after, button.secondary::after {
+  content: '';
+  display: inline-block;
+  width: var(--body-font-size-m);
+  height: var(--body-font-size-m);
+  background: url('../icons/play-fill.svg') no-repeat;
+  background-size: contain;
+  margin-left: 2px;
+  position: relative;
+  transform: translateY(12%);
 }
 
 main input {
@@ -228,20 +234,34 @@ main img {
   width: 100%;
 }
 
-main .section {
-  padding: 64px 16px;
+main {
+  padding-left: 12px;
+  padding-right: 12px;
 }
 
-@media (min-width: 600px) {
+main .section {
+  margin-top: 24px;
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: var(--padding-spacer-x, 0.75rem);
+  padding-right: var(--padding-spacer-x, 0.75rem);
+}
+
+@media (min-width: 576px) {
   main .section {
-    padding: 64px 32px;
+    max-width: 540px;
   }
 }
 
-@media (min-width: 900px) {
-  .section > div {
-    max-width: 1200px;
-    margin: auto;
+@media (min-width: 768px) {
+  main .section {
+    max-width: 720px;
+  }
+}
+
+@media (min-width: 992px) {
+  main .section {
+    max-width: 960px;
   }
 }
 
