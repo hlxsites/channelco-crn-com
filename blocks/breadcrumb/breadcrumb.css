@@ -1,11 +1,7 @@
 .breadcrumb {
     display: flex;
     flex-direction: column;
-}
-
-.breadcrumb .breadcrumb-black-border {
     border-top: 2px solid #000;
-    width: 100%;
 }
 
 .breadcrumb-list {
