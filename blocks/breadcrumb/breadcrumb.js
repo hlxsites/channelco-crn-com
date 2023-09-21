@@ -1,4 +1,3 @@
-import { getMetadata } from "../../scripts/lib-franklin.js";
 import { createTag } from "../../scripts/scripts.js";
 
 function createBreadcrumbItem(href, label) {
