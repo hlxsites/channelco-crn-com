@@ -40,6 +40,7 @@ function buildHeroBlock(main) {
  */
 function buildBreadcrumb(main) {
   const div = document.createElement('div');
+  div.classList.add('test');
   div.append(buildBlock('breadcrumb', { elems: [] }));
   main.prepend(div)
 }

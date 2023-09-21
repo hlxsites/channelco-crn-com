@@ -20,15 +20,10 @@ export default function decorate(block) {
         list.append(createBreadcrumbItem(segments, path === '' ? 'HOME' : ` ▸ ${path.replaceAll('-', ' ')}`));
     })
 
-    // Last item in breadcrumb should be current page title for articles and path for anything else
-    const templateType = getMetadata('template');
-    if (templateType == 'article') {
-        const currPageTitle = document.querySelector('h1');
-        list.append(` ▸ ${currPageTitle.innerText}`);
-    } else {
-        list.append(` ▸ ${lastPath.replaceAll('-', ' ')}`);
-    }
-    
+    // Last item in breadcrumb should be current page title. If not found, default to path
+    const currPageTitle = document.querySelector('h1');
+    list.append(` ▸ `);
+    list.append(currPageTitle ? currPageTitle.innerText : lastPath.replaceAll('-', ' '));
 
     block.append(list);
 }

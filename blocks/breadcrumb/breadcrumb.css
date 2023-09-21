@@ -1,7 +1,12 @@
+.breadcrumb-container {
+    padding-left: 0 !important;
+}
+
 .breadcrumb {
     display: flex;
     flex-direction: column;
     border-top: 2px solid #000;
+    width: 100%;
 }
 
 .breadcrumb-list {
@@ -11,7 +16,6 @@
     border-bottom: 2px solid #c5c5c5;
     font-size: 14px;
     font-weight: 600;
-    width: 100%;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -19,4 +23,5 @@
 
 .breadcrumb-list a {
     color: var(--clr-grey);
+    width: 100%;
 }
