@@ -247,6 +247,14 @@ main .section {
   padding-right: var(--padding-spacer-x, 0.75rem);
   max-width: 1140px;
 }
+
+main .divider {
+  display: block;
+  width: auto;
+  margin: var(--spacer-layout-16) 0;
+  border: 2px dotted #a7a7a7;
+  padding: inherit;
+}
  
 @media (min-width: 576px) {
   main .section > div {
