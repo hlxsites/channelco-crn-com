@@ -1,12 +1,7 @@
 import {
   sampleRUM,
-  buildBlock,
   loadHeader,
   loadFooter,
-  decorateButtons,
-  decorateIcons,
-  decorateSections,
-  decorateBlocks,
   decorateTemplateAndTheme,
   waitForLCP,
   loadBlocks,
@@ -15,24 +10,11 @@ import {
   getMetadata,
 } from './lib-franklin.js';
 
+import { decorateMain } from './shared.js';
+
 const LCP_BLOCKS = []; // add your LCP blocks to the list
 
 const TEMPLATE_LIST = ['category', 'article'];
-
-/**
- * Builds hero block and prepends to main in a new section.
- * @param {Element} main The container element
- */
-function buildHeroBlock(main) {
-  const h1 = main.querySelector('h1');
-  const picture = main.querySelector('picture');
-  // eslint-disable-next-line no-bitwise
-  if (h1 && picture && (h1.compareDocumentPosition(picture) & Node.DOCUMENT_POSITION_PRECEDING)) {
-    const section = document.createElement('div');
-    section.append(buildBlock('hero', { elems: [picture, h1] }));
-    main.prepend(section);
-  }
-}
 
 /**
  * load fonts.css and set a session storage flag
@@ -47,24 +29,19 @@ async function loadFonts() {
 }
 
 /**
- * Builds all synthetic blocks in a container element.
- * @param {Element} main The container element
- */
-function buildAutoBlocks(main) {
-  try {
-    buildHeroBlock(main);
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Auto Blocking failed', error);
-  }
-}
-
-/**
  * Run template specific decoration code.
  * @param {Element} main The container element
  */
 async function decorateTemplates(main) {
   try {
+    // Load the universal template for every page
+    const universalTemplate = 'universal';
+    const universalMod = await import(`../templates/${universalTemplate}/${universalTemplate}.js`);
+    loadCSS(`${window.hlx.codeBasePath}/templates/${universalTemplate}/${universalTemplate}.css`);
+    if (universalMod.default) {
+      await universalMod.default(main);
+    }
+
     const template = toClassName(getMetadata('template'));
     const templates = TEMPLATE_LIST;
     if (templates.includes(template)) {
@@ -80,18 +57,53 @@ async function decorateTemplates(main) {
   }
 }
 
-/**
- * Decorates the main element.
- * @param {Element} main The main element
- */
-// eslint-disable-next-line import/prefer-default-export
-export function decorateMain(main) {
-  // hopefully forward compatible button decoration
-  decorateButtons(main);
-  decorateIcons(main);
-  buildAutoBlocks(main);
-  decorateSections(main);
-  decorateBlocks(main);
+function createContentAndAdsSections(doc) {
+  const mainContainer = document.createElement('div');
+  mainContainer.className = 'main-content-container';
+
+  const contentSection = document.createElement('div');
+  contentSection.className = 'content-section';
+  contentSection.innerHTML = 'Main Content here'; // You can replace this with your actual content.
+
+  const topAdSection = document.createElement('div');
+  topAdSection.className = 'top-ad-section';
+  topAdSection.id = 'top-ad-fragment-container'; // Set ID for easy targeting
+  topAdSection.innerHTML = 'Ads here'; // You can replace this with actual ad content.
+
+  const contentAndAdsContainer = document.createElement('div');
+  contentAndAdsContainer.className = 'content-and-ads-container';
+
+  const rightAdSection = document.createElement('div');
+  rightAdSection.className = 'right-ad-section';
+  rightAdSection.id = 'right-ad-fragment-container'; // Set ID for easy targeting
+  rightAdSection.innerHTML = 'Ads here'; // You can replace this with actual ad content.
+
+  contentAndAdsContainer.appendChild(contentSection);
+  contentAndAdsContainer.appendChild(rightAdSection);
+
+  mainContainer.appendChild(topAdSection);
+  mainContainer.appendChild(contentAndAdsContainer);
+
+  const main = doc.querySelector('main');
+  if (main) {
+    main.appendChild(mainContainer);
+  }
+}
+
+async function loadAdFragment() {
+  const adFragmentContainer = document.getElementById('right-ad-fragment-container');
+  if (adFragmentContainer) {
+    const path = '/fragments/global-layout-right-fragment'; // Updated the fragment path
+    const resp = await fetch(`${path}.plain.html`);
+    if (resp.ok) {
+      const fragmentHTML = await resp.text();
+      adFragmentContainer.innerHTML = fragmentHTML;
+      decorateMain(adFragmentContainer);
+      await loadBlocks(adFragmentContainer);
+    } else {
+      adFragmentContainer.innerHTML = '<p>Error loading content</p>';
+    }
+  }
 }
 
 /**
@@ -155,7 +167,9 @@ function loadDelayed() {
 async function loadPage() {
   await loadEager(document);
   await loadLazy(document);
+  createContentAndAdsSections(document);
   loadDelayed();
+  await loadAdFragment();
 }
 
 loadPage();

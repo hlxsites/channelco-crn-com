@@ -570,21 +570,6 @@ export function normalizeHeadings(el, allowedHeadings) {
 }
 
 /**
- * Set template (page structure) and theme (page styles).
- */
-export function decorateTemplateAndTheme() {
-  const addClasses = (element, classes) => {
-    classes.split(',').forEach((c) => {
-      element.classList.add(toClassName(c.trim()));
-    });
-  };
-  const template = getMetadata('template');
-  if (template) addClasses(document.body, template);
-  const theme = getMetadata('theme');
-  if (theme) addClasses(document.body, theme);
-}
-
-/**
  * Decorates paragraphs containing a single link as buttons.
  * @param {Element} element container element
  */
@@ -612,6 +597,21 @@ export function decorateButtons(element) {
       }
     }
   });
+}
+
+/**
+ * Set template (page structure) and theme (page styles).
+ */
+export function decorateTemplateAndTheme() {
+  const addClasses = (element, classes) => {
+    classes.split(',').forEach((c) => {
+      element.classList.add(toClassName(c.trim()));
+    });
+  };
+  const template = getMetadata('template');
+  if (template) addClasses(document.body, template);
+  const theme = getMetadata('theme');
+  if (theme) addClasses(document.body, theme);
 }
 
 /**
