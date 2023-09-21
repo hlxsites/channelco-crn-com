@@ -231,4 +231,77 @@ async function loadPage() {
   loadDelayed();
 }
 
+/**
+ * @typedef QueryIndexRecord
+ * @property {string} path
+ * @property {string} title
+ * @property {string} description
+ * @property {string} image
+ * @property {string} tag
+ * @property {string} template
+ * @property {string} author
+ * @property {string} authorimage
+ * @property {string} authortitle
+ * @property {string} authordescription
+ * @property {string} publisheddate
+ * @property {string} keywords
+ * @property {string} lastModified
+ */
+
+let cachedIndex;
+/**
+ * Queries the site's index and only includes those records that match a given filter.
+ * @param {function} filter Filter through which each record will be sent. The function will
+ *  receive a single argument: the current record's raw data. The function should return true
+ *  to include the record in the final result, or false to exclude it from the result.
+ * @returns {Promise<Array<QueryIndexRecord>>} Resolves with an array of information for all
+ *  matching records.
+ */
+export async function queryIndex(filter) {
+  let index = cachedIndex;
+  if (!index) {
+    // will need to be updated to use ffetch for performance.
+    const res = await fetch('/query-index.json');
+    if (res && res.ok) {
+      try {
+        index = await res.json();
+        // storing the query index in memory as a speed performance optimization.
+        // may need to revisit this if the query index gets very large.
+        cachedIndex = index;
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.log('Unable to parse query index json', e);
+      }
+    }
+  }
+  const { data = [] } = index || {};
+  return data.filter(filter);
+}
+
+/**
+ * Retrieves all articles whose path matches one of a given list of path values.
+ * @param {Array<string>} paths List of all article paths to retrieve from the site's collection
+ *  of articles.
+ * @returns {Promise<Array<QueryIndexRecord>>} Resolves with an array of information for all
+ *  matching articles.
+ */
+export async function getArticlesByPath(paths) {
+  const pathLookup = {};
+  paths.forEach((path) => { pathLookup[path] = true; });
+  return queryIndex((record) => !!pathLookup[record.path]);
+}
+
+/**
+ * Retrieves all authors whose full name matches one of a given list of values.
+ * @param {Array<string>} names Names of authors to retrieve from the site's collection
+ *  of authors.
+ * @returns {Promise<Array<QueryIndexRecord>>} Resolves with an array of information for
+ *  all matching authors.
+ */
+export async function getAuthorsByName(names) {
+  const nameLookup = {};
+  names.forEach((name) => { nameLookup[name] = true; });
+  return queryIndex((record) => String(record.path).startsWith('/authors/') && !!nameLookup[record.author]);
+}
+
 loadPage();

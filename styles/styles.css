@@ -16,6 +16,8 @@
   --clr-black: #1b1b1b;
   --clr-white: #fff;
   --clr-grey: #8c8c8c;
+  --color-mid-grey: #a7a7a7;
+  --color-light-grey: #d7d7d7;
   --text-color: var(--clr-black);
   --link-color: var(--clr-red);
   --link-hover-color: var(--clr-red);
@@ -38,9 +40,13 @@
   /* sizes */
   --heading-font-size-xxl: 1.75rem;
   --heading-font-size-xl: 1.25rem;
+  --heading-font-size-ll: 1.05rem;
   --heading-font-size-l: 1rem;
+  --heading-font-size-ml: 0.95rem;
+  --heading-font-size-mml: 0.9rem;
   --heading-font-size-m: 0.825rem;
   --heading-font-size-s: 0.750rem;
+  --heading-font-size-ms: 0.6rem;
   --heading-font-size-xs: 0.625rem;
 
   /* nav height */
