@@ -39,8 +39,13 @@ function buildHeroBlock(main) {
  * @param {Element} main The container element
  */
 function buildBreadcrumb(main) {
+  const path = window.location.pathname;
+  const title = document.querySelector('h1').innerText;
+  if (path === '/' || title === '404') {
+    return;
+  }
+
   const div = document.createElement('div');
-  div.classList.add('test');
   div.append(buildBlock('breadcrumb', { elems: [] }));
   main.prepend(div)
 }
