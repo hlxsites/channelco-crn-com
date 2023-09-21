@@ -1,7 +1,9 @@
-import { createTag } from '../../scripts/scripts.js';
-
 function createBreadcrumbItem(href, label) {
-  return createTag('a', { href, class: 'breadcrumb-item' }, label);
+  const a = document.createElement('a');
+  a.classList.add('breadcrumb-item');
+  a.href = href;
+  a.innerHTML = label;
+  return a;
 }
 
 export default function decorate(block) {
@@ -12,7 +14,8 @@ export default function decorate(block) {
   pathArr.pop();
 
   // Formulate the list for breadcrumb
-  const list = createTag('ul', { class: 'breadcrumb-list' });
+  const list = document.createElement('ul');
+  list.classList.add('breadcrumb-list');
   let segments = '/';
   pathArr.forEach((path) => {
     if (path !== '') segments += `${path}/`;
