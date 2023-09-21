@@ -17,6 +17,22 @@ const LCP_BLOCKS = []; // add your LCP blocks to the list
 const TEMPLATE_LIST = ['category', 'article'];
 
 /**
+ * Fetch fragment by path
+ */
+export default async function fetchFragment(path) {
+  const resp = await fetch(`${path}.plain.html`);
+  if (resp.ok) {
+    const container = document.createElement('main');
+    container.innerHTML = await resp.text();
+    // eslint-disable-next-line no-use-before-define
+    decorateMain(container);
+    await loadBlocks(container);
+    return container.querySelector(':scope .section');
+  }
+  return null;
+}
+
+/**
  * load fonts.css and set a session storage flag
  */
 async function loadFonts() {
