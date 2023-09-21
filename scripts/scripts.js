@@ -47,7 +47,7 @@ function buildBreadcrumb(main) {
 
   const div = document.createElement('div');
   div.append(buildBlock('breadcrumb', { elems: [] }));
-  main.prepend(div)
+  main.prepend(div);
 }
 
 /**
