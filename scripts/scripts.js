@@ -63,7 +63,6 @@ function createContentAndAdsSections(doc) {
 
   const contentSection = document.createElement('div');
   contentSection.className = 'content-section';
-  contentSection.innerHTML = 'Main Content here'; // You can replace this with your actual content.
 
   const topAdSection = document.createElement('div');
   topAdSection.className = 'top-ad-section';
@@ -76,7 +75,6 @@ function createContentAndAdsSections(doc) {
   const rightAdSection = document.createElement('div');
   rightAdSection.className = 'right-ad-section';
   rightAdSection.id = 'right-ad-fragment-container'; // Set ID for easy targeting
-  rightAdSection.innerHTML = 'Ads here'; // You can replace this with actual ad content.
 
   contentAndAdsContainer.appendChild(contentSection);
   contentAndAdsContainer.appendChild(rightAdSection);
@@ -86,6 +84,11 @@ function createContentAndAdsSections(doc) {
 
   const main = doc.querySelector('main');
   if (main) {
+    // Transfer all child nodes of main to contentSection
+    while (main.firstChild) {
+      contentSection.appendChild(main.firstChild);
+    }
+
     main.appendChild(mainContainer);
   }
 }

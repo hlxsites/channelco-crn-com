@@ -21,7 +21,6 @@
 
 .content-and-ads-container .content-section {
   flex: 0.75; 
-  background-color: aqua; /* Just for demonstration */
   padding: 20px;
 }
 
