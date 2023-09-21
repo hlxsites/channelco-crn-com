@@ -22,16 +22,54 @@ function buildHeroBlock(main) {
 }
 
 /**
+ * Builds breadcrumb menu and prepends to main in a new section
+ * @param {Element} main The container element
+ */
+function buildBreadcrumb(main) {
+  const path = window.location.pathname;
+  const title = document.querySelector('h1').innerText;
+  if (path === '/' || title === '404') {
+    return;
+  }
+
+  const div = document.createElement('div');
+  div.append(buildBlock('breadcrumb', { elems: [] }));
+  main.prepend(div);
+}
+
+/**
  * Builds all synthetic blocks in a container element.
  * @param {Element} main The container element
  */
 function buildAutoBlocks(main) {
   try {
     buildHeroBlock(main);
+    buildBreadcrumb(main);
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Auto Blocking failed', error);
   }
+}
+
+export function linkPicture(picture) {
+  const nextSib = picture.parentNode.nextElementSibling;
+  if (nextSib) {
+    const a = nextSib.querySelector('a');
+    if (a && a.textContent.startsWith('https://')) {
+      a.innerHTML = '';
+      a.className = '';
+      a.appendChild(picture);
+    }
+  }
+}
+
+export function decorateLinkedPictures(main) {
+  /* thanks to word online */
+  main.querySelectorAll('picture').forEach((picture) => {
+    if (!picture.closest('div.block')) {
+      linkPicture(picture);
+    }
+  });
 }
 
 /**
@@ -40,6 +78,7 @@ function buildAutoBlocks(main) {
  */
 // eslint-disable-next-line import/prefer-default-export
 export function decorateMain(main) {
+  decorateLinkedPictures(main);
   // hopefully forward compatible button decoration
   decorateButtons(main);
   decorateIcons(main);
