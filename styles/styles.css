@@ -15,6 +15,7 @@
   --clr-red: #ed1c24;
   --clr-black: #1b1b1b;
   --clr-white: #fff;
+  --clr-grey: #8c8c8c;
   --text-color: var(--clr-black);
   --link-color: var(--clr-red);
   --link-hover-color: var(--clr-red);
@@ -130,7 +131,6 @@ pre {
 
 main pre {
   background-color: var(--overlay-background-color);
-  padding: 1em;
   border-radius: .25em;
   overflow-x: auto;
   white-space: pre;
@@ -239,34 +239,40 @@ main img {
   width: 100%;
 }
 
-main {
-  padding-left: 12px;
-  padding-right: 12px;
-}
-
 main .section {
   margin-top: 24px;
   margin-left: 0;
   margin-right: 0;
   padding-left: var(--padding-spacer-x, 0.75rem);
   padding-right: var(--padding-spacer-x, 0.75rem);
+  max-width: 1140px;
 }
-
+ 
 @media (min-width: 576px) {
-  main .section {
+  main .section > div {
     max-width: 540px;
   }
 }
 
 @media (min-width: 768px) {
-  main .section {
+  main .section > div {
     max-width: 720px;
   }
 }
 
 @media (min-width: 992px) {
-  main .section {
+  main .section > div {
     max-width: 960px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (min-width: 1200px) {
+  main .section > div {
+    max-width: 1140px;
+    margin-left: auto;
+    margin-right: auto;
   }
 }
 

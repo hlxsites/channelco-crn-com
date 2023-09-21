@@ -35,6 +35,22 @@ function buildHeroBlock(main) {
 }
 
 /**
+ * Builds breadcrumb menu and prepends to main in a new section
+ * @param {Element} main The container element
+ */
+function buildBreadcrumb(main) {
+  const path = window.location.pathname;
+  const title = document.querySelector('h1').innerText;
+  if (path === '/' || title === '404') {
+    return;
+  }
+
+  const div = document.createElement('div');
+  div.append(buildBlock('breadcrumb', { elems: [] }));
+  main.prepend(div);
+}
+
+/**
  * load fonts.css and set a session storage flag
  */
 async function loadFonts() {
@@ -53,6 +69,7 @@ async function loadFonts() {
 function buildAutoBlocks(main) {
   try {
     buildHeroBlock(main);
+    buildBreadcrumb(main);
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Auto Blocking failed', error);
