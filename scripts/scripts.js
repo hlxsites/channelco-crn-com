@@ -76,6 +76,12 @@ function createContentAndAdsSections(doc) {
   rightAdSection.className = 'right-ad-section';
   rightAdSection.id = 'right-ad-fragment-container'; // Set ID for easy targeting
 
+  // Create the new bottom ad section
+  const bottomAdSection = document.createElement('div');
+  bottomAdSection.className = 'bottom-ad-section';
+  bottomAdSection.id = 'bottom-ad-fragment-container'; // Set ID for easy targeting
+  bottomAdSection.innerHTML = 'Bottom ads here'; // Replace with your actual ad content
+
   contentAndAdsContainer.appendChild(contentSection);
   contentAndAdsContainer.appendChild(rightAdSection);
 
@@ -91,6 +97,8 @@ function createContentAndAdsSections(doc) {
 
     main.appendChild(mainContainer);
   }
+
+  doc.body.appendChild(bottomAdSection);
 }
 
 async function loadAdFragment() {
