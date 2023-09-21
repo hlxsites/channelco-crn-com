@@ -42,8 +42,10 @@ export default async function decorate(block) {
     return;
   }
 
+  const addlArticleContainer = document.createElement('div');
+  addlArticleContainer.classList.add('sub-article');
   // add article cards for each article
-  articles.forEach((article) => {
+  articles.forEach((article, index) => {
     const cardDiv = document.createElement('div');
     cardDiv.classList.add('article-card');
 
@@ -85,6 +87,12 @@ export default async function decorate(block) {
     cardDiv.append(createOptimizedPicture(article.image));
     cardDiv.append(infoDiv);
 
-    blockTarget.append(cardDiv);
+    if (index > 0) {
+      addlArticleContainer.append(cardDiv);
+    } else {
+      cardDiv.classList.add('featured-article');
+      blockTarget.append(cardDiv);
+    }
   });
+  blockTarget.append(addlArticleContainer);
 }
