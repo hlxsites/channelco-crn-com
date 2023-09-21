@@ -43,7 +43,7 @@
   z-index: 500;
   left: 50%;
   margin-left: -496px;
-  background-color: aqua;
+  background-color: rgba(230, 230, 230, 0.7);
 }
 
 @media (min-width: 576px) {
