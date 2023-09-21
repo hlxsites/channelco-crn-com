@@ -20,6 +20,22 @@ const LCP_BLOCKS = []; // add your LCP blocks to the list
 const TEMPLATE_LIST = ['category', 'article'];
 
 /**
+ * Fetch fragment by path
+ */
+export async function fetchFragment(path) {
+  const resp = await fetch(`${path}.plain.html`);
+  if (resp.ok) {
+    const container = document.createElement('main');
+    container.innerHTML = await resp.text();
+    // eslint-disable-next-line no-use-before-define
+    decorateMain(container);
+    await loadBlocks(container);
+    return container.querySelector(':scope .section');
+  }
+  return null;
+}
+
+/**
  * Builds hero block and prepends to main in a new section.
  * @param {Element} main The container element
  */
