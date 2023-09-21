@@ -97,6 +97,27 @@ async function decorateTemplates(main) {
   }
 }
 
+export function linkPicture(picture) {
+  const nextSib = picture.parentNode.nextElementSibling;
+  if (nextSib) {
+    const a = nextSib.querySelector('a');
+    if (a && a.textContent.startsWith('https://')) {
+      a.innerHTML = '';
+      a.className = '';
+      a.appendChild(picture);
+    }
+  }
+}
+
+export function decorateLinkedPictures(main) {
+  /* thanks to word online */
+  main.querySelectorAll('picture').forEach((picture) => {
+    if (!picture.closest('div.block')) {
+      linkPicture(picture);
+    }
+  });
+}
+
 /**
  * Decorates the main element.
  * @param {Element} main The main element
@@ -104,6 +125,7 @@ async function decorateTemplates(main) {
 // eslint-disable-next-line import/prefer-default-export
 export function decorateMain(main) {
   // hopefully forward compatible button decoration
+  decorateLinkedPictures(main);
   decorateButtons(main);
   decorateIcons(main);
   buildAutoBlocks(main);
