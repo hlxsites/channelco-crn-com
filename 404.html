@@ -31,15 +31,18 @@
     });
 
     async function loadFragment() {
-            const fragmentContainer = document.getElementById('fragment-container');
-            if (fragmentContainer) {
-                const fragmentHTML = await fetchFragment('/fragments/404-fragment');
-                fragmentContainer.innerHTML = '';
-                fragmentContainer.appendChild(fragmentHTML);
-                } else {
-                    fragmentContainer.innerHTML = '<p>Error loading content</p>';
-                }
-            }
+          const fragmentContainer = document.getElementById('fragment-container');
+          if (!fragmentContainer) return;
+
+          try {
+            const fragmentHTML = await fetchFragment('/fragments/404-fragment');
+            fragmentContainer.innerHTML = ''; 
+            fragmentContainer.appendChild(fragmentHTML);
+          } catch (error) {
+            console.error('Error fetching the fragment:', error);
+            fragmentContainer.innerHTML = '<p>Error loading content</p>';
+        }
+      }
 
         // Call the load404Fragment function when your 404 page loads
         document.addEventListener('DOMContentLoaded', loadFragment);
