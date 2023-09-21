@@ -11,7 +11,7 @@
   <meta property="og:title" content="Page not found">
   <script src="/scripts/scripts.js" type="module" crossorigin="use-credentials"></script>
   <script type="module">
-    import { decorateMain } from '../../scripts/scripts.js';
+    import { decorateMain,fetchFragment } from '../../scripts/scripts.js';
     import { sampleRUM, loadBlocks } from '/scripts/lib-franklin.js';
 
     window.addEventListener('load', () => {
@@ -33,18 +33,13 @@
     async function loadFragment() {
             const fragmentContainer = document.getElementById('fragment-container');
             if (fragmentContainer) {
-                const path = '/fragments/404-fragment';
-                const resp = await fetch(`${path}.plain.html`);
-                if (resp.ok) {
-                    const fragmentHTML = await resp.text();
-                    fragmentContainer.innerHTML = fragmentHTML;
-                    decorateMain(fragmentContainer);
-                    await loadBlocks(fragmentContainer);
+                const fragmentHTML = await fetchFragment('/fragments/404-fragment');
+                fragmentContainer.innerHTML = '';
+                fragmentContainer.appendChild(fragmentHTML);
                 } else {
                     fragmentContainer.innerHTML = '<p>Error loading content</p>';
                 }
             }
-        }
 
         // Call the load404Fragment function when your 404 page loads
         document.addEventListener('DOMContentLoaded', loadFragment);
