@@ -377,6 +377,15 @@ export async function getAuthorsByName(names) {
 }
 
 /**
+ * Retrieves all authors from the site.
+ * @returns {Promise<Array<QueryIndexRecord>>} Resolves with an array of information for
+ *  all authors on the site.
+ */
+export async function getAllAuthors() {
+  return queryIndex((record) => String(record.path).startsWith('/authors/'));
+}
+
+/**
  * Retrieves the full, absolute path to a given path's category.
  * @param {string} path Path to a page on the site.
  * @returns {string} Path to the page's category.
