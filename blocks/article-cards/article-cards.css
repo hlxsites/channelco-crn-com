@@ -23,6 +23,10 @@
   padding: 1rem 0 .3rem;
 }
 
+.article-cards .article-card .uncolored-link {
+  color: var(--text-color);
+}
+
 .article-cards .article-card-category,
 .article-cards .article-card-author,
 .article-cards .article-card-date {
@@ -47,7 +51,7 @@
   font-size: var(--heading-font-size-ms);
 }
 
-.article-cards a::after {
+.article-cards a.link-arrow::after {
   content: '▶';
   display: inline-block;
   margin-left: .5rem;

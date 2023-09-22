@@ -1,4 +1,8 @@
-import { getArticlesByPath } from '../../scripts/scripts.js';
+import {
+  getArticlesByPath,
+  getCategoryName,
+  getCategoryPath,
+} from '../../scripts/scripts.js';
 import { createOptimizedPicture } from '../../scripts/lib-franklin.js';
 
 /**
@@ -30,12 +34,6 @@ export default async function decorate(block) {
 
   // retrieve article information for all specified article paths
   const articles = await getArticlesByPath(paths);
-  const authorNames = {};
-  articles.forEach((article) => {
-    if (article.author) {
-      authorNames[article.author] = true;
-    }
-  });
 
   const blockTarget = block.children.item(0).children.item(0);
   if (!blockTarget) {
@@ -51,22 +49,26 @@ export default async function decorate(block) {
 
     const category = document.createElement('h3');
     category.classList.add('article-card-category');
-    // TODO: need to determine how to get category
+    const categoryName = getCategoryName(article);
     category.innerHTML = `
-      <a href="/news/networking">Networking</a>
+      <a href="${getCategoryPath(article.path)}" class="link-arrow" aria-label="${categoryName}">${categoryName}</a>
     `;
 
     const title = document.createElement('h5');
     title.classList.add('article-card-title');
-    title.innerText = article.title;
+    title.innerHTML = `
+      <a href="${article.path}" class="uncolored-link" aria-label="${article.title}">${article.title}</a>
+    `;
 
     const author = document.createElement('h5');
     author.classList.add('article-card-author');
+    // attempting to predict the URL to the author. may need to change to query
+    // author information from index
     const authorId = String(article.author).toLowerCase()
       .replaceAll(/[^0-9a-z ]/g, '')
       .replaceAll(/[^0-9a-z]/g, '-');
     author.innerHTML = `
-      by <a href="/authors/${authorId}">${article.author}</a>
+      <a href="/authors/${authorId}" class="link-arrow" aria-label="${article.author}"><span class="uncolored-link">by</span> ${article.author}</a>
     `;
 
     const date = document.createElement('h5');
@@ -84,7 +86,15 @@ export default async function decorate(block) {
     infoDiv.append(date);
     infoDiv.append(description);
 
-    cardDiv.append(createOptimizedPicture(article.image));
+    const articlePictureLink = document.createElement('a');
+    articlePictureLink.href = article.path;
+    articlePictureLink.setAttribute('aria-label', article.title);
+    const articlePicture = createOptimizedPicture(article.image);
+    articlePictureLink.append(articlePicture);
+    const articleImage = articlePicture.querySelector('img');
+    articleImage.alt = article.title;
+    articleImage.title = article.title;
+    cardDiv.append(articlePictureLink);
     cardDiv.append(infoDiv);
 
     if (index > 0) {

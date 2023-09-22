@@ -19,6 +19,9 @@ const LCP_BLOCKS = []; // add your LCP blocks to the list
 
 const TEMPLATE_LIST = ['category', 'article'];
 
+const DEFAULT_CATEGORY_PATH = '/news';
+const DEFAULT_CATEGORY_NAME = 'News';
+
 /**
  * Fetch fragment by path
  */
@@ -233,19 +236,22 @@ async function loadPage() {
 
 /**
  * @typedef QueryIndexRecord
- * @property {string} path
- * @property {string} title
- * @property {string} description
- * @property {string} image
- * @property {string} tag
- * @property {string} template
- * @property {string} author
- * @property {string} authorimage
- * @property {string} authortitle
- * @property {string} authordescription
- * @property {string} publisheddate
- * @property {string} keywords
- * @property {string} lastModified
+ * @property {string} path Absolute path of the page on the site.
+ * @property {string} title Title of the page from its metadata.
+ * @property {string} description Summary description of the page from its metadata.
+ * @property {string} image Absolute URL of the image from the page's metadata.
+ * @property {string} category Name of the page's category.
+ * @property {string} template Template assigned to the page associated with the index record.
+ * @property {string} author Name of the author associated with the index record.
+ * @property {string} authorimage Relative URL of the author's picture.
+ * @property {string} authortitle Job title of the record's author.
+ * @property {string} authordescription Bio information for the record's author.
+ * @property {string} publisheddate Full, human-readable date when the record was published.
+ * @property {string} keywords Comma-separated list of keywords associated with the index record.
+ * @property {string} company-names Comma-separated list of companies to which the index record
+ *  applies.
+ * @property {string} company-webpages Comma-separated list of websites for the index's companies.
+ * @property {string} lastModified Unix timestamp of the last time the index record was modified.
  */
 
 let cachedIndex;
@@ -302,6 +308,40 @@ export async function getAuthorsByName(names) {
   const nameLookup = {};
   names.forEach((name) => { nameLookup[name] = true; });
   return queryIndex((record) => String(record.path).startsWith('/authors/') && !!nameLookup[record.author]);
+}
+
+/**
+ * Retrieves the full, absolute path to a given path's category.
+ * @param {string} path Path to a page on the site.
+ * @returns {string} Path to the page's category.
+ */
+export function getCategoryPath(path) {
+  if (!path || path === '/') {
+    return DEFAULT_CATEGORY_PATH;
+  }
+  let pathStr = String(path);
+  while (pathStr.length > 1 && pathStr.endsWith('/')) {
+    pathStr = pathStr.substring(0, pathStr.length - 1);
+  }
+  const lastSlash = pathStr.lastIndexOf('/');
+  if (lastSlash <= 0) {
+    // fall back to default category if unexpected path format
+    return DEFAULT_CATEGORY_PATH;
+  }
+  return pathStr.substring(0, lastSlash);
+}
+
+/**
+ * Retrieves the category name of a record from the index.
+ * @param {QueryIndexRecord} record Record from the site's query index.
+ * @returns {string} Category name assigned to the record.
+ */
+export function getCategoryName(record) {
+  const category = String(record.category).trim();
+  if (!category.length) {
+    return DEFAULT_CATEGORY_NAME;
+  }
+  return category;
 }
 
 loadPage();
