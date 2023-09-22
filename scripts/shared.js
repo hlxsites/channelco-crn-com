@@ -39,8 +39,6 @@ function buildBreadcrumb(main) {
 }
 
 /**
-<<<<<<< HEAD
-=======
  * Builds a page divider by adding divider or Divider in fixed-fonts eg. Courier New
  * @param {Element} main The container element
  */

@@ -3,7 +3,7 @@ import {
   sampleRUM,
 } from './lib-franklin.js';
 
-import fetchFragment from './shared.js';
+import { fetchFragment } from './shared.js';
 
 // Core Web Vitals RUM collection
 sampleRUM('cwv');
