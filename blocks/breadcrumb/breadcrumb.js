@@ -1,9 +1,11 @@
 function createBreadcrumbItem(href, label) {
+  const li = document.createElement('li');
   const a = document.createElement('a');
   a.classList.add('breadcrumb-item');
   a.href = href;
   a.innerHTML = label;
-  return a;
+  li.append(a);
+  return li;
 }
 
 export default function decorate(block) {
