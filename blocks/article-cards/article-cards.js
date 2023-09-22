@@ -2,8 +2,8 @@ import {
   getArticlesByPath,
   getCategoryName,
   getCategoryPath,
+  createOptimizedPicture,
 } from '../../scripts/scripts.js';
-import { createOptimizedPicture } from '../../scripts/lib-franklin.js';
 
 /**
  * Converts the cards block from its authored format into HTML.
