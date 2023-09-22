@@ -52,6 +52,7 @@ export default async function decorate(block) {
     decorateBlock(blades);
     await loadBlock(blades);
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.log('Unable to retrieve author information', e);
   }
 }
