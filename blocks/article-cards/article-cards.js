@@ -68,7 +68,7 @@ export default async function decorate(block) {
       .replaceAll(/[^0-9a-z ]/g, '')
       .replaceAll(/[^0-9a-z]/g, '-');
     author.innerHTML = `
-      <a href="/authors/${authorId}" class="link-arrow" aria-label="${article.author}"><span class="uncolored-link">by</span> ${article.author}</a>
+      <a href="/authors/${authorId}" class="link-arrow" aria-label="By ${article.author}"><span class="uncolored-link">By</span> ${article.author}</a>
     `;
 
     const date = document.createElement('h5');
