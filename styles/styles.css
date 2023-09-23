@@ -56,6 +56,10 @@
   /* crn variables */
   --padding-spacer-x: 1.5rem;
   --padding-spacer-y: 0;
+
+  /* gutter */
+  --custom-gutter-x: 1.5rem;
+  --custom-gutter-y: 0rem;
 }
 
 @media (min-width: 900px) {

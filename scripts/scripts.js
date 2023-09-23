@@ -1,12 +1,7 @@
 import {
   sampleRUM,
-  buildBlock,
   loadHeader,
   loadFooter,
-  decorateButtons,
-  decorateIcons,
-  decorateSections,
-  decorateBlocks,
   decorateTemplateAndTheme,
   waitForLCP,
   loadBlocks,
@@ -15,59 +10,14 @@ import {
   getMetadata,
 } from './lib-franklin.js';
 
+import { decorateMain } from './shared.js';
+
 const LCP_BLOCKS = []; // add your LCP blocks to the list
 
 const TEMPLATE_LIST = ['category', 'article'];
 
 const DEFAULT_CATEGORY_PATH = '/news';
 const DEFAULT_CATEGORY_NAME = 'News';
-
-/**
- * Fetch fragment by path
- */
-export async function fetchFragment(path) {
-  const resp = await fetch(`${path}.plain.html`);
-  if (resp.ok) {
-    const container = document.createElement('main');
-    container.innerHTML = await resp.text();
-    // eslint-disable-next-line no-use-before-define
-    decorateMain(container);
-    await loadBlocks(container);
-    return container.querySelector(':scope .section');
-  }
-  return null;
-}
-
-/**
- * Builds hero block and prepends to main in a new section.
- * @param {Element} main The container element
- */
-function buildHeroBlock(main) {
-  const h1 = main.querySelector('h1');
-  const picture = main.querySelector('picture');
-  // eslint-disable-next-line no-bitwise
-  if (h1 && picture && (h1.compareDocumentPosition(picture) & Node.DOCUMENT_POSITION_PRECEDING)) {
-    const section = document.createElement('div');
-    section.append(buildBlock('hero', { elems: [picture, h1] }));
-    main.prepend(section);
-  }
-}
-
-/**
- * Builds breadcrumb menu and prepends to main in a new section
- * @param {Element} main The container element
- */
-function buildBreadcrumb(main) {
-  const path = window.location.pathname;
-  const title = document.querySelector('h1');
-  if (path === '/' || (title && title.innerText === '404')) {
-    return;
-  }
-
-  const div = document.createElement('div');
-  div.append(buildBlock('breadcrumb', { elems: [] }));
-  main.prepend(div);
-}
 
 /**
  * load fonts.css and set a session storage flag
@@ -82,43 +32,19 @@ async function loadFonts() {
 }
 
 /**
- * Builds a page divider by adding divider or Divider in fixed-fonts eg. Courier New
- * @param {Element} main The container element
- */
-function buildPageDivider(main) {
-  const allPageDivider = main.querySelectorAll('code');
-
-  allPageDivider.forEach((el) => {
-    const alt = el.innerText.trim();
-    const lower = alt.toLowerCase();
-    if (lower === 'divider') {
-      el.innerText = '';
-      el.classList.add('divider');
-    }
-  });
-}
-
-/**
- * Builds all synthetic blocks in a container element.
- * @param {Element} main The container element
- */
-function buildAutoBlocks(main) {
-  try {
-    buildHeroBlock(main);
-    buildBreadcrumb(main);
-    buildPageDivider(main);
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Auto Blocking failed', error);
-  }
-}
-
-/**
  * Run template specific decoration code.
  * @param {Element} main The container element
  */
 async function decorateTemplates(main) {
   try {
+    // Load the universal template for every page
+    const universalTemplate = 'universal';
+    const universalMod = await import(`../templates/${universalTemplate}/${universalTemplate}.js`);
+    loadCSS(`${window.hlx.codeBasePath}/templates/${universalTemplate}/${universalTemplate}.css`);
+    if (universalMod.default) {
+      await universalMod.default(main);
+    }
+
     const template = toClassName(getMetadata('template'));
     const templates = TEMPLATE_LIST;
     if (templates.includes(template)) {
@@ -134,40 +60,50 @@ async function decorateTemplates(main) {
   }
 }
 
-export function linkPicture(picture) {
-  const nextSib = picture.parentNode.nextElementSibling;
-  if (nextSib) {
-    const a = nextSib.querySelector('a');
-    if (a && a.textContent.startsWith('https://')) {
-      a.innerHTML = '';
-      a.className = '';
-      a.appendChild(picture);
+async function createContentAndAdsSections(doc) {
+  const mainContainer = document.createElement('div');
+  mainContainer.className = 'main-content-container';
+
+  const contentSection = document.createElement('div');
+  contentSection.className = 'content-section';
+
+  const topAdSection = document.createElement('div');
+  topAdSection.className = 'top-ad-section';
+  topAdSection.id = 'top-ad-fragment-container';
+  topAdSection.innerHTML = 'Ads here';
+
+  const contentAndAdsContainer = document.createElement('div');
+  contentAndAdsContainer.className = 'content-and-ads-container';
+
+  const rightAdSection = document.createElement('div');
+  rightAdSection.className = 'right-ad-section';
+  rightAdSection.id = 'right-ad-fragment-container';
+
+  const bottomAdSection = document.createElement('div');
+  bottomAdSection.className = 'bottom-ad-section';
+  bottomAdSection.id = 'bottom-ad-fragment-container';
+  bottomAdSection.innerHTML = 'Bottom ads here';
+
+  contentAndAdsContainer.appendChild(contentSection);
+  contentAndAdsContainer.appendChild(rightAdSection);
+
+  const main = doc.querySelector('main');
+
+  if (main) {
+    const breadcrumb = main.querySelector('.breadcrumb-container');
+    if (breadcrumb) {
+      main.insertBefore(topAdSection, breadcrumb); // Place the ad section before breadcrumb
+      contentSection.appendChild(main.children[2]);
+    } else {
+      main.prepend(topAdSection); // Place the ad section as the first child
+      contentSection.appendChild(main.children[1]);
     }
+
+    mainContainer.appendChild(contentAndAdsContainer);
+    main.appendChild(mainContainer);
   }
-}
 
-export function decorateLinkedPictures(main) {
-  /* thanks to word online */
-  main.querySelectorAll('picture').forEach((picture) => {
-    if (!picture.closest('div.block')) {
-      linkPicture(picture);
-    }
-  });
-}
-
-/**
- * Decorates the main element.
- * @param {Element} main The main element
- */
-// eslint-disable-next-line import/prefer-default-export
-export function decorateMain(main) {
-  // hopefully forward compatible button decoration
-  decorateLinkedPictures(main);
-  decorateButtons(main);
-  decorateIcons(main);
-  buildAutoBlocks(main);
-  decorateSections(main);
-  decorateBlocks(main);
+  doc.body.appendChild(bottomAdSection);
 }
 
 /**
@@ -231,6 +167,7 @@ function loadDelayed() {
 async function loadPage() {
   await loadEager(document);
   await loadLazy(document);
+  await createContentAndAdsSections(document);
   loadDelayed();
 }
 

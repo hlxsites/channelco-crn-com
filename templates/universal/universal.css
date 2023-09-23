@@ -1,0 +1,118 @@
+.main-content-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.top-ad-section {
+  width: 100%; 
+  background-color: #e0e0e0;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-top: 2px solid #000000;
+  border-bottom: 2px solid #ed1c24;
+}
+
+.content-and-ads-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.content-and-ads-container .content-section {
+  padding: 20px;
+}
+
+.content-and-ads-container .right-ad-section {
+  padding: 20px;
+}
+
+.content-and-ads-container .content-section,
+.content-and-ads-container .right-ad-section {
+  width: 100%; 
+  padding: 15px; 
+}
+
+.bottom-ad-section {
+  position: fixed;
+  bottom: 0px;
+  max-height: 134px;
+  width: 992px;
+  z-index: 500;
+  left: 50%;
+  margin-left: -496px;
+  background-color: rgba(230, 230, 230, 0.7);
+}
+
+@media (min-width: 576px) {
+  .content-and-ads-container .content-section,
+  .content-and-ads-container .right-ad-section {
+    width: 100%;  /* col-sm-12 */
+  }
+}
+
+@media (min-width: 768px) {
+  .content-and-ads-container {
+    flex-direction: row;
+  }
+
+  .content-and-ads-container .content-section {
+    width: 70%;  /* col-md-9 */
+  }
+  .content-and-ads-container .right-ad-section {
+    width: 30%;  /* col-md-3 */
+  }
+
+  .bottom-ad-section {
+    min-width: 982px;
+    min-height: 40px;
+  }
+}
+
+@media (min-width: 992px) {
+  .content-and-ads-container .content-section {
+    width: 66.6666667%;  /* col-lg-8 */
+  }
+  .content-and-ads-container .right-ad-section {
+    width: 33.3333333%;  /* col-lg-4 */
+  }
+}
+
+@media (min-width: 1200px) {
+  .content-and-ads-container .content-section,
+  .content-and-ads-container .right-ad-section {
+    margin-left: 0;  /* mx-xl-0 */
+    margin-right: 0;  /* mx-xl-0 */
+  }
+  .content-and-ads-container .content-section {
+    width: 70%;  /* col-xl-9 */
+  }
+  .content-and-ads-container .right-ad-section {
+    width: 30%;  /* col-xl-3 */
+  }
+}
+
+@media (min-width: 1400px) {
+  .content-and-ads-container .content-section {
+    width: 70%;  /* col-xxl-9 */
+  }
+  .content-and-ads-container .right-ad-section {
+    width: 30%;  /* col-xxl-3 */
+  }
+}
+
+
+@media (max-width: 768px) {
+  .bottom-ad-section {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    min-height: 50px;
+    width: 380px;
+    min-width: 380px;
+    z-index: 500;
+    left: 50%;
+    margin-left: -190px;
+    background-color: aqua;
+  }
+}

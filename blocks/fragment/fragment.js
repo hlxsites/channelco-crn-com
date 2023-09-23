@@ -4,7 +4,7 @@
  * https://www.hlx.live/developer/block-collection/fragment
  */
 
-import { decorateMain } from '../../scripts/scripts.js';
+import { decorateMain } from '../../scripts/shared.js';
 import { loadBlocks } from '../../scripts/lib-franklin.js';
 
 /**
@@ -18,7 +18,7 @@ async function loadFragment(path) {
     if (resp.ok) {
       const main = document.createElement('main');
       main.innerHTML = await resp.text();
-      decorateMain(main);
+      decorateMain(main, true);
       await loadBlocks(main);
       return main;
     }
