@@ -21,6 +21,10 @@
     text-overflow: ellipsis;
 }
 
+.breadcrumb-list li {
+    display: inline;
+}
+
 .breadcrumb-list a {
     color: var(--clr-grey);
     width: 100%;

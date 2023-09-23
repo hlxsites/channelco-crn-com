@@ -1,9 +1,11 @@
 function createBreadcrumbItem(href, label) {
+  const li = document.createElement('li');
   const a = document.createElement('a');
   a.classList.add('breadcrumb-item');
   a.href = href;
   a.innerHTML = label;
-  return a;
+  li.append(a);
+  return li;
 }
 
 export default function decorate(block) {
@@ -24,8 +26,10 @@ export default function decorate(block) {
 
   // Last item in breadcrumb should be current page title. If not found, default to path
   const currPageTitle = document.querySelector('h1');
-  list.append(' ▸ ');
-  list.append(currPageTitle ? currPageTitle.innerText : lastPath.replaceAll('-', ' '));
+  const li = document.createElement('li');
+  li.append(' ▸ ');
+  li.append(currPageTitle ? currPageTitle.innerText : lastPath.replaceAll('-', ' '));
+  list.append(li);
 
   block.append(list);
 }
