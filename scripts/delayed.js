@@ -15,7 +15,7 @@ async function loadRightAdFragment() {
   if (!adFragmentContainer) return;
 
   try {
-    const fragmentHTML = await fetchFragment('/fragments/global-layout-right-fragment');
+    const fragmentHTML = await fetchFragment('/fragments/global-layout-right-fragment', true);
     adFragmentContainer.innerHTML = '';
     adFragmentContainer.appendChild(fragmentHTML);
   } catch (error) {

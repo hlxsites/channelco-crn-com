@@ -60,7 +60,7 @@ async function decorateTemplates(main) {
   }
 }
 
-function createContentAndAdsSections(doc) {
+async function createContentAndAdsSections(doc) {
   const mainContainer = document.createElement('div');
   mainContainer.className = 'main-content-container';
 
@@ -69,35 +69,37 @@ function createContentAndAdsSections(doc) {
 
   const topAdSection = document.createElement('div');
   topAdSection.className = 'top-ad-section';
-  topAdSection.id = 'top-ad-fragment-container'; // Set ID for easy targeting
-  topAdSection.innerHTML = 'Ads here'; // You can replace this with actual ad content.
+  topAdSection.id = 'top-ad-fragment-container';
+  topAdSection.innerHTML = 'Ads here';
 
   const contentAndAdsContainer = document.createElement('div');
   contentAndAdsContainer.className = 'content-and-ads-container';
 
   const rightAdSection = document.createElement('div');
   rightAdSection.className = 'right-ad-section';
-  rightAdSection.id = 'right-ad-fragment-container'; // Set ID for easy targeting
+  rightAdSection.id = 'right-ad-fragment-container';
 
-  // Create the new bottom ad section
   const bottomAdSection = document.createElement('div');
   bottomAdSection.className = 'bottom-ad-section';
-  bottomAdSection.id = 'bottom-ad-fragment-container'; // Set ID for easy targeting
-  bottomAdSection.innerHTML = 'Bottom ads here'; // Replace with your actual ad content
+  bottomAdSection.id = 'bottom-ad-fragment-container';
+  bottomAdSection.innerHTML = 'Bottom ads here';
 
   contentAndAdsContainer.appendChild(contentSection);
   contentAndAdsContainer.appendChild(rightAdSection);
 
-  mainContainer.appendChild(topAdSection);
-  mainContainer.appendChild(contentAndAdsContainer);
-
   const main = doc.querySelector('main');
+
   if (main) {
-    // Transfer all child nodes of main to contentSection
-    while (main.firstChild) {
-      contentSection.appendChild(main.firstChild);
+    const breadcrumb = main.querySelector('.breadcrumb-container');
+    if (breadcrumb) {
+      main.insertBefore(topAdSection, breadcrumb); // Place the ad section before breadcrumb
+      contentSection.appendChild(main.children[2]);
+    } else {
+      main.prepend(topAdSection); // Place the ad section as the first child
+      contentSection.appendChild(main.children[1]);
     }
 
+    mainContainer.appendChild(contentAndAdsContainer);
     main.appendChild(mainContainer);
   }
 
@@ -165,7 +167,7 @@ function loadDelayed() {
 async function loadPage() {
   await loadEager(document);
   await loadLazy(document);
-  createContentAndAdsSections(document);
+  await createContentAndAdsSections(document);
   loadDelayed();
 }
 

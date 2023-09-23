@@ -96,12 +96,17 @@ export function decorateLinkedPictures(main) {
  * @param {Element} main The main element
  */
 // eslint-disable-next-line import/prefer-default-export
-export function decorateMain(main) {
+export function decorateMain(main, blocksExist) {
   decorateLinkedPictures(main);
   // hopefully forward compatible button decoration
   decorateButtons(main);
   decorateIcons(main);
-  buildAutoBlocks(main);
+
+  // no need to rebuild blocks in delayed if they already exist
+  if (!blocksExist) {
+    buildAutoBlocks(main);
+  }
+
   decorateSections(main);
   decorateBlocks(main);
 }
@@ -109,13 +114,13 @@ export function decorateMain(main) {
 /**
  * Fetch fragment by path
  */
-export async function fetchFragment(path) {
+export async function fetchFragment(path, blocksExist) {
   const resp = await fetch(`${path}.plain.html`);
   if (resp.ok) {
     const container = document.createElement('main');
     container.innerHTML = await resp.text();
     // eslint-disable-next-line no-use-before-define
-    decorateMain(container);
+    decorateMain(container, blocksExist);
     await loadBlocks(container);
     return container.querySelector(':scope .section');
   }
