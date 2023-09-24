@@ -29,7 +29,7 @@ function buildHeroBlock(main) {
 function buildBreadcrumb(main) {
   const path = window.location.pathname;
   const title = document.querySelector('h1');
-  if (path === '/' || (title && title === '404')) {
+  if (path === '/' || (title && title.innerText === '404')) {
     return;
   }
 
