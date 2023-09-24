@@ -32,7 +32,7 @@ function addMartechStack() {
     'data-debug': 'false',
   });
   const globalAdScript = 'window.TAS = window.TAS || { cmd: [] }';
-  loadScript('', {}, globalAdScript);
+  // loadScript('', {}, globalAdScript);
   // loadScript('https://securepubads.g.doubleclick.net/tag/js/gpt.js', { async: '' });
 
   // Add Adobe Analytics
