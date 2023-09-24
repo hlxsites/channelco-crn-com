@@ -5,7 +5,7 @@
 
 .right-ad-section .banner {
   border: 4px solid #ed1c24;
-  background-color: #ffffff;
+  background-color: #fff;
   flex-shrink: 0;
   width: 100%;
   max-width: 100%;
@@ -23,16 +23,30 @@
   height: 100%;
 }
 
+.right-ad-section .banner h2 {
+  font-size: 1.500rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  font-family: inherit;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #ed1c24;
+}
+
 .right-ad-section .banner.sponsored-resources h2 {
   font-size: 1.000rem;
-  margin-left: 0em;
+  margin-left: 0;
   color: #1b1b1b;
 }
 
 .right-ad-section .banner.sponsored-resources ul {
   margin-top: 0.5rem;
-  padding-left: 0rem;
+  padding-left: 0;
   list-style-type: none;
+}
+
+.right-ad-section .banner li {
+  text-align: -webkit-match-parent;
 }
 
 .right-ad-section .banner.sponsored-resources li {
@@ -42,7 +56,6 @@
 .right-ad-section .banner.sponsored-resources li::before {
   content: url('/styles/icons/stop-fill.svg');
   display: inline-block;
-
   font-style: normal;
   font-weight: normal !important;
   font-variant: normal;
@@ -52,45 +65,28 @@
   -webkit-font-smoothing: antialiased;
 }
 
+.right-ad-section .banner a {
+  text-decoration: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 1.025rem;
+  font-weight: normal;
+  color: #333;
+  line-height: 1rem;
+  text-align: left;
+}
+
 .right-ad-section .banner.sponsored-resources a {
   font-family: inherit;
   font-size: 0.775rem;
   font-weight: normal;
-  color: #333333;
+  color: #333;
   line-height: normal;
   text-align: justify;
 }
 
-.right-ad-section .banner h2 {
-  font-size: 1.500rem;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-  font-family: inherit;
-  font-size: 1.500rem;
-  font-weight: bold;
-  text-transform: uppercase;
-  color: #ed1c24;
-}
-
 .right-ad-section .banner ol {
   list-style-type: decimal;
-}
-
-.right-ad-section .banner li {
-  text-align: -webkit-match-parent;
-}
-
-.right-ad-section .banner a {
-  text-decoration: none;
-  color: inherit;
-  cursor: pointer;
-
-  font-family: inherit;
-  font-size: 1.025rem;
-  font-weight: normal;
-  color: #333333;
-  line-height: 1rem;
-  text-align: left;
 }
 
 .right-ad-section .banner li::marker {
@@ -110,15 +106,6 @@
 
 .right-ad-section .banner .button-container {
   margin: 0;
-}
-
-.right-ad-section .banner .button-container a {
-  font-family: inherit;
-  font-size: 1rem;
-  color: #1b1b1b;
-  line-height: 1rem;
-  text-align: left;
-  text-transform: none;
 }
 
 .right-ad-section .banner .button-container a {
@@ -168,7 +155,7 @@
   font-family: inherit;
   font-size: .900rem;
   font-weight: bold;
-  color: #333333;
+  color: #333;
   text-align: left;
   margin-bottom: 1.5rem;
 }
@@ -185,8 +172,8 @@
   max-width: 100px;
   width: 100%;
   height: auto;
-  padding: 0rem 0rem;
-  border: 1px solid #CCCCCC;
+  padding: 0;
+  border: 1px solid #CCC;
 }
 
 /* tv */
@@ -214,14 +201,14 @@
   flex-direction: column;
   align-items: flex-start;
   flex: 0 0 auto;
-  width: 33.33333%;
+  width: 33.3333%;
 }
 
 .right-ad-section .banner.tv .links-container a {
   font-family: inherit;
   font-size: .900rem;
   font-weight: bold;
-  color: #333333;
+  color: #333;
   text-align: left;
   margin-bottom: 1.5rem;
 }
@@ -230,7 +217,7 @@
   display: flex;
   justify-content: center;
   flex: 0 0 auto;
-  width: 66.66667%;
+  width: 66.6667%;
 }
 
 .right-ad-section .banner.tv .image-container picture img {
@@ -280,7 +267,7 @@
   font-family: inherit;
   font-size: .900rem;
   font-weight: bold;
-  color: #333333;
+  color: #333;
   text-align: left;
   margin-bottom: 1.5rem;
   margin-top: 0;
@@ -307,8 +294,8 @@
   max-width: 100px;
   width: 100%;
   height: auto;
-  padding: 0rem 0rem;
-  border: 1px solid #CCCCCC;
+  padding: 0;
+  border: 1px solid #CCC;
 }
 
 @media (max-width: 767px) {
