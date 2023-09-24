@@ -24,13 +24,16 @@ function loadScript(url, attrs, body) {
   return script;
 }
 function addMartechStack() {
-  // Add Global Ads
-  // loadScript('https://lib.tashop.co/crn/adengine.js', {
-  //   async: '',
-  //   'data-tmsclient': 'CRN',
-  //   'data-layout': 'ros',
-  //   'data-debug': 'false',
-  // });
+  // Defer the loading of the Global Ads script for 3 seconds
+  setTimeout(() => {
+    loadScript('https://lib.tashop.co/crn/adengine.js', {
+      async: '',
+      'data-tmsclient': 'CRN',
+      'data-layout': 'ros',
+      'data-debug': 'false',
+    });
+  }, 3000); // 3-second delay
+
   const globalAdScript = 'window.TAS = window.TAS || { cmd: [] }';
   loadScript('', {}, globalAdScript);
   loadScript('https://securepubads.g.doubleclick.net/tag/js/gpt.js', { async: '' });
