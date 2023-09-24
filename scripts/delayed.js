@@ -25,18 +25,18 @@ function loadScript(url, attrs, body) {
 }
 function addMartechStack() {
   // Add Global Ads
-  loadScript('https://lib.tashop.co/crn/adengine.js', {
-    async: '',
-    'data-tmsclient': 'CRN',
-    'data-layout': 'ros',
-    'data-debug': 'false',
-  });
+  // loadScript('https://lib.tashop.co/crn/adengine.js', {
+  //   async: '',
+  //   'data-tmsclient': 'CRN',
+  //   'data-layout': 'ros',
+  //   'data-debug': 'false',
+  // });
   const globalAdScript = 'window.TAS = window.TAS || { cmd: [] }';
-  loadScript('', {}, globalAdScript);
-  loadScript('https://securepubads.g.doubleclick.net/tag/js/gpt.js', { async: '' });
+  // loadScript('', {}, globalAdScript);
+  // loadScript('https://securepubads.g.doubleclick.net/tag/js/gpt.js', { async: '' });
 
   // Add Adobe Analytics
-  loadScript('https://assets.adobedtm.com/9cfdfb0dd4d0/37e7a63c5b44/launch-54eb03504761.min.js');
+  // loadScript('https://assets.adobedtm.com/9cfdfb0dd4d0/37e7a63c5b44/launch-54eb03504761.min.js');
 
   // Add Google Tag Manager
   const gtmIframe = document.createElement('iframe');
