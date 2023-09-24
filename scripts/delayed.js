@@ -1,11 +1,28 @@
 // eslint-disable-next-line import/no-cycle
 import {
   sampleRUM,
-  loadScript,
 } from './lib-franklin.js';
 
 import { fetchFragment } from './shared.js';
 
+function loadScript(url, attrs, body) {
+  const head = document.querySelector('head');
+  const script = document.createElement('script');
+  if (url) script.src = url;
+  if (attrs) {
+    // eslint-disable-next-line no-restricted-syntax, guard-for-in
+    for (const attr in attrs) {
+      script.setAttribute(attr, attrs[attr]);
+    }
+  }
+  if (body) {
+    script.type = 'text/javascript';
+    script.text = body;
+  }
+
+  head.append(script);
+  return script;
+}
 function addMartechStack() {
   // Defer the loading of the Global Ads script for 3 seconds
   loadScript('https://lib.tashop.co/crn/adengine.js', {
