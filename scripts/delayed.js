@@ -25,12 +25,14 @@ function loadScript(url, attrs, body) {
 }
 function addMartechStack() {
   // Defer the loading of the Global Ads script for 3 seconds
-  loadScript('https://lib.tashop.co/crn/adengine.js', {
-    async: '',
-    'data-tmsclient': 'CRN',
-    'data-layout': 'ros',
-    'data-debug': 'false',
-  });
+  setTimeout(() => {
+    loadScript('https://lib.tashop.co/crn/adengine.js', {
+      async: '',
+      'data-tmsclient': 'CRN',
+      'data-layout': 'ros',
+      'data-debug': 'false',
+    });
+  }, 6000); // 3-second delay
 
   const globalAdScript = 'window.TAS = window.TAS || { cmd: [] }';
   loadScript('', {}, globalAdScript);
