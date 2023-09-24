@@ -40,7 +40,7 @@
 }
 
 .right-ad-section .banner.sponsored-resources li::before {
-  content: url('/styles/icons/stop-fill.svg'); /* Reference to your SVG icon */
+  content: url('/styles/icons/stop-fill.svg');
   display: inline-block;
 
   font-style: normal;

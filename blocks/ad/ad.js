@@ -1,6 +1,4 @@
 export default function decorate(block) {
-  console.log('block', block);
-
   // Extract the unit-id from the block
   const unitIdElement = block.querySelector('div:nth-child(1) > div:nth-child(2)');
   if (!unitIdElement) {
