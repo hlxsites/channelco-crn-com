@@ -28,8 +28,8 @@ function buildHeroBlock(main) {
  */
 function buildBreadcrumb(main) {
   const path = window.location.pathname;
-  const title = document.querySelector('h1').innerText;
-  if (path === '/' || title === '404') {
+  const title = document.querySelector('h1');
+  if (path === '/' || (title && title.innerText === '404')) {
     return;
   }
 
