@@ -108,12 +108,11 @@ function loadBottomAd() {
   }
 }
 
-async function loadDelayedAds(main) {
+function loadDelayedAds(main) {
   try {
     addMartechStack();
     loadTopAd(main);
     loadBottomAd();
-    await loadRightAdFragment();
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Delayed Auto Blocking failed', error);
@@ -122,4 +121,5 @@ async function loadDelayedAds(main) {
 
 // Core Web Vitals RUM collection
 sampleRUM('cwv');
-await loadDelayedAds(document.querySelector('main'));
+loadDelayedAds(document.querySelector('main'));
+await loadRightAdFragment();
