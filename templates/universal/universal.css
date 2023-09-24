@@ -5,12 +5,45 @@
 }
 
 .top-ad-section {
-  width: 100%; 
   background-color: #e0e0e0;
-  padding: 20px;
+  padding-bottom: 20px;
   margin-bottom: 20px;
   border-top: 2px solid #000000;
   border-bottom: 2px solid #ed1c24;
+  text-align: center;
+}
+
+.top-ad-section .top-ad {
+  width: 100%;
+  margin: 0 auto;
+}
+
+.bottom-ad-section {
+  text-align: center;
+  position: relative;
+}
+
+.close-icon {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  width: 16px;
+  height: 16px;
+  opacity: 1;
+  cursor: pointer;
+}
+
+.bottom-ad-section .bottom-ad {
+  width: 100%;
+  margin: 0 auto;
+}
+
+.ad-title {
+  font-family: inherit;
+  color: #333333;
+  font-size: .60rem;
+  text-transform: uppercase;
+  font-weight: bold;
 }
 
 .content-and-ads-container {
@@ -33,6 +66,7 @@
   padding: 15px; 
 }
 
+
 .bottom-ad-section {
   position: fixed;
   bottom: 0px;
@@ -42,6 +76,20 @@
   left: 50%;
   margin-left: -496px;
   background-color: rgba(230, 230, 230, 0.7);
+}
+
+.banner-container > .ad-wrapper:last-of-type {
+  position: -webkit-sticky; 
+  position: sticky;
+  top: 0;
+  text-align: center;
+}
+
+.banner-container > .banner-wrapper:last-of-type {
+  position: -webkit-sticky; 
+  position: sticky;
+  top: 0;
+  text-align: center;
 }
 
 @media (min-width: 576px) {
