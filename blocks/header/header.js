@@ -144,11 +144,51 @@ export default async function decorate(block) {
         <span class="nav-hamburger-icon"></span>
       </button>`;
     hamburger.addEventListener('click', () => toggleMenu(nav, navSections));
+    if (!isDesktop.matches) {
+      const navDrops = navSections.querySelectorAll('.nav-drop');
+      navDrops.forEach((navDrop) => {
+        navDrop.classList.add('mobile-collapse');
+      });
+    }
     nav.prepend(hamburger);
     nav.setAttribute('aria-expanded', 'false');
     // prevent mobile nav behavior on window resize
     toggleMenu(nav, navSections, isDesktop.matches);
     isDesktop.addEventListener('change', () => toggleMenu(nav, navSections, isDesktop.matches));
+
+    // nav-drop click
+    const navDrops = navSections.querySelectorAll('.nav-drop');
+    navDrops.forEach((navDrop) => {
+      navDrop.addEventListener('click', function handleNavDropClick() {
+        if (!isDesktop.matches) {
+          const listItems = this.querySelectorAll('ul li');
+          listItems.forEach((listItem) => {
+            listItem.classList.toggle('expanded');
+          });
+        }
+      });
+    });
+
+    isDesktop.addEventListener('change', () => {
+      toggleMenu(nav, navSections, isDesktop.matches);
+      if (isDesktop.matches) {
+        navDrops.forEach((navDrop) => {
+          navDrop.classList.remove('mobile-collapse');
+        });
+      } else {
+        navDrops.forEach((navDrop) => {
+          navDrop.classList.add('mobile-collapse');
+        });
+      }
+    });
+
+    // const newsTab = document.getElementsByClassName('news');
+    // newsTab.addEventListener('click', () => {
+    //   const allTabs = document.querySelectorAll('.news li');
+    //   allTabs.forEach((tab) => tab.classList.add('hidden'));
+    //   const newsList = newsTab.querySelector('.news');
+    //   newsList.classList.remove('hidden');
+    // });
 
     decorateIcons(nav);
     decorateLinkedPictures(nav);
