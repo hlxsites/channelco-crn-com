@@ -67,7 +67,6 @@ async function createContentAndAdsSections(doc) {
   const topAdSection = document.createElement('div');
   topAdSection.className = 'top-ad-section';
   topAdSection.id = 'top-ad-fragment-container';
-  topAdSection.innerHTML = 'Ads here';
 
   const contentAndAdsContainer = document.createElement('div');
   contentAndAdsContainer.className = 'content-and-ads-container';
@@ -79,8 +78,19 @@ async function createContentAndAdsSections(doc) {
   const bottomAdSection = document.createElement('div');
   bottomAdSection.className = 'bottom-ad-section';
   bottomAdSection.id = 'bottom-ad-fragment-container';
-  bottomAdSection.innerHTML = 'Bottom ads here';
 
+  // Create the close icon
+  const closeIcon = document.createElement('img');
+  closeIcon.className = 'close-icon';
+  closeIcon.src = '/styles/icons/close-ribbon.png';
+  closeIcon.alt = 'Close'; // Accessibility
+
+  // Add event listener to close the bottom ad section when the close icon is clicked
+  closeIcon.addEventListener('click', () => {
+    bottomAdSection.style.display = 'none';
+  });
+
+  bottomAdSection.appendChild(closeIcon);
   contentAndAdsContainer.appendChild(contentSection);
   contentAndAdsContainer.appendChild(rightAdSection);
 
