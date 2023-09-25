@@ -4,9 +4,9 @@ import {
   loadBlock,
 } from '../../scripts/lib-franklin.js';
 import {
-  getAllAuthors,
+  getRecordsFromBlock,
   createOptimizedPicture,
-} from '../../scripts/scripts.js';
+} from '../../scripts/shared.js';
 
 const BIO_LENGTH = 350;
 
@@ -24,9 +24,8 @@ function createAuthorLink(author) {
  * @param {HTMLElement} block Target where author blades will be added.
  */
 export default async function decorate(block) {
-  block.innerHTML = '';
   try {
-    const authors = await getAllAuthors();
+    const authors = await getRecordsFromBlock(block);
     const authorRows = [];
     authors.forEach((author) => {
       const pictureLink = createAuthorLink(author);

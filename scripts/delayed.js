@@ -19,6 +19,7 @@ async function loadRightAdFragment() {
     adFragmentContainer.innerHTML = '';
     adFragmentContainer.appendChild(fragmentHTML);
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Error fetching the fragment:', error);
     adFragmentContainer.innerHTML = '<p>Error loading content</p>';
   }
