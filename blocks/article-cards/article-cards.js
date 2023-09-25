@@ -1,39 +1,17 @@
 import {
-  getArticlesByPath,
   getCategoryName,
   getCategoryPath,
-} from '../../scripts/scripts.js';
-import { createOptimizedPicture } from '../../scripts/lib-franklin.js';
+  createOptimizedPicture,
+  getRecordsFromBlock,
+} from '../../scripts/shared.js';
 
 /**
  * Converts the cards block from its authored format into HTML.
  * @param {HTMLElement} block The block's element on the page.
  */
 export default async function decorate(block) {
-  const uls = block.querySelectorAll('ul');
-  let paths = [];
-
-  // merge all li's from all ul's into a flat list of article paths
-  [...uls].forEach((ul) => {
-    ul.remove();
-    const articles = ul.querySelectorAll('li');
-    const articlePaths = [...articles].map((article) => {
-      try {
-        const url = new URL(article.textContent);
-        const articlePath = url.pathname;
-        return articlePath;
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.log('unable to process card due to invalid URL content', e);
-      }
-      return false;
-    })
-      .filter((path) => !!path);
-    paths = paths.concat(paths, articlePaths);
-  });
-
-  // retrieve article information for all specified article paths
-  const articles = await getArticlesByPath(paths);
+  // retrieve article information for all specified article urls
+  const articles = await getRecordsFromBlock(block);
 
   const blockTarget = block.children.item(0).children.item(0);
   if (!blockTarget) {
