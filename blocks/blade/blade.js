@@ -11,6 +11,8 @@ export default function decorate(block) {
         column.classList.add('blade-picture');
       } else {
         column.classList.add('blade-text');
+        // ensure proper text wrapping
+        column.innerHTML = column.innerHTML.replaceAll(/&nbsp;/g, ' ');
       }
     });
   });
