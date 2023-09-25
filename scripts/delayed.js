@@ -1,37 +1,19 @@
 // eslint-disable-next-line import/no-cycle
 import {
-  sampleRUM,
+  sampleRUM, loadScript,
 } from './lib-franklin.js';
 
 import { fetchFragment } from './shared.js';
 
-function loadScript(url, attrs, body) {
-  const head = document.querySelector('head');
-  const script = document.createElement('script');
-  if (url) script.src = url;
-  if (attrs) {
-    // eslint-disable-next-line no-restricted-syntax, guard-for-in
-    for (const attr in attrs) {
-      script.setAttribute(attr, attrs[attr]);
-    }
-  }
-  if (body) {
-    script.type = 'text/javascript';
-    script.text = body;
-  }
-
-  head.append(script);
-  return script;
-}
 function addMartechStack() {
   // Defer the loading of the Global Ads script for 3 seconds
 
-  // loadScript('https://lib.tashop.co/crn/adengine.js', {
-  //   async: '',
-  //   'data-tmsclient': 'CRN',
-  //   'data-layout': 'ros',
-  //   'data-debug': 'false',
-  // });
+  loadScript('https://lib.tashop.co/crn/adengine.js', {
+    async: '',
+    'data-tmsclient': 'CRN',
+    'data-layout': 'ros',
+    'data-debug': 'false',
+  });
 
   const globalAdScript = 'window.TAS = window.TAS || { cmd: [] }';
   loadScript('', {}, globalAdScript);
@@ -118,7 +100,8 @@ function loadDelayedAds(main) {
   }
 }
 
+await loadRightAdFragment();
+loadDelayedAds(document.querySelector('main'));
+
 // Core Web Vitals RUM collection
 sampleRUM('cwv');
-loadDelayedAds(document.querySelector('main'));
-await loadRightAdFragment();
