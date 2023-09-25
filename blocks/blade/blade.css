@@ -47,7 +47,8 @@
   text-decoration-color: var(--link-color);
 }
 
-.blade.ranking img {
+.blade.ranking picture {
+  display: block;
   height: 140px;
   width: 140px;
 }
