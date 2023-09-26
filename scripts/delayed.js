@@ -101,8 +101,8 @@ function loadDelayedAds(main) {
   }
 }
 
-await loadRightAdFragment();
 loadDelayedAds(document.querySelector('main'));
+await loadRightAdFragment();
 
 // Core Web Vitals RUM collection
 sampleRUM('cwv');
