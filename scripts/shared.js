@@ -34,14 +34,21 @@ function buildEmbed(main) {
   const regex = /(https?:\/\/(.+?\.)?(flippingbook|issuu)\.com(\/[A-Za-z0-9\-._~:/?#[\]@!$&'()*+,;=]*)?)/;
   main.querySelectorAll('a').forEach((a) => {
     if (regex.test(a.href)) {
-      const html = `
+      const observer = new IntersectionObserver((entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          const html = `
             <div class="embed-container">
               <div>
                   <iframe loading="lazy" allow="encrypted-media" allowfullscreen="allowfullscreen" src="${a.href}"></iframe>
               </div>
             </div>
           `;
-      a.innerHTML = html;
+          a.innerHTML = html;
+          observer.disconnect();
+        }
+      });
+      observer.observe(a);
+      a.textContent = '';
     }
   });
 }
