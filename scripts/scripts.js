@@ -100,11 +100,13 @@ async function createContentAndAdsSections(doc) {
     const breadcrumb = main.querySelector('.breadcrumb-container');
     if (breadcrumb) {
       main.insertBefore(topAdSection, breadcrumb); // Place the ad section before breadcrumb
-      contentSection.appendChild(main.children[2]);
     } else {
-      main.prepend(topAdSection); // Place the ad section as the first child
-      contentSection.appendChild(main.children[1]);
+      main.prepend(topAdSection);
     }
+
+    // Move remaining sections in main to contentSection using array iteration
+    Array.from(main.children).filter((child) => child !== topAdSection && child !== breadcrumb)
+      .forEach((section) => contentSection.appendChild(section));
 
     mainContainer.appendChild(contentAndAdsContainer);
     main.appendChild(mainContainer);
