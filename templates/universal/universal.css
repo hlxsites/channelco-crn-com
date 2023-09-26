@@ -79,6 +79,11 @@
   align-items: center;
   justify-content: left; 
   gap: 10px; 
+  font-family: Arial Black, Arial, sans serif;
+  font-size: 1.0rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
 }
 
 .triangle-fill {
