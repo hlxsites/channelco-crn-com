@@ -299,3 +299,17 @@ main .divider {
 main .section.highlight {
   background-color: var(--highlight-background-color);
 }
+
+.embed-container {
+  aspect-ratio: 16 / 9;
+}
+
+.embed-container div {
+  width: 100%;
+  height: 100%;
+}
+
+.embed-container iframe {
+  width: 100%;
+  height: 100%;
+}

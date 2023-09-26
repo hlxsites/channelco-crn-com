@@ -11,21 +11,6 @@ const DEFAULT_CATEGORY_PATH = '/news';
 const DEFAULT_CATEGORY_NAME = 'News';
 
 /**
- * Builds hero block and prepends to main in a new section.
- * @param {Element} main The container element
- */
-function buildHeroBlock(main) {
-  const h1 = main.querySelector('h1');
-  const picture = main.querySelector('picture');
-  // eslint-disable-next-line no-bitwise
-  if (h1 && picture && (h1.compareDocumentPosition(picture) & Node.DOCUMENT_POSITION_PRECEDING)) {
-    const section = document.createElement('div');
-    section.append(buildBlock('hero', { elems: [picture, h1] }));
-    main.prepend(section);
-  }
-}
-
-/**
  * Builds breadcrumb menu and prepends to main in a new section
  * @param {Element} main The container element
  */
@@ -39,6 +24,33 @@ function buildBreadcrumb(main) {
   const div = document.createElement('div');
   div.append(buildBlock('breadcrumb', { elems: [] }));
   main.prepend(div);
+}
+
+/**
+ * Builds an embed to Flipbook and Issuu when one of their links are detected in main
+ * @param {Element} main The container element
+ */
+function buildEmbed(main) {
+  const regex = /(https?:\/\/(.+?\.)?(flippingbook|issuu)\.com(\/[A-Za-z0-9\-._~:/?#[\]@!$&'()*+,;=]*)?)/;
+  main.querySelectorAll('a').forEach((a) => {
+    if (regex.test(a.href)) {
+      const observer = new IntersectionObserver((entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          const html = `
+            <div class="embed-container">
+              <div>
+                  <iframe loading="lazy" allow="encrypted-media" allowfullscreen="allowfullscreen" src="${a.href}"></iframe>
+              </div>
+            </div>
+          `;
+          a.innerHTML = html;
+          observer.disconnect();
+        }
+      });
+      observer.observe(a);
+      a.textContent = '';
+    }
+  });
 }
 
 /**
@@ -64,8 +76,8 @@ function buildPageDivider(main) {
  */
 function buildAutoBlocks(main) {
   try {
-    buildHeroBlock(main);
     buildBreadcrumb(main);
+    buildEmbed(main);
     buildPageDivider(main);
   } catch (error) {
     // eslint-disable-next-line no-console
