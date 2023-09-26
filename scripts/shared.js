@@ -31,8 +31,9 @@ function buildBreadcrumb(main) {
  * @param {Element} main The container element
  */
 function buildEmbed(main) {
+  const regex = /(https?:\/\/(.+?\.)?(flippingbook|issuu)\.com(\/[A-Za-z0-9\-._~:/?#[\]@!$&'()*+,;=]*)?)/;
   main.querySelectorAll('a').forEach((a) => {
-    if (a.href.includes('flippingbook.com') || a.href.includes('issuu.com')) {
+    if (regex.test(a.href)) {
       const observer = new IntersectionObserver((entries) => {
         if (entries.some((e) => e.isIntersecting)) {
           const html = `
