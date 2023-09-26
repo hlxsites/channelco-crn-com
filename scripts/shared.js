@@ -1,5 +1,7 @@
 import {
   buildBlock,
+  decorateBlock,
+  loadBlock,
   decorateSections,
   decorateBlocks,
   decorateButtons,
@@ -9,6 +11,7 @@ import {
 
 const DEFAULT_CATEGORY_PATH = '/news';
 const DEFAULT_CATEGORY_NAME = 'News';
+const EMAIL_REGEX = /\S+[a-z0-9]@[a-z0-9.]+/img;
 
 /**
  * Builds hero block and prepends to main in a new section.
@@ -293,6 +296,33 @@ export async function getRecordsByPath(paths) {
 }
 
 /**
+ * Retrieves the record whose path matches a given value.
+ * @param {string} path Path to retrieve from the site's index.
+ * @returns {Promise<QueryIndexRecord>} Resolves with the information for the matching
+ *  record. Will be falsy if a matching record was not found.
+ */
+export async function getRecordByPath(path) {
+  const matching = await getRecordsByPath([path]);
+  if (!matching.length) {
+    return undefined;
+  }
+  return matching[0];
+}
+
+/**
+ * Retrieves query index information for an author, by the author's name.
+ * @param {string} authorName The name of the author to retrieve.
+ * @returns {Promise<QueryIndexRecord>} Resolves author information.
+ */
+export async function getAuthorByName(authorName) {
+  const records = await queryIndex((record) => record.path.startsWith('/authors/') && record.author === authorName);
+  if (!records.length) {
+    return undefined;
+  }
+  return records[0];
+}
+
+/**
  * Processes the contents of a block and retrieves the records specified in the
  * block. The method assumes that the block's content consists of a <ul> whose
  * list items are links to items in the site's query index.
@@ -325,4 +355,178 @@ export function getRecordsFromBlock(block) {
 
   // retrieve article information for all specified article paths
   return getRecordsByPath(paths);
+}
+
+/**
+ * Creates an HTML element that contains an article author's name, a link to the
+ * author's profile page, and the publish date of the article.
+ * @param {QueryIndexRecord} article Article whose author information will be
+ *  included.
+ * @returns {HTMLElement} Element containing summary information about the author of
+ *  an article.
+ */
+export function buildArticleAuthor(article) {
+  const author = document.createElement('h5');
+  author.classList.add('article-author');
+  // attempting to predict the URL to the author. may need to change to query
+  // author information from index
+  const authorId = String(article.author).toLowerCase()
+    .replaceAll(/[^0-9a-z ]/g, '')
+    .replaceAll(/[^0-9a-z]/g, '-');
+  author.innerHTML = `
+    <a href="/authors/${authorId}" class="link-arrow" aria-label="By ${article.author}"><span class="uncolored-link">By</span> ${article.author}</a>
+  `;
+
+  const date = document.createElement('h5');
+  date.classList.add('article-date');
+  date.innerText = article.publisheddate;
+
+  const container = document.createElement('div');
+  container.classList.add('article-author-container');
+  container.append(author, date);
+  return container;
+}
+
+function createAuthorLink(author) {
+  const authorLink = document.createElement('a');
+  authorLink.title = author.author;
+  authorLink.setAttribute('alt', author.author);
+  authorLink.href = author.path;
+  return authorLink;
+}
+
+/**
+ * Parses a given string and replaces any email addresses found in the value
+ * with HTML mailto links.
+ * @param {string} text Text to be processed.
+ * @returns {string} Original text, potentially modified to include raw
+ *  HTML.
+ */
+export function createMailToLinks(text) {
+  let modifiedText = text;
+  const uniqueEmails = {};
+  const emailAddresses = modifiedText.match(EMAIL_REGEX)
+    .filter((email) => {
+      if (uniqueEmails[email]) {
+        return false;
+      }
+      uniqueEmails[email] = true;
+      return true;
+    })
+    // escape special characters for regex
+    .map((email) => ({ email, regex: email.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&') }));
+  // replace email address in bio with mailto link
+  emailAddresses.forEach((emailInfo) => {
+    modifiedText = modifiedText.replaceAll(new RegExp(emailInfo.regex, 'g'), `<a href="mailto:${emailInfo.email}">${emailInfo.email}</a>`);
+  });
+  return modifiedText;
+}
+
+/**
+ * Creates blade blocks containing information about article authors, and adds
+ * them as children of an existing HTML element.
+ * @param {HTMLElement} target Element to which the blade blocks will
+ *  be added.
+ * @param {Array<QueryIndexRecord>} authors Information for the authors
+ *  that should be included in the blades.
+ * @param {number} [bioLength] If provided, the maximum length that the
+ *  author's bio should be. If the bio exceeds this length, it will be
+ *  truncated with a "Read more" link to the author's profile.
+ * @returns {Promise} Resolves when the blades have been built and added.
+ */
+export async function buildAuthorBlades(target, authors, bioLength = 0) {
+  const authorRows = [];
+  authors.forEach((author) => {
+    const pictureLink = createAuthorLink(author);
+    pictureLink.append(createOptimizedPicture(author.authorimage));
+
+    const nameLink = createAuthorLink(author);
+    const authorName = document.createElement('h4');
+    authorName.innerText = author.author;
+    nameLink.append(authorName);
+
+    let bioStr = String(author.authordescription);
+    if (bioLength && bioStr.length > bioLength) {
+      bioStr = `${bioStr.substring(0, bioLength)}... <a href="${author.path}" title="Read more" aria-label="Read more">Read more</a>`;
+    } else {
+      bioStr = createMailToLinks(bioStr);
+    }
+
+    const bio = document.createElement('p');
+    bio.innerHTML = bioStr;
+
+    authorRows.push([{ elems: [pictureLink] }, { elems: [nameLink, bio] }]);
+  });
+  const blades = buildBlock('blade', authorRows);
+  blades.classList.add('author');
+  target.append(blades);
+  decorateBlock(blades);
+  return loadBlock(blades);
+}
+
+/**
+ * Builds a learn-more block based on a given list of keywords, then adds it
+ * as a child of a given element.
+ * @param {HTMLElement} target Element to which the block will be added.
+ * @param {string} keywords Comma-separated list of keywords to include in the
+ *  learn more list.
+ * @returns {Promise} Resolves when the operation is complete.
+ */
+export async function buildLearnMore(target, keywords) {
+  const ul = document.createElement('ul');
+  const items = String(keywords)
+    .split(',')
+    .map((keyword) => keyword.trim());
+  items.forEach((keyword) => {
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <a href="/tags/${encodeURIComponent(keyword)}" title="${keyword}" aria-label="${keyword}">
+        ${keyword}
+      </a>
+    `;
+    ul.append(li);
+  });
+  const learnMore = buildBlock('learn-more', { elems: [ul] });
+  target.append(learnMore);
+  decorateBlock(learnMore);
+  return loadBlock(learnMore);
+}
+
+/**
+ * Dynamically creates a related content block based on a given list of
+ * article paths, then appends the new block to a given element.
+ * @param {HTMLElement} target Element to which related content block will be added.
+ * @param {Array<string>} articlePaths List of full article paths to use as
+ *  related items.
+ * @returns {Promise} Resolves when the operation is complete.
+ */
+export async function buildRelatedContent(target, articlePaths) {
+  const ul = document.createElement('ul');
+  articlePaths.forEach((article) => {
+    const item = document.createElement('li');
+    item.innerHTML = `
+      <a href="${article}">
+        ${article}
+      </a>
+    `;
+    ul.append(item);
+  });
+  const relatedContent = buildBlock('related-content', { elems: [ul] });
+  target.append(relatedContent);
+  decorateBlock(relatedContent);
+  return loadBlock(relatedContent);
+}
+
+/**
+ * Dynamically creates a social share block, then appends the new block after
+ * a given element.
+ * @param {HTMLElement} insertAfter Element after which the block will be inserted.
+ * @returns {Promise} Resolves when the operation is complete.
+ */
+export async function buildSocialShare(insertAfter) {
+  const insertBefore = insertAfter.nextSibling;
+  const socialShare = buildBlock('social-share', { elems: [] });
+  insertAfter.parentElement.insertBefore(socialShare, insertBefore);
+  decorateBlock(socialShare);
+  return loadBlock(socialShare);
 }

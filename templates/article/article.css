@@ -1,1 +1,69 @@
-/* nothing here */
+.article main .author .blade-text > a:first-child {
+  text-transform: uppercase;
+  display: flex;
+  gap: 0.25rem;
+  padding: 0;
+  margin: 0;
+  align-items: center;
+  font-size: var(--heading-font-size-s);
+  font-weight: normal;
+}
+
+.article main .author .blade-text > a:first-child h4 {
+  padding: 0;
+  margin: 0;
+  font-size: var(--heading-font-size-s);
+  font-weight: normal;
+  line-height: 1;
+}
+
+.article main .author .blade-text > a:first-child::before {
+  content: 'By';
+  color: var(--text-color);
+  line-height: 1;
+}
+
+.article main .blade.author p {
+  font-size: var(--body-font-size-m);
+}
+
+.article main .blade.author > div {
+  padding-top: 1rem;
+  border-top: 2px dotted var(--color-mid-grey);
+  border-bottom: 2px dotted var(--color-mid-grey);
+}
+
+.article main .social-share {
+  margin: 1rem 0;
+}
+
+.article main .to-article-top {
+  padding: 0;
+  margin: 1rem 0 0 0;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  gap: .25rem;
+}
+
+.article main .to-article-top h3 {
+    padding: 0;
+    margin: 0;
+    line-height: 1;
+  }
+
+.article main .up-arrow::before {
+  content: '▲';
+}
+
+.article main .learn-more {
+  margin-top: 1rem;
+}
+
+.article main .blade.author {
+  margin-top: 1rem;
+}
+
+.article main .related-content {
+  margin-top: 1rem;
+}
