@@ -27,7 +27,7 @@ function buildBreadcrumb(main) {
 }
 
 /**
- * Builds an embed to Flipbook and Issuu when either of their links are detected in main
+ * Builds an embed to Flipbook and Issuu when one of their links are detected in main
  * @param {Element} main The container element
  */
 function buildEmbed(main) {
