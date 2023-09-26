@@ -57,6 +57,44 @@ async function decorateTemplates(main) {
   }
 }
 
+function scrollToTop(event) {
+  event.preventDefault();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function createToTopSection() {
+  const toTopContainer = document.createElement('div');
+  toTopContainer.className = 'back-to-top';
+
+  const toTopCol = document.createElement('div');
+  toTopCol.className = 'to-top-text';
+
+  const toTopContent = document.createElement('div');
+  const toTopLink = document.createElement('a');
+  toTopLink.href = '#top';
+  toTopLink.target = '_self';
+  toTopLink.ariaLabel = 'To Top';
+
+  const toTopHeader = document.createElement('h3');
+  toTopHeader.className = 'back-top-top-section-header';
+
+  const toTopIcon = document.createElement('img');
+  toTopIcon.className = 'triangle-fill';
+  toTopIcon.src = '/styles/icons/triangle-fill.svg';
+  toTopHeader.appendChild(toTopIcon);
+  toTopHeader.appendChild(document.createTextNode(' TO TOP'));
+
+  toTopLink.appendChild(toTopHeader);
+  toTopContent.appendChild(toTopLink);
+  toTopCol.appendChild(toTopContent);
+  toTopContainer.appendChild(toTopCol);
+
+  // Event listener to scroll to top smoothly
+  toTopLink.addEventListener('click', scrollToTop);
+
+  return toTopContainer;
+}
+
 async function createContentAndAdsSections(doc) {
   const mainContainer = document.createElement('div');
   mainContainer.className = 'main-content-container';
@@ -109,6 +147,11 @@ async function createContentAndAdsSections(doc) {
       .forEach((section) => contentSection.appendChild(section));
 
     mainContainer.appendChild(contentAndAdsContainer);
+
+    // Append the "TO TOP" section to the mainContainer (Outside of the flex container)
+    const toTopSection = createToTopSection();
+    mainContainer.appendChild(toTopSection);
+
     main.appendChild(mainContainer);
   }
 
