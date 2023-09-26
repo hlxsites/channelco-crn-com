@@ -53,17 +53,37 @@
 }
 
 .content-and-ads-container .content-section {
-  padding: 20px;
+  padding: 20 20 20 0;
 }
 
 .content-and-ads-container .right-ad-section {
-  padding: 20px;
+  padding: 20 20 20 0;
 }
 
 .content-and-ads-container .content-section,
 .content-and-ads-container .right-ad-section {
   width: 100%; 
-  padding: 15px; 
+}
+
+.back-to-top {
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 100%;
+  padding-left: var(--padding-spacer-x, 0.75rem);
+  padding-right: var(--padding-spacer-x, 0.75rem);
+  margin-top: var(--custom-gutter-y);
+}
+
+.back-top-top-section-header {
+  display: flex; 
+  align-items: center;
+  justify-content: left; 
+  gap: 10px; 
+}
+
+.triangle-fill {
+  display: inline-block;
+  vertical-align: center; 
 }
 
 
