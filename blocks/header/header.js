@@ -89,6 +89,7 @@ function toggleMenu(nav, navSections, forceExpanded = null) {
  * decorates the header, mainly the nav
  * @param {Element} block The header block element
  */
+
 export default async function decorate(block) {
   // fetch nav content
   const navMeta = getMetadata('nav');
@@ -148,16 +149,15 @@ export default async function decorate(block) {
     nav.prepend(hamburger);
     nav.setAttribute('aria-expanded', 'false');
     // prevent mobile nav behavior on window resize
+
     toggleMenu(nav, navSections, isDesktop.matches);
     isDesktop.addEventListener('change', () => toggleMenu(nav, navSections, isDesktop.matches));
-
     decorateIcons(nav);
     decorateLinkedPictures(nav);
     const navWrapper = document.createElement('div');
     navWrapper.className = 'nav-wrapper';
     navWrapper.append(nav);
     block.append(navWrapper);
-
     // class names for drop down lists
     const classNames = ['news', 'companies', 'awards', 'events', 'industry', 'about'];
     for (let i = 0; i < classNames.length; i += 1) {
