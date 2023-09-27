@@ -1,0 +1,60 @@
+.learn-more > div > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.learn-more ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+  align-items: center;
+}
+
+.learn-more .icon-info-circle {
+  color: var(--link-color);
+  width: 40px;
+  height: 40px;
+  margin: 20px;
+  min-width: 40px;
+  max-width: 150px;
+}
+
+.learn-more .learn-more-links {
+  flex: 1;
+}
+
+.learn-more ul::before {
+  content: 'Learn More:';
+  text-transform: uppercase;
+  color: #5e5e5e;
+}
+
+.learn-more ul li {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: var(--heading-font-size-l);
+}
+
+.learn-more ul li:not(:first-child)::before {
+  content: '|';
+  margin-right: 0.25rem;
+}
+
+@media (min-width: 576px) {
+  .learn-more > div > div {
+    align-items: center;
+    flex-direction: row;
+  }
+
+  .learn-more .icon-info-circle {
+    flex: 1;
+  }
+
+  .learn-more .learn-more-links {
+    flex: unset;
+  }
+}
