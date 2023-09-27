@@ -465,6 +465,18 @@ export async function buildAuthorBlades(target, authors, bioLength = 0) {
 }
 
 /**
+ * Parses a comma-separate list of keywords into an array of keyword values.
+ * @param {string} keywords Keywords to parse.
+ * @returns {Array<string>} List of keywords.
+ */
+function parseKeywords(keywords) {
+  return String(keywords)
+    .split(',')
+    .map((keyword) => keyword.trim())
+    .filter((keyword) => !!keyword);
+}
+
+/**
  * Builds a learn-more block based on a given list of keywords, then adds it
  * as a child of a given element.
  * @param {HTMLElement} target Element to which the block will be added.
@@ -474,9 +486,7 @@ export async function buildAuthorBlades(target, authors, bioLength = 0) {
  */
 export async function buildLearnMore(target, keywords) {
   const ul = document.createElement('ul');
-  const items = String(keywords)
-    .split(',')
-    .map((keyword) => keyword.trim());
+  const items = parseKeywords(keywords);
   items.forEach((keyword) => {
     const li = document.createElement('li');
     li.innerHTML = `
@@ -510,6 +520,7 @@ export async function buildRelatedContent(target, articlePaths) {
       </a>
     `;
     ul.append(item);
+    console.log(item);
   });
   const relatedContent = buildBlock('related-content', { elems: [ul] });
   target.append(relatedContent);
@@ -529,4 +540,93 @@ export async function buildSocialShare(insertAfter) {
   insertAfter.parentElement.insertBefore(socialShare, insertBefore);
   decorateBlock(socialShare);
   return loadBlock(socialShare);
+}
+
+function buildKeywordLookup(keywords) {
+  const map = {};
+  parseKeywords(keywords)
+    .forEach((keyword) => map[keyword] = true);
+  return map;
+}
+
+/**
+ * Retrieves articles related to a set of keywords. Articles with more matching
+ * keywords will have a higher relation score, and articles with a newer
+ * publish date will have a higher score when the relation score is the same.
+ * @param {string} keywords Comma-separated list of keyword values.
+ * @param {number} [relatedCount] Optional number of items to return. Default: 5.
+ * @returns {Promise<Array<QueryIndexRecord>>} Resolves with the most related articles.
+ */
+export async function getRelatedArticles(keywords, relatedCount = 5) {
+  // this method will almost certainly need to be optimized as the number of articles
+  // grows. As is, it will:
+  // 1. Potentially read a very large number of articles into memory.
+  // 2. Query the full index.
+  // 3. Sort a very large number of articles.
+  const related = [];
+  const lookup = buildKeywordLookup(keywords);
+
+  await queryIndex((record) => {
+    if (!record.keywords
+        || (record.template && String(record.template).toLowerCase() !== 'article')
+        || !String(record.path).startsWith('/news/')) {
+      return false;
+    }
+    // calculate relevance by determining how many of the given keywords each
+    // article has
+    let matchCount = 0;
+    const currRecordKeywords = parseKeywords(record.keywords);
+    currRecordKeywords.forEach((keyword) => {
+      if (lookup[keyword]) {
+        matchCount++;
+      }
+    });
+    if (matchCount > 0) {
+      related.push({
+        record,
+        relevance: matchCount,
+      });
+    }
+    return false;
+  });
+
+  // sort the articles, favoring those with highest relevance, then those that
+  // are newest
+  related.sort((a, b) => {
+    if (a.relevance > b.relevance) {
+      return -1;
+    } else if (a.relevance < b.relevance) {
+      return 1;
+    }
+
+    const recordA = a.record;
+    const recordB = b.record;
+    if (!recordA.publisheddate && !recordB.publisheddate) {
+      return 0;
+    } else if (!recordA.publisheddate && recordB.publisheddate) {
+      return 1;
+    } else if (recordA.publisheddate && !recordB.publisheddate) {
+      return -1;
+    }
+
+    try {
+      const date1 = Date.parse(recordA.publisheddate);
+      const date2 = Date.parse(recordB.publisheddate);
+      if (date1 < date2) {
+        return 1;
+      }
+      return -1;
+    } catch {
+      // don't compare dates if parsing fails
+    }
+    return 0;
+  });
+
+  const topRelated = [];
+  const topCount = related.length > relatedCount ? relatedCount : related.length;
+  for (let i = 0; i < topCount; i += 1) {
+    topRelated.push(related[i].record);
+  }
+
+  return topRelated;
 }
