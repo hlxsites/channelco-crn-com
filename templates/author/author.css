@@ -1,0 +1,49 @@
+.author main .blade.author .blade-picture img {
+  width: 200px;
+  height: 200px;
+}
+
+.author main .blade.author .blade-text .author-link-icon {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: black;
+}
+
+.author main .blade.author .blade-text a {
+  color: var(--text-color);
+}
+
+.author main .blade.author .blade-text p {
+  font-size: var(--body-font-size-l);
+}
+
+.author main .blade.author .blade-text a:hover {
+  color: var(--link-color);
+}
+
+.author main .blade.author .blade-text .icon {
+  width: 40px;
+  height: 40px;
+}
+
+.author main .blade.author .blade-text .icon svg {
+  width: 40px;
+  height: 40px;
+}
+
+@media (min-width: 576px) {
+  /* author variant */
+  .author main .blade.author > div {
+    gap: unset;
+    flex-direction: column;
+  }
+}
+
+@media (min-width: 1200px) {
+  /* author variant */
+  .author main .blade.author > div {
+    gap: 3rem;
+    flex-direction: row;
+  }
+}
