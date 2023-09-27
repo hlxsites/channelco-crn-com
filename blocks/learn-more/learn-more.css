@@ -1,6 +1,7 @@
 .learn-more > div > div {
   display: flex;
   flex-direction: column;
+  gap: 1rem;
 }
 
 .learn-more ul {
@@ -15,11 +16,16 @@
 
 .learn-more .icon-info-circle {
   color: var(--link-color);
+  width: 100px;
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.learn-more .icon-info-circle svg {
   width: 40px;
   height: 40px;
-  margin: 20px;
-  min-width: 40px;
-  max-width: 150px;
 }
 
 .learn-more .learn-more-links {
@@ -46,15 +52,8 @@
 
 @media (min-width: 576px) {
   .learn-more > div > div {
-    align-items: center;
+    gap: 3rem;
     flex-direction: row;
-  }
-
-  .learn-more .icon-info-circle {
-    flex: 1;
-  }
-
-  .learn-more .learn-more-links {
-    flex: unset;
+    align-items: center;
   }
 }
