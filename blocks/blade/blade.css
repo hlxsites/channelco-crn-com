@@ -1,0 +1,67 @@
+.blade > div {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.blade .blade-text {
+  flex: 1;
+}
+
+/* author variant */
+.blade.author > div {
+  border-bottom: 1px solid var(--clr-red);
+}
+
+.blade.author h4 {
+  font-size: var(--heading-font-size-ll);
+}
+
+.blade.author p {
+  font-size: var(--body-font-size-ms);
+}
+
+.blade.author img {
+  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+}
+
+/* ranking variant */
+.blade.ranking > div {
+  flex-direction: column-reverse;
+  border-bottom: 1px solid var(--clr-grey);
+}
+
+.blade.ranking h4 {
+  font-weight: 700;
+  font-size: var(--heading-font-size-xl);
+}
+
+.blade.ranking a {
+  color: var(--text-color);
+}
+
+.blade.ranking p a {
+  text-decoration: underline;
+  text-decoration-color: var(--link-color);
+}
+
+.blade.ranking picture {
+  display: block;
+  height: 140px;
+  width: 140px;
+}
+
+@media (min-width: 576px) {
+  .blade > div,
+  .blade.ranking > div {
+    flex-direction: row;
+    gap: 1rem;
+  }
+
+  /* author variant */
+  .blade.author > div {
+    gap: 3rem;
+  }
+}

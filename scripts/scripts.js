@@ -1,12 +1,7 @@
 import {
   sampleRUM,
-  buildBlock,
   loadHeader,
   loadFooter,
-  decorateButtons,
-  decorateIcons,
-  decorateSections,
-  decorateBlocks,
   decorateTemplateAndTheme,
   waitForLCP,
   loadBlocks,
@@ -15,24 +10,11 @@ import {
   getMetadata,
 } from './lib-franklin.js';
 
+import { decorateMain } from './shared.js';
+
 const LCP_BLOCKS = []; // add your LCP blocks to the list
 
 const TEMPLATE_LIST = ['category', 'article'];
-
-/**
- * Builds hero block and prepends to main in a new section.
- * @param {Element} main The container element
- */
-function buildHeroBlock(main) {
-  const h1 = main.querySelector('h1');
-  const picture = main.querySelector('picture');
-  // eslint-disable-next-line no-bitwise
-  if (h1 && picture && (h1.compareDocumentPosition(picture) & Node.DOCUMENT_POSITION_PRECEDING)) {
-    const section = document.createElement('div');
-    section.append(buildBlock('hero', { elems: [picture, h1] }));
-    main.prepend(section);
-  }
-}
 
 /**
  * load fonts.css and set a session storage flag
@@ -47,24 +29,19 @@ async function loadFonts() {
 }
 
 /**
- * Builds all synthetic blocks in a container element.
- * @param {Element} main The container element
- */
-function buildAutoBlocks(main) {
-  try {
-    buildHeroBlock(main);
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Auto Blocking failed', error);
-  }
-}
-
-/**
  * Run template specific decoration code.
  * @param {Element} main The container element
  */
 async function decorateTemplates(main) {
   try {
+    // Load the universal template for every page
+    const universalTemplate = 'universal';
+    const universalMod = await import(`../templates/${universalTemplate}/${universalTemplate}.js`);
+    loadCSS(`${window.hlx.codeBasePath}/templates/${universalTemplate}/${universalTemplate}.css`);
+    if (universalMod.default) {
+      await universalMod.default(main);
+    }
+
     const template = toClassName(getMetadata('template'));
     const templates = TEMPLATE_LIST;
     if (templates.includes(template)) {
@@ -80,40 +57,105 @@ async function decorateTemplates(main) {
   }
 }
 
-export function linkPicture(picture) {
-  const nextSib = picture.parentNode.nextElementSibling;
-  if (nextSib) {
-    const a = nextSib.querySelector('a');
-    if (a && a.textContent.startsWith('https://')) {
-      a.innerHTML = '';
-      a.className = '';
-      a.appendChild(picture);
-    }
-  }
+function scrollToTop(event) {
+  event.preventDefault();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-export function decorateLinkedPictures(main) {
-  /* thanks to word online */
-  main.querySelectorAll('picture').forEach((picture) => {
-    if (!picture.closest('div.block')) {
-      linkPicture(picture);
-    }
+function createToTopSection() {
+  const toTopContainer = document.createElement('div');
+  toTopContainer.className = 'back-to-top';
+
+  const toTopCol = document.createElement('div');
+  toTopCol.className = 'to-top-text';
+
+  const toTopContent = document.createElement('div');
+  const toTopLink = document.createElement('a');
+  toTopLink.href = '#top';
+  toTopLink.target = '_self';
+  toTopLink.ariaLabel = 'To Top';
+
+  const toTopHeader = document.createElement('h3');
+  toTopHeader.className = 'back-top-top-section-header';
+
+  const toTopIcon = document.createElement('img');
+  toTopIcon.className = 'triangle-fill';
+  toTopIcon.src = '/styles/icons/triangle-fill.svg';
+  toTopHeader.appendChild(toTopIcon);
+  toTopHeader.appendChild(document.createTextNode(' TO TOP'));
+
+  toTopLink.appendChild(toTopHeader);
+  toTopContent.appendChild(toTopLink);
+  toTopCol.appendChild(toTopContent);
+  toTopContainer.appendChild(toTopCol);
+
+  // Event listener to scroll to top smoothly
+  toTopLink.addEventListener('click', scrollToTop);
+
+  return toTopContainer;
+}
+
+async function createContentAndAdsSections(doc) {
+  const mainContainer = document.createElement('div');
+  mainContainer.className = 'main-content-container';
+
+  const contentSection = document.createElement('div');
+  contentSection.className = 'content-section';
+
+  const topAdSection = document.createElement('div');
+  topAdSection.className = 'top-ad-section';
+  topAdSection.id = 'top-ad-fragment-container';
+
+  const contentAndAdsContainer = document.createElement('div');
+  contentAndAdsContainer.className = 'content-and-ads-container';
+
+  const rightAdSection = document.createElement('div');
+  rightAdSection.className = 'right-ad-section';
+  rightAdSection.id = 'right-ad-fragment-container';
+
+  const bottomAdSection = document.createElement('div');
+  bottomAdSection.className = 'bottom-ad-section';
+  bottomAdSection.id = 'bottom-ad-fragment-container';
+
+  // Create the close icon
+  const closeIcon = document.createElement('img');
+  closeIcon.className = 'close-icon';
+  closeIcon.src = '/styles/icons/close-ribbon.png';
+  closeIcon.alt = 'Close'; // Accessibility
+
+  // Add event listener to close the bottom ad section when the close icon is clicked
+  closeIcon.addEventListener('click', () => {
+    bottomAdSection.style.display = 'none';
   });
-}
 
-/**
- * Decorates the main element.
- * @param {Element} main The main element
- */
-// eslint-disable-next-line import/prefer-default-export
-export function decorateMain(main) {
-  // hopefully forward compatible button decoration
-  decorateLinkedPictures(main);
-  decorateButtons(main);
-  decorateIcons(main);
-  buildAutoBlocks(main);
-  decorateSections(main);
-  decorateBlocks(main);
+  bottomAdSection.appendChild(closeIcon);
+  contentAndAdsContainer.appendChild(contentSection);
+  contentAndAdsContainer.appendChild(rightAdSection);
+
+  const main = doc.querySelector('main');
+
+  if (main) {
+    const breadcrumb = main.querySelector('.breadcrumb-container');
+    if (breadcrumb) {
+      main.insertBefore(topAdSection, breadcrumb); // Place the ad section before breadcrumb
+    } else {
+      main.prepend(topAdSection);
+    }
+
+    // Move remaining sections in main to contentSection using array iteration
+    Array.from(main.children).filter((child) => child !== topAdSection && child !== breadcrumb)
+      .forEach((section) => contentSection.appendChild(section));
+
+    mainContainer.appendChild(contentAndAdsContainer);
+
+    // Append the "TO TOP" section to the mainContainer (Outside of the flex container)
+    const toTopSection = createToTopSection();
+    mainContainer.appendChild(toTopSection);
+
+    main.appendChild(mainContainer);
+  }
+
+  doc.body.appendChild(bottomAdSection);
 }
 
 /**
@@ -125,9 +167,9 @@ async function loadEager(doc) {
   decorateTemplateAndTheme();
   const main = doc.querySelector('main');
   if (main) {
-    await decorateTemplates(main);
     decorateMain(main);
     document.body.classList.add('appear');
+    await decorateTemplates(main);
     await waitForLCP(LCP_BLOCKS);
   }
 
@@ -177,6 +219,7 @@ function loadDelayed() {
 async function loadPage() {
   await loadEager(document);
   await loadLazy(document);
+  await createContentAndAdsSections(document);
   loadDelayed();
 }
 

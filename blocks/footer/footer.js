@@ -1,5 +1,5 @@
 import { readBlockConfig, decorateIcons } from '../../scripts/lib-franklin.js';
-import { decorateLinkedPictures } from '../../scripts/scripts.js';
+import { decorateLinkedPictures } from '../../scripts/shared.js';
 
 /**
  * loads and decorates the footer
