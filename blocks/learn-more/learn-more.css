@@ -19,6 +19,7 @@
   height: 40px;
   margin: 20px;
   min-width: 40px;
+  max-width: 150px;
 }
 
 .learn-more .learn-more-links {

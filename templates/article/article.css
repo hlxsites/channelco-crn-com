@@ -1,3 +1,7 @@
+.article main picture img {
+  border: 1px solid #0f0f0f;
+}
+
 .article main .author .blade-text > a:first-child {
   text-transform: uppercase;
   display: flex;

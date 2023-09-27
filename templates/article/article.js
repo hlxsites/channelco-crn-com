@@ -60,15 +60,4 @@ export default async function loadTemplate(main) {
     'https://main--channelco-crn-com--hlxsites.hlx.page/news/computing/asus-starts-selling-nuc-mini-pcs-after-intel-exits-business',
     'https://main--channelco-crn-com--hlxsites.hlx.page/news/computing/dell-s-moonshot-5-key-features-of-concept-luna',
   ]);
-
-  const topLink = document.createElement('a');
-  topLink.classList.add('up-arrow', 'to-article-top');
-  topLink.href = '#top';
-  topLink.target = '_self';
-  topLink.title = 'To Top';
-  topLink.setAttribute('aria-label', 'To Top');
-  topLink.innerHTML = `
-    <h3>To Top</h3>
-  `;
-  heading.parentElement.append(topLink);
 }
