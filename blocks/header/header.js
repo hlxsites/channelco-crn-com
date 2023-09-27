@@ -8,9 +8,7 @@ function closeOnEscape(e) {
   if (e.code === 'Escape') {
     const nav = document.getElementById('nav');
     const navSections = nav.querySelector('.nav-sections');
-    const navSectionExpanded = navSections.querySelector(
-      '[aria-expanded="true"]',
-    );
+    const navSectionExpanded = navSections.querySelector('[aria-expanded="true"]');
     if (navSectionExpanded && isDesktop.matches) {
       // eslint-disable-next-line no-use-before-define
       toggleAllNavSections(navSections);
@@ -48,7 +46,6 @@ function toggleAllNavSections(sections, expanded = false) {
     section.setAttribute('aria-expanded', expanded);
   });
 }
-
 /**
  * Toggles the entire nav
  * @param {Element} nav The container element
@@ -56,20 +53,13 @@ function toggleAllNavSections(sections, expanded = false) {
  * @param {*} forceExpanded Optional param to force nav expand behavior when not null
  */
 function toggleMenu(nav, navSections, forceExpanded = null) {
-  const expanded = forceExpanded !== null
-    ? !forceExpanded
-    : nav.getAttribute('aria-expanded') === 'true';
+  const expanded = forceExpanded !== null ? !forceExpanded : nav.getAttribute('aria-expanded') === 'true';
   const button = nav.querySelector('.nav-hamburger button');
-  document.body.style.overflowY = expanded || isDesktop.matches ? '' : 'hidden';
+  document.body.style.overflowY = (expanded || isDesktop.matches) ? '' : 'hidden';
   nav.setAttribute('aria-expanded', expanded ? 'false' : 'true');
-  toggleAllNavSections(
-    navSections,
-    expanded || isDesktop.matches ? 'false' : 'true',
-  );
-  button.setAttribute(
-    'aria-label',
-    expanded ? 'Open navigation' : 'Close navigation',
-  );
+  toggleAllNavSections(navSections, expanded || isDesktop.matches ? 'false' : 'true');
+  button.setAttribute('aria-label', expanded ? 'Open navigation' : 'Close navigation');
+
   // enable nav dropdown keyboard accessibility
   const navDrops = navSections.querySelectorAll('.nav-drop');
   if (isDesktop.matches) {
@@ -95,7 +85,6 @@ function toggleMenu(nav, navSections, forceExpanded = null) {
     window.removeEventListener('keydown', closeOnEscape);
   }
 }
-
 /**
  * decorates the header, mainly the nav
  * @param {Element} block The header block element
@@ -123,15 +112,27 @@ export default async function decorate(block) {
     const navSections = nav.querySelector('.nav-sections');
     if (navSections) {
       navSections.querySelectorAll(':scope > ul > li').forEach((navSection) => {
-        if (navSection.querySelector('ul')) { navSection.classList.add('nav-drop'); }
+        if (navSection.querySelector('ul')) navSection.classList.add('nav-drop');
         navSection.addEventListener('click', () => {
           if (isDesktop.matches) {
             const expanded = navSection.getAttribute('aria-expanded') === 'true';
             toggleAllNavSections(navSections);
-            navSection.setAttribute(
-              'aria-expanded',
-              expanded ? 'false' : 'true',
-            );
+            navSection.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+            // mobile nav menu drop down
+          } else {
+            const expanded = navSection.getAttribute('aria-expanded') === 'true';
+            navSection.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+            const ul = navSection.querySelector('ul');
+            if (ul) {
+              const list = ul.querySelectorAll('li');
+              list.forEach((li) => {
+                li.addEventListener('click', (event) => {
+                  event.stopPropagation();
+                  const childExpanded = li.getAttribute('aria-expanded') === 'true';
+                  li.setAttribute('aria-expanded', childExpanded ? 'false' : 'true');
+                });
+              });
+            }
           }
         });
       });
@@ -143,52 +144,12 @@ export default async function decorate(block) {
     hamburger.innerHTML = `<button type="button" aria-controls="nav" aria-label="Open navigation">
         <span class="nav-hamburger-icon"></span>
       </button>`;
-    hamburger.addEventListener('click', () => toggleMenu(nav, navSections));
-    if (!isDesktop.matches) {
-      const navDrops = navSections.querySelectorAll('.nav-drop');
-      navDrops.forEach((navDrop) => {
-        navDrop.classList.add('mobile-collapse');
-      });
-    }
+    hamburger.addEventListener('click', () => toggleMenu(nav)); // removed navSections to keep ari expanded false in mobile
     nav.prepend(hamburger);
     nav.setAttribute('aria-expanded', 'false');
     // prevent mobile nav behavior on window resize
     toggleMenu(nav, navSections, isDesktop.matches);
     isDesktop.addEventListener('change', () => toggleMenu(nav, navSections, isDesktop.matches));
-
-    // nav-drop click
-    const navDrops = navSections.querySelectorAll('.nav-drop');
-    navDrops.forEach((navDrop) => {
-      navDrop.addEventListener('click', function handleNavDropClick() {
-        if (!isDesktop.matches) {
-          const listItems = this.querySelectorAll('ul li');
-          listItems.forEach((listItem) => {
-            listItem.classList.toggle('expanded');
-          });
-        }
-      });
-    });
-
-    isDesktop.addEventListener('change', () => {
-      toggleMenu(nav, navSections, isDesktop.matches);
-      if (isDesktop.matches) {
-        navDrops.forEach((navDrop) => {
-          navDrop.classList.remove('mobile-collapse');
-        });
-      } else {
-        navDrops.forEach((navDrop) => {
-          navDrop.classList.add('mobile-collapse');
-        });
-      }
-    });
-
-    // const newsTab = document.getElementsByClassName('news');
-    // newsTab.addEventListener('click', () => {
-    //   const allTabs = document.querySelectorAll('.news li');
-    //   allTabs.forEach((tab) => tab.classList.add('hidden'));
-    //   const newsList = newsTab.querySelector('.news');
-    //   newsList.classList.remove('hidden');
-    // });
 
     decorateIcons(nav);
     decorateLinkedPictures(nav);
@@ -199,12 +160,11 @@ export default async function decorate(block) {
 
     // class names for drop down lists
     const classNames = ['news', 'companies', 'awards', 'events', 'industry', 'about'];
-
     for (let i = 0; i < classNames.length; i += 1) {
       const index = i + 1;
-      const element = document.querySelector(`.nav-sections > ul > li:nth-child(${index}) > ul`);
+      const element = document.querySelector(`.nav-sections > ul > li:nth-child(${index})`);
       if (element) {
-        element.className = classNames[i];
+        element.id = classNames[i];
       }
     }
   }
