@@ -50,6 +50,10 @@ export default async function loadTemplate(main) {
   await buildLearnMore(heading.parentElement, article.keywords);
   if (author) {
     await buildAuthorBlades(heading.parentElement, [author]);
+    const authorLink = heading.parentElement.querySelector('.blade.author .blade-text a');
+    if (authorLink) {
+      authorLink.classList.add('link-arrow');
+    }
   }
   // TODO: need to determine how to get related content. For now it will just
   // link to a static list.

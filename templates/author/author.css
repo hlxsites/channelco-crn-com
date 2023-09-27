@@ -32,6 +32,10 @@
   height: 40px;
 }
 
+.author main .blade.author > div {
+  border-bottom: 2px dotted var(--color-mid-grey);
+}
+
 @media (min-width: 576px) {
   /* author variant */
   .author main .blade.author > div {
