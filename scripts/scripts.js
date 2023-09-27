@@ -167,9 +167,9 @@ async function loadEager(doc) {
   decorateTemplateAndTheme();
   const main = doc.querySelector('main');
   if (main) {
-    await decorateTemplates(main);
     decorateMain(main);
     document.body.classList.add('appear');
+    await decorateTemplates(main);
     await waitForLCP(LCP_BLOCKS);
   }
 
