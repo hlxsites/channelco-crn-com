@@ -1,9 +1,28 @@
 // eslint-disable-next-line import/no-cycle
 import {
-  sampleRUM, loadScript,
+  sampleRUM,
 } from './lib-franklin.js';
 
 import { fetchFragment } from './shared.js';
+
+function loadScript(url, attrs, body) {
+  const head = document.querySelector('head');
+  const script = document.createElement('script');
+  if (url) script.src = url;
+  if (attrs) {
+    // eslint-disable-next-line no-restricted-syntax, guard-for-in
+    for (const attr in attrs) {
+      script.setAttribute(attr, attrs[attr]);
+    }
+  }
+  if (body) {
+    script.type = 'text/javascript';
+    script.text = body;
+  }
+
+  head.append(script);
+  return script;
+}
 
 function addMartechStack() {
   // Defer the loading of the Global Ads script for 3 seconds
@@ -39,10 +58,7 @@ _paq.push(['enableLinkTracking']);
   g.async=true; g.src=u+'js/tracker.php'; s.parentNode.insertBefore(g,s);
 })();
 `;
-  const scriptTag = document.createElement('script');
-  scriptTag.type = 'text/javascript';
-  scriptTag.text = funnelFuelCode;
-  document.head.appendChild(scriptTag);
+  loadScript('', {}, funnelFuelCode);
 }
 
 // Load Right Ad fragment
