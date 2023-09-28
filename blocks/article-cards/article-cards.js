@@ -3,6 +3,7 @@ import {
   getCategoryPath,
   createOptimizedPicture,
   getRecordsFromBlock,
+  buildArticleAuthor,
 } from '../../scripts/shared.js';
 
 /**
@@ -38,21 +39,7 @@ export default async function decorate(block) {
       <a href="${article.path}" class="uncolored-link" aria-label="${article.title}">${article.title}</a>
     `;
 
-    const author = document.createElement('h5');
-    author.classList.add('article-card-author');
-    // attempting to predict the URL to the author. may need to change to query
-    // author information from index
-    const authorId = String(article.author).toLowerCase()
-      .replaceAll(/[^0-9a-z ]/g, '')
-      .replaceAll(/[^0-9a-z]/g, '-');
-    author.innerHTML = `
-      <a href="/authors/${authorId}" class="link-arrow" aria-label="By ${article.author}"><span class="uncolored-link">By</span> ${article.author}</a>
-    `;
-
-    const date = document.createElement('h5');
-    date.classList.add('article-card-date');
-    date.innerText = article.publisheddate;
-
+    const author = buildArticleAuthor(article);
     const description = document.createElement('p');
     description.classList.add('article-card-description');
     description.innerText = article.description;
@@ -61,16 +48,14 @@ export default async function decorate(block) {
     infoDiv.append(category);
     infoDiv.append(title);
     infoDiv.append(author);
-    infoDiv.append(date);
     infoDiv.append(description);
 
     const articlePictureLink = document.createElement('a');
     articlePictureLink.href = article.path;
     articlePictureLink.setAttribute('aria-label', article.title);
-    const articlePicture = createOptimizedPicture(article.image);
+    const articlePicture = createOptimizedPicture(article.image, article.title, index === 0);
     articlePictureLink.append(articlePicture);
     const articleImage = articlePicture.querySelector('img');
-    articleImage.alt = article.title;
     articleImage.title = article.title;
     cardDiv.append(articlePictureLink);
     cardDiv.append(infoDiv);

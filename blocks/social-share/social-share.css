@@ -1,0 +1,9 @@
+.block.social-share {
+  height: 32px;
+  border: 1px solid black;
+  padding: 0.5rem 2rem;
+}
+
+.social-share-buttons-container {
+  max-width: 300px;
+}

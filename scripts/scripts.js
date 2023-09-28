@@ -14,7 +14,7 @@ import { decorateMain } from './shared.js';
 
 const LCP_BLOCKS = []; // add your LCP blocks to the list
 
-const TEMPLATE_LIST = ['category', 'article'];
+const TEMPLATE_LIST = ['category', 'article', 'author'];
 
 /**
  * load fonts.css and set a session storage flag
@@ -55,6 +55,39 @@ async function decorateTemplates(main) {
     // eslint-disable-next-line no-console
     console.error('template loading failed', error);
   }
+}
+
+function scrollToTop(event) {
+  event.preventDefault();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function createToTopSection() {
+  const toTopContainer = document.createElement('div');
+  toTopContainer.className = 'back-to-top';
+
+  const toTopCol = document.createElement('div');
+  toTopCol.className = 'to-top-text';
+
+  const toTopContent = document.createElement('div');
+  const toTopLink = document.createElement('a');
+  toTopLink.href = '#top';
+  toTopLink.target = '_self';
+  toTopLink.ariaLabel = 'To Top';
+
+  const toTopHeader = document.createElement('h3');
+  toTopHeader.className = 'back-top-top-section-header';
+  toTopHeader.innerText = 'To Top';
+
+  toTopLink.appendChild(toTopHeader);
+  toTopContent.appendChild(toTopLink);
+  toTopCol.appendChild(toTopContent);
+  toTopContainer.appendChild(toTopCol);
+
+  // Event listener to scroll to top smoothly
+  toTopLink.addEventListener('click', scrollToTop);
+
+  return toTopContainer;
 }
 
 async function createContentAndAdsSections(doc) {
@@ -109,6 +142,11 @@ async function createContentAndAdsSections(doc) {
       .forEach((section) => contentSection.appendChild(section));
 
     mainContainer.appendChild(contentAndAdsContainer);
+
+    // Append the "TO TOP" section to the mainContainer (Outside of the flex container)
+    const toTopSection = createToTopSection();
+    mainContainer.appendChild(toTopSection);
+
     main.appendChild(mainContainer);
   }
 
@@ -124,9 +162,9 @@ async function loadEager(doc) {
   decorateTemplateAndTheme();
   const main = doc.querySelector('main');
   if (main) {
-    await decorateTemplates(main);
     decorateMain(main);
     document.body.classList.add('appear');
+    await decorateTemplates(main);
     await waitForLCP(LCP_BLOCKS);
   }
 

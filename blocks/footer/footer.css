@@ -8,6 +8,10 @@ footer {
   margin-bottom: 100px;
 }
 
+.footer-wrapper {
+  margin-top: 24px;
+}
+
 .footer {
   border-top: 10px solid var(--clr-black);
   display: flex;
