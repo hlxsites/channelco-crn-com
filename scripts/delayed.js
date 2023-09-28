@@ -1,28 +1,10 @@
 // eslint-disable-next-line import/no-cycle
 import {
   sampleRUM,
+  loadScript,
 } from './lib-franklin.js';
 
 import { fetchFragment } from './shared.js';
-
-function loadScript(url, attrs, body) {
-  const head = document.querySelector('head');
-  const script = document.createElement('script');
-  if (url) script.src = url;
-  if (attrs) {
-    // eslint-disable-next-line no-restricted-syntax, guard-for-in
-    for (const attr in attrs) {
-      script.setAttribute(attr, attrs[attr]);
-    }
-  }
-  if (body) {
-    script.type = 'text/javascript';
-    script.text = body;
-  }
-
-  head.append(script);
-  return script;
-}
 
 function addMartechStack() {
   // Defer the loading of the Global Ads script for 3 seconds
@@ -34,31 +16,16 @@ function addMartechStack() {
     'data-debug': 'false',
   });
 
-  const globalAdScript = 'window.TAS = window.TAS || { cmd: [] }';
-  loadScript('', {}, globalAdScript);
-  loadScript('https://securepubads.g.doubleclick.net/tag/js/gpt.js', { async: '' });
+  window.TAS = window.TAS || { cmd: [] };
 
   // Add Adobe Analytics
-  loadScript('https://assets.adobedtm.com/9cfdfb0dd4d0/2d8aa33fcffa/launch-826786cb6e10.min.js');
+  loadScript('https://assets.adobedtm.com/9cfdfb0dd4d0/2d8aa33fcffa/launch-826786cb6e10.min.js', { async: '' });
 
   // Add Google Tag Manager
   loadScript('/scripts/gtm-init.js', { defer: true });
 
-  // FunnelFuel Tracking Code
-  const funnelFuelCode = `
-var _paq = window._paq = window._paq || [];
-/* tracker methods like "setCustomDimension" should be called before "trackPageView" */
-_paq.push(['trackPageView']);
-_paq.push(['enableLinkTracking']);
-(function() {
-  var u="//analytics.funnelfuel.io/";
-  _paq.push(['setTrackerUrl', u+'js/tracker.php']);
-  _paq.push(['setSiteId', '5']);
-  var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-  g.async=true; g.src=u+'js/tracker.php'; s.parentNode.insertBefore(g,s);
-})();
-`;
-  loadScript('', {}, funnelFuelCode);
+  // Add Funnel Fuel
+  loadScript('/scripts/funnel-fuel-init.js', { defer: true });
 }
 
 // Load Right Ad fragment
@@ -125,8 +92,11 @@ function loadDelayedAds(main) {
 }
 
 async function loadShareThis() {
-  loadScript('https://platform-api.sharethis.com/js/sharethis.js#property=6436d2b545aa460012e10320&product=sop');
-  return loadScript('https://buttons-config.sharethis.com/js/6436d2b545aa460012e10320.js', { async: '' });
+  const shareThis = document.querySelector('.sharethis-inline-share-buttons');
+  if (shareThis) {
+    await loadScript('https://platform-api.sharethis.com/js/sharethis.js#property=6436d2b545aa460012e10320&product=sop', { async: '' });
+    await loadScript('https://buttons-config.sharethis.com/js/6436d2b545aa460012e10320.js', { async: '' });
+  }
 }
 
 await loadRightAdFragment();
