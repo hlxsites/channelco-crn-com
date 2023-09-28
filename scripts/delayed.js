@@ -101,8 +101,14 @@ function loadDelayedAds(main) {
   }
 }
 
+async function loadShareThis() {
+  loadScript('https://platform-api.sharethis.com/js/sharethis.js#property=6436d2b545aa460012e10320&product=sop');
+  return loadScript('https://buttons-config.sharethis.com/js/6436d2b545aa460012e10320.js', { async: '' });
+}
+
 await loadRightAdFragment();
 loadDelayedAds(document.querySelector('main'));
+loadShareThis();
 
 // Core Web Vitals RUM collection
 sampleRUM('cwv');
