@@ -20,25 +20,32 @@ function addMartechStack() {
   loadScript('https://securepubads.g.doubleclick.net/tag/js/gpt.js', { async: '' });
 
   // Add Adobe Analytics
-  loadScript('https://assets.adobedtm.com/9cfdfb0dd4d0/37e7a63c5b44/launch-54eb03504761.min.js');
+  loadScript('https://assets.adobedtm.com/9cfdfb0dd4d0/2d8aa33fcffa/launch-826786cb6e10.min.js');
 
   // Add Google Tag Manager
-  const gtmIframe = document.createElement('iframe');
-  gtmIframe.classList.add('gtm-iframe');
-  gtmIframe.src = 'https://www.googletagmanager.com/ns.html?id=GTM-NZJV95M';
-  const gtmEl = document.createElement('noscript');
-  gtmEl.append(gtmIframe);
-  document.body.prepend(gtmEl);
+  loadScript('/scripts/gtm-init.js', { defer: true });
 
-  const gtmCode = `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','GTM-NZJV95M');`;
-
-  loadScript('', {}, gtmCode);
+  // FunnelFuel Tracking Code
+  const funnelFuelCode = `
+var _paq = window._paq = window._paq || [];
+/* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+_paq.push(['trackPageView']);
+_paq.push(['enableLinkTracking']);
+(function() {
+  var u="//analytics.funnelfuel.io/";
+  _paq.push(['setTrackerUrl', u+'js/tracker.php']);
+  _paq.push(['setSiteId', '5']);
+  var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+  g.async=true; g.src=u+'js/tracker.php'; s.parentNode.insertBefore(g,s);
+})();
+`;
+  const scriptTag = document.createElement('script');
+  scriptTag.type = 'text/javascript';
+  scriptTag.text = funnelFuelCode;
+  document.head.appendChild(scriptTag);
 }
 
+// Load Right Ad fragment
 async function loadRightAdFragment() {
   const adFragmentContainer = document.getElementById('right-ad-fragment-container');
   if (!adFragmentContainer) return;
