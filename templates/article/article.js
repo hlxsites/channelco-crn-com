@@ -57,6 +57,6 @@ export default async function loadTemplate(main) {
     }
   }
 
-  const related = await getRelatedArticles(article.keywords);
+  const related = await getRelatedArticles(article);
   await buildRelatedContent(heading.parentElement, related.map((relatedArticle) => `${window.location.protocol}//${window.location.host}${relatedArticle.path}`));
 }
