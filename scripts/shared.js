@@ -520,7 +520,6 @@ export async function buildRelatedContent(target, articlePaths) {
       </a>
     `;
     ul.append(item);
-    console.log(item);
   });
   const relatedContent = buildBlock('related-content', { elems: [ul] });
   target.append(relatedContent);
@@ -545,7 +544,7 @@ export async function buildSocialShare(insertAfter) {
 function buildKeywordLookup(keywords) {
   const map = {};
   parseKeywords(keywords)
-    .forEach((keyword) => map[keyword] = true);
+    .forEach((keyword) => { map[keyword] = true; });
   return map;
 }
 
@@ -578,7 +577,7 @@ export async function getRelatedArticles(keywords, relatedCount = 5) {
     const currRecordKeywords = parseKeywords(record.keywords);
     currRecordKeywords.forEach((keyword) => {
       if (lookup[keyword]) {
-        matchCount++;
+        matchCount += 1;
       }
     });
     if (matchCount > 0) {
@@ -595,7 +594,8 @@ export async function getRelatedArticles(keywords, relatedCount = 5) {
   related.sort((a, b) => {
     if (a.relevance > b.relevance) {
       return -1;
-    } else if (a.relevance < b.relevance) {
+    }
+    if (a.relevance < b.relevance) {
       return 1;
     }
 
@@ -603,9 +603,11 @@ export async function getRelatedArticles(keywords, relatedCount = 5) {
     const recordB = b.record;
     if (!recordA.publisheddate && !recordB.publisheddate) {
       return 0;
-    } else if (!recordA.publisheddate && recordB.publisheddate) {
+    }
+    if (!recordA.publisheddate && recordB.publisheddate) {
       return 1;
-    } else if (recordA.publisheddate && !recordB.publisheddate) {
+    }
+    if (recordA.publisheddate && !recordB.publisheddate) {
       return -1;
     }
 
