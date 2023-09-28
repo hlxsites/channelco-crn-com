@@ -53,10 +53,9 @@ export default async function decorate(block) {
     const articlePictureLink = document.createElement('a');
     articlePictureLink.href = article.path;
     articlePictureLink.setAttribute('aria-label', article.title);
-    const articlePicture = createOptimizedPicture(article.image);
+    const articlePicture = createOptimizedPicture(article.image, article.title, index === 0);
     articlePictureLink.append(articlePicture);
     const articleImage = articlePicture.querySelector('img');
-    articleImage.alt = article.title;
     articleImage.title = article.title;
     cardDiv.append(articlePictureLink);
     cardDiv.append(infoDiv);
