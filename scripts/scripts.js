@@ -136,24 +136,34 @@ async function createContentAndAdsSections(doc) {
 
   if (main) {
     const breadcrumb = main.querySelector('.breadcrumb-container');
+    const newsSlider = main.querySelector('.news-slider-container');
+    
+    // Determine the reference element before which topAdSection will be inserted
+    // let refElement;
+    // if (breadcrumb) {
+    //   refElement = breadcrumb;
+    // } else if (newsSlider) {
+    //   refElement = newsSlider;
+    // }
+  
     if (breadcrumb) {
-      main.insertBefore(topAdSection, breadcrumb); // Place the ad section before breadcrumb
+      main.insertBefore(topAdSection, breadcrumb); // Place the ad section before the determined reference element
     } else {
       main.prepend(topAdSection);
     }
-
+  
     // Move remaining sections in main to contentSection using array iteration
-    Array.from(main.children).filter((child) => child !== topAdSection && child !== breadcrumb)
-      .forEach((section) => contentSection.appendChild(section));
-
+    Array.from(main.children).filter(child => child !== topAdSection && child !== breadcrumb && child !== newsSlider)
+      .forEach(section => contentSection.appendChild(section));
+  
     mainContainer.appendChild(contentAndAdsContainer);
-
+  
     // Append the "TO TOP" section to the mainContainer (Outside of the flex container)
     const toTopSection = createToTopSection();
     mainContainer.appendChild(toTopSection);
-
+  
     main.appendChild(mainContainer);
-  }
+  }  
 
   doc.body.appendChild(bottomAdSection);
 }
