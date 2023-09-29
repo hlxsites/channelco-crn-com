@@ -506,17 +506,17 @@ export async function buildLearnMore(target, keywords) {
  * Dynamically creates a related content block based on a given list of
  * article paths, then appends the new block to a given element.
  * @param {HTMLElement} target Element to which related content block will be added.
- * @param {Array<string>} articlePaths List of full article paths to use as
+ * @param {Array<QueryIndexRecord>} articles List of articles to use as
  *  related items.
  * @returns {Promise} Resolves when the operation is complete.
  */
-export async function buildRelatedContent(target, articlePaths) {
+export async function buildRelatedContent(target, articles) {
   const ul = document.createElement('ul');
-  articlePaths.forEach((article) => {
+  articles.forEach((article) => {
     const item = document.createElement('li');
     item.innerHTML = `
-      <a href="${article}">
-        ${article}
+      <a href="${article.path}" title="${article.title}" aria-label="${article.title}">
+        ${article.title}
       </a>
     `;
     ul.append(item);
