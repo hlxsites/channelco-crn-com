@@ -53,7 +53,7 @@ main .section.news-slider-container {
   backface-visibility: hidden;
   transform: translateX(0);
   perspective: 1000px;
-  width: 400%;
+  width: 520%;
   height: 64px;
   border-radius: 0;
   background-color: #fff;
@@ -148,5 +148,9 @@ main .section.news-slider-container {
   #inthenews-carousel {
     width: 79%;
     height: 60px;
+  }
+
+  .handle {
+    width: 400%;
   }
 }
