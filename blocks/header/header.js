@@ -159,7 +159,7 @@ export default async function decorate(block) {
     navWrapper.append(nav);
     block.append(navWrapper);
     // class names for drop down lists
-    const classNames = ['news', 'companies', 'awards', 'events', 'industry', 'about'];
+    const classNames = ['news', 'video', 'companies', 'awards', 'events', 'industry', 'about'];
     for (let i = 0; i < classNames.length; i += 1) {
       const index = i + 1;
       const element = document.querySelector(`.nav-sections > ul > li:nth-child(${index})`);
