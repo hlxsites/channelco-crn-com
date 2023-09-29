@@ -12,55 +12,46 @@ export default async function decorate(block) {
   const dataSource = config['data-source'];
   const { year } = config;
   const spreadsheet = `/data-source/${dataSource}/${dataSource}-data.json`;
-  const dataMapSheet = `/data-source/${dataSource}/data-mapping.json`;
   const filterFields = config['filter-fields'].split(',');
   const tableFields = config['table-fields'].split(',');
 
   const data = await ffetch(spreadsheet).sheet(year).all();
-  const dataMap = await ffetch(dataMapSheet).sheet(year).all();
 
-  const currentUrlArray = window.location.href.split('/');
-  currentUrlArray[currentUrlArray.length - 1] = `${currentUrlArray[currentUrlArray.length - 1]}-${year}details`;
-  const detailsUrl = currentUrlArray.join('/');
-
-  // Create filter
-  console.log(dataMap);
-  
-  // Create table
   const table = document.createElement('table');
   const thead = document.createElement('thead');
   const tbody = document.createElement('tbody');
   table.append(thead, tbody);
 
   const headerRow = document.createElement('tr');
-  headerRow.classList.add('row1');
   tableFields.forEach((field) => {
     const cell = buildCell(0);
-    cell.innerText = field.includes('(link)') ? field.replace('(link)', '').trim() : field;
+    cell.innerText = field;
     headerRow.append(cell);
   });
   thead.append(headerRow);
 
-  data.forEach((item, i) => {
+  data.forEach((item) => {
     const row = document.createElement('tr');
-    const isEvenRow = i % 2 === 0;
-    row.classList.add(isEvenRow ? 'row2' : 'row1');
     tableFields.forEach((field) => {
-      const isDetailsLink = field.includes('(link)');
-      const value = isDetailsLink ? item[field.replace('(link)', '').trim()] : item[field];
+      const value = item[field];
       const cell = buildCell(1);
-      if (isDetailsLink) {
-        const a = document.createElement('a');
-        a.href = `${detailsUrl}?key=${item.Pkey}&reportCode=${spreadsheet}&year`;
-        a.innerText = value;
-        cell.append(a);
-      } else {
-        cell.innerText = value;
-      }
+      cell.innerText = value;
       row.append(cell);
     });
     tbody.append(row);
   });
   block.innerHTML = '';
   block.append(table);
+  // [...block.children].forEach((child, i) => {
+  //   const row = document.createElement('tr');
+  //   if (i) tbody.append(row);
+  //   else thead.append(row);
+  //   [...child.children].forEach((col) => {
+  //     const cell = buildCell(i);
+  //     cell.innerHTML = col.innerHTML;
+  //     row.append(cell);
+  //   });
+  // });
+  // block.innerHTML = '';
+  // block.append(table);
 }
