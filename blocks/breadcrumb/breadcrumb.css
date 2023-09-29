@@ -1,15 +1,12 @@
-.breadcrumb-container {
-    padding-left: 0 !important;
-}
-
 .breadcrumb {
     display: flex;
     flex-direction: column;
-    border-top: 2px solid #000;
     width: 100%;
 }
 
 .breadcrumb-list {
+    padding-left: 30px;
+    padding-right: 30px;
     text-transform: uppercase;
     color: var(--clr-grey);
     border-top: 2px solid #c5c5c5;
@@ -19,6 +16,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    margin: 0;
 }
 
 .breadcrumb-list li {
