@@ -125,7 +125,7 @@ main .back-top-top-section-header {
     display: grid;
     gap: var(--padding-spacer-x);
     grid-template:
-      ". content ads ." / auto auto 330px auto;
+      ". content ads ." / auto 1fr 330px auto;
   }
 
   main .content-and-ads-container .content-section {
