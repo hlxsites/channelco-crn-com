@@ -8,6 +8,7 @@ import {
   buildLearnMore,
   buildRelatedContent,
   buildSocialShare,
+  getRelatedArticles,
 } from '../../scripts/shared.js';
 
 /**
@@ -55,13 +56,7 @@ export default async function loadTemplate(main) {
       authorLink.classList.add('link-arrow');
     }
   }
-  // TODO: need to determine how to get related content. For now it will just
-  // link to a static list.
-  await buildRelatedContent(heading.parentElement, [
-    'https://main--channelco-crn-com--hlxsites.hlx.page/news/managed-services/painful-decision-slalom-consulting-layoffs-hit-900-workers',
-    'https://main--channelco-crn-com--hlxsites.hlx.page/news/internet-of-things/5-industrial-iot-solutions-that-are-solving-big-problems',
-    'https://main--channelco-crn-com--hlxsites.hlx.page/news/computing/apple-mac-s-transition-from-intel-has-lured-influx-of-new-customers',
-    'https://main--channelco-crn-com--hlxsites.hlx.page/news/computing/asus-starts-selling-nuc-mini-pcs-after-intel-exits-business',
-    'https://main--channelco-crn-com--hlxsites.hlx.page/news/computing/dell-s-moonshot-5-key-features-of-concept-luna',
-  ]);
+
+  const related = await getRelatedArticles(article);
+  await buildRelatedContent(heading.parentElement, related);
 }
