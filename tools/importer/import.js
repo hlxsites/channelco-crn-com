@@ -119,6 +119,30 @@ const createAuthorBio = (main, document) => {
   main.querySelector('.author-name-md').remove();
 };
 
+const createAdBlock = (adBlock, document) => {
+ 
+  adBlock.querySelectorAll('.int-ads').forEach((ad) => {
+    const div = ad.querySelector(':scope > div');
+    
+    const cells = [
+      ['AD'],
+      ['id', div.id],
+      ['type', 'Sponsored post'],
+    ];
+    const table = WebImporter.DOMUtils.createTable(cells, document);
+    ad.parentNode.innerHTML = '';
+    adBlock.append(table);
+  });
+};
+
+const removeLearnMore = (main, document) => {
+  main.querySelectorAll('.card').forEach((card) => {
+    const learnMore = card.querySelector('.learn-more-md');
+    if(learnMore) {
+      card.remove();
+    }
+  });
+};
 
 export default {
   /**
@@ -142,7 +166,10 @@ export default {
     if(templateType.content === 'article') {
     createAuthorBio(main, document); 
     }
+    const adBlock = document.getElementById('imu1forarticles');
+    createAdBlock(adBlock, document);
     createMetadata(main, document);
+    removeLearnMore(main, document);
     WebImporter.DOMUtils.remove(main, [
       'nav',
       'footer',
