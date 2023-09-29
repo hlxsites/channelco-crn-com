@@ -1,157 +1,152 @@
 main .section.news-slider-container {
-    margin-top: 0;
+  margin-top: 0;
 }
 
 .news-slider-wrapper {
-    flex: 0 0 auto;
-    width: 100%;
+  flex: 0 0 auto;
+  width: 100%;
 }
 
 #inthenews {
-    width: 100%;
-    border-bottom: 1px solid #8c8c8c;
-    --custom-gutter-x: 1.5rem;
-    --custom-gutter-y: 0;
-    display: flex;        
-    align-items: center; 
+  width: 100%;
+  border-bottom: 1px solid #8c8c8c;
+  display: flex;
+  align-items: center;
+
+  --custom-gutter-x: 1.5rem;
+  --custom-gutter-y: 0;
 }
 
 .inthenews-header {
-    text-transform: uppercase;
-    color: #ed1c24;
-    font-weight: 600;
-    width: 34%;
-    vertical-align: middle;
-    float: none;
+  text-transform: uppercase;
+  color: #ed1c24;
+  font-weight: 600;
+  width: 34%;
+  vertical-align: middle;
+  float: none;
 }
 
 #inthenews-carousel {
-    position: relative;
-    cursor: pointer;
-    height: 64px;
-    width: 66%;
-    border-radius: 0px;
-    border-top-left-radius: 0px;
-    border-top-right-radius: 0px;
-    border-bottom-right-radius: 0px;
-    border-bottom-left-radius: 0px;
-    overflow: hidden;
-    overflow-x: hidden;
-    overflow-y: hidden;
+  position: relative;
+  cursor: pointer;
+  height: 64px;
+  width: 66%;
+  border-radius: 0;
+  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: hidden;
 }
 
 .dragdealer-background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #e1e1e1;
-    z-index: 1; 
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #e1e1e1;
+  z-index: 1;
 }
 
 .handle {
-    z-index: 2;
-    position: relative;
-    backface-visibility: hidden;
-    transform: translateX(0px);
-    perspective: 1000px;
-    width: 400%;
-    height: 64px;
-    border-radius: 0px;
-    background-color: #fff;
-    transition: transform 0.3s;
+  z-index: 2;
+  position: relative;
+  backface-visibility: hidden;
+  transform: translateX(0);
+  perspective: 1000px;
+  width: 400%;
+  height: 64px;
+  border-radius: 0;
+  background-color: #fff;
+  transition: transform 0.3s;
 }
 
 .slide {
-    float: left;
-    position: relative;
-    background-repeat: no-repeat;
-    background-position: center center;
-    height: 50px;
-    padding-top: 20px;
-    padding-bottom: 12px;
-    padding-right: 10px;
-    background-color: #fff;
+  float: left;
+  position: relative;
+  background-repeat: no-repeat;
+  background-position: center center;
+  height: 50px;
+  padding-top: 20px;
+  padding-bottom: 12px;
+  padding-right: 10px;
+  background-color: #fff;
 }
 
 .inthenews-item {
-    text-transform: uppercase;
-    color: #8c8c8c;
-    width: 200px;
-    margin-right: 1rem;
+  text-transform: uppercase;
+  color: #8c8c8c;
+  width: 200px;
+  margin-right: 1rem;
 }
 
 .inthenews-dot {
-    height: 8px;
-    width: 8px;
-    margin-right: 8px;
-    margin-bottom: 1px;
-    background-color: #ed1c24;
-    border-radius: 50%;
-    display: inline-block;
+  height: 8px;
+  width: 8px;
+  margin-right: 8px;
+  margin-bottom: 1px;
+  background-color: #ed1c24;
+  border-radius: 50%;
+  display: inline-block;
 }
 
 .inthenews-item a {
-    text-decoration: none;
-    color: #8c8c8c;
+  text-decoration: none;
+  color: #8c8c8c;
 }
 
 .inthenews-item a:hover {
-    color: red;
+  color: red;
 }
 
 /* Create a fade-out effect on both ends of the carousel */
-#inthenews-carousel::before, 
+#inthenews-carousel::before,
 #inthenews-carousel::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 50px;
-    pointer-events: none;  /* Make sure the gradient doesn't interfere with dragging */
-    z-index: 2;  /* Ensure gradient is on top of the content */
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50px;
+  pointer-events: none; /* Make sure the gradient doesn't interfere with dragging */
+  z-index: 2; /* Ensure gradient is on top of the content */
 }
 
-.fade-effect::before, 
+.fade-effect::before,
 .fade-effect::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 50px;
-    pointer-events: none;
-    z-index: 4; /* Ensure this stays on top of everything else */
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50px;
+  pointer-events: none;
+  z-index: 4; /* Ensure this stays on top of everything else */
 }
 
 .fade-effect::before {
-    left: 0;
-    background: linear-gradient(to right, #fff 0%, transparent 100%);
+  left: 0;
+  background: linear-gradient(to right, #fff 0%, transparent 100%);
 }
 
 .fade-effect::after {
-    right: 0;
-    background: linear-gradient(to left, #fff 0%, transparent 100%);
+  right: 0;
+  background: linear-gradient(to left, #fff 0%, transparent 100%);
 }
 
-
 .swipe-text {
-    text-align: right;
-    font-size: 12px;
-    color: #777;
-  }
-
+  text-align: right;
+  font-size: 12px;
+  color: #777;
+}
 
 @media (min-width: 768px) {
-    .inthenews-header {
-        width: 19%;
-        padding-top: 19px;
-        padding-left: 10px;
-        height: 40px;
-    }
+  .inthenews-header {
+    width: 19%;
+    padding-top: 19px;
+    padding-left: 10px;
+    height: 40px;
+  }
 
-    #inthenews-carousel {
-        width: 79%;
-        height: 60px;
-    }
+  #inthenews-carousel {
+    width: 79%;
+    height: 60px;
+  }
 }
