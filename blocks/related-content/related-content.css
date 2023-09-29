@@ -3,7 +3,6 @@
   align-items: flex-start;
   border: 1px solid #494949;
   border-radius: 20px;
-  padding: 1rem;
   flex-direction: column;
 }
 
@@ -18,6 +17,7 @@
 
 .related-content .related-content-list {
   flex: 1;
+  padding: 1rem;
 }
 
 .related-content ul {
@@ -50,5 +50,10 @@
 @media (min-width: 576px) {
   .related-content > div > div {
     flex-direction: row;
+    gap: 2rem;
+  }
+
+  .related-content .related-content-list {
+    padding: 1rem 0;
   }
 }
