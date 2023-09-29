@@ -6,7 +6,7 @@ main {
 }
 
 main .main-content-container {
-  margin-top: 1rem;
+  margin-top: 0;
 }
 
 .top-ad-section {
@@ -124,7 +124,15 @@ main .back-top-top-section-header {
   main .content-and-ads-container {
     display: grid;
     gap: var(--padding-spacer-x);
-    grid-template: ". content ads ." / auto auto 330px auto;
+    grid-template-columns: auto auto 330px auto;
+    grid-template-rows: auto auto;
+    grid-template-areas: 
+      ". news news ." 
+      ". content ads .";
+  }
+
+  main .content-and-ads-container .news-slider-wrapper {
+    grid-area: news;
   }
 
   main .content-and-ads-container .content-section {

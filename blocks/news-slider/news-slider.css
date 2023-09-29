@@ -3,8 +3,8 @@ main .section.news-slider-container {
 }
 
 .news-slider-wrapper {
-  flex: 0 0 auto;
-  width: 100%;
+  padding-left: var(--padding-spacer-x, 0.75rem);
+  padding-right: var(--padding-spacer-x, 0.75rem);
 }
 
 #inthenews {
@@ -138,6 +138,10 @@ main .section.news-slider-container {
 }
 
 @media (min-width: 768px) {
+  .news-slider-wrapper {
+    padding: 0;
+  }
+
   .inthenews-header {
     width: 19%;
     padding-top: 19px;

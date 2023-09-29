@@ -2,10 +2,10 @@ function addDragEvents(handle, carousel) {
   const RESISTANCE_FACTOR = 5;
   const DRAG_TOLERANCE = 10;
 
-  let BOUNDARY_RIGHT = window.innerWidth <= 768 ? -930 : -2596;
+  let BOUNDARY_RIGHT = window.innerWidth <= 768 ? -930 : -2590;
 
   function adjustBoundary() {
-    BOUNDARY_RIGHT = window.innerWidth <= 768 ? -930 : -2596;
+    BOUNDARY_RIGHT = window.innerWidth <= 768 ? -930 : -2590;
   }
 
   let isDragging = false;
