@@ -1,3 +1,6 @@
+main .section.news-slider-container {
+    margin-top: 0;
+}
 
 .news-slider-wrapper {
     flex: 0 0 auto;

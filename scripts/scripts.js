@@ -77,12 +77,7 @@ function createToTopSection() {
 
   const toTopHeader = document.createElement('h3');
   toTopHeader.className = 'back-top-top-section-header';
-
-  const toTopIcon = document.createElement('img');
-  toTopIcon.className = 'triangle-fill';
-  toTopIcon.src = '/styles/icons/triangle-fill.svg';
-  toTopHeader.appendChild(toTopIcon);
-  toTopHeader.appendChild(document.createTextNode(' TO TOP'));
+  toTopHeader.innerText = 'To Top';
 
   toTopLink.appendChild(toTopHeader);
   toTopContent.appendChild(toTopLink);

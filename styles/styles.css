@@ -294,7 +294,15 @@ main .divider {
   padding: 0;
   font-size: var(--heading-font-size-ms);
 }
- 
+
+main .back-top-top-section-header {
+  text-transform: uppercase;
+}
+
+main .back-top-top-section-header::before {
+  content: '▲';
+}
+
 @media (min-width: 576px) {
   main .section > div {
     max-width: 540px;
