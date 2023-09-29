@@ -4,10 +4,6 @@
   margin-bottom: 1rem;
 }
 
-.article-cards > div > div::after {
-  content: '';
-}
-
 .article-cards .article-card picture img {
   border: 1px solid var(--color-light-grey);
   aspect-ratio: 16 / 10;
@@ -130,6 +126,7 @@
     display: block;
     width: 45%;
     margin-right: 1rem;
+    margin-left: auto;
   }
 
   .article-cards.lead-article .article-card picture img {
@@ -139,6 +136,10 @@
 
   .article-cards.lead-article .sub-article .article-card:nth-child(odd) {
     border-bottom: unset;
+  }
+
+  .article-cards.lead-article .sub-article .article-card:nth-child(even) {
+    margin-right: 0;
   }
 
   .article-cards.lead-article .sub-article .article-card:nth-child(n+3) {
