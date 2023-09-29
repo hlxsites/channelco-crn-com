@@ -265,6 +265,18 @@ export function getCategoryName(record) {
  * @property {string} lastModified Unix timestamp of the last time the index record was modified.
  */
 
+/**
+ * Determines whether a given record from the site's query index is an article.
+ * @param {QueryIndexRecord} record Record to test.
+ * @returns {boolean} True if the record is an article, false otherwise.
+ */
+export function isArticle(record) {
+  // the record is an article if its path starts with /news/, and its template is
+  // either empty or "article"
+  return (!record.template || String(record.template).toLowerCase() === 'article')
+    && String(record.path).startsWith('/news/');
+}
+
 let cachedIndex;
 /**
  * Queries the site's index and only includes those records that match a given filter.
@@ -305,6 +317,16 @@ export async function getRecordsByPath(paths) {
   const pathLookup = {};
   paths.forEach((path) => { pathLookup[path] = true; });
   return queryIndex((record) => !!pathLookup[record.path]);
+}
+
+/**
+ * Retrieves all articles in a given category.
+ * @param {string} categoryName Category whose articles should be retrieved.
+ * @returns {Promise<Array<QueryIndexRecord>>} Resolves with an array of matching
+ *  articles.
+ */
+export async function getArticlesByCategory(categoryName) {
+  return queryIndex((record) => record.category === categoryName && isArticle(record));
 }
 
 /**
@@ -582,18 +604,6 @@ function calculateScore(keywordLookup, record) {
 }
 
 /**
- * Determines whether a given record from the site's query index is an article.
- * @param {QueryIndexRecord} record Record to test.
- * @returns {boolean} True if the record is an article, false otherwise.
- */
-export function isArticle(record) {
-  // the record is an article if its path starts with /news/, and its template is
-  // either empty or "article"
-  return (!record.template || String(record.template).toLowerCase() === 'article')
-    && String(record.path).startsWith('/news/');
-}
-
-/**
  * @typedef QueryIndexRecordRelevance
  * @property {QueryIndexRecord} record Record from the query index to which
  *  the relevance score applies.
@@ -654,7 +664,7 @@ function compareRelevance(a, b) {
  * @returns {number} Returns -1 if b has a more recent date than a, 1 if a
  *  has a more recent date than b, or 0 if the two are the same.
  */
-function comparePublishDate(a, b) {
+export function comparePublishDate(a, b) {
   if (!a.publisheddate && !b.publisheddate) {
     // records are the same when neither has a publish date
     return 0;
