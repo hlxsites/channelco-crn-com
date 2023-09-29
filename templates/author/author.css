@@ -36,6 +36,25 @@
   border-bottom: 2px dotted var(--color-mid-grey);
 }
 
+.author main .default-content-wrapper > h2 {
+  text-transform: uppercase;
+}
+
+.author main .default-content-wrapper .article-card {
+  border-bottom: 2px dotted var(--color-mid-grey);
+}
+
+.author main .default-content-wrapper .article-card .article-card-title a {
+  color: var(--text-color);
+}
+
+.author main .default-content-wrapper .block.ad {
+  min-height: 300px;
+  text-align: center;
+  background-color: #f1f1f1;
+  border: 1px solid #c9c9c9;
+}
+
 @media (min-width: 576px) {
   /* author variant */
   .author main .blade.author > div {

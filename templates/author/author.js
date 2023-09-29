@@ -5,7 +5,11 @@ import {
   getMetadata,
   decorateIcons,
 } from '../../scripts/lib-franklin.js';
-import { createOptimizedPicture } from '../../scripts/shared.js';
+import {
+  createOptimizedPicture,
+  getArticlesByAuthor,
+  comparePublishDate,
+} from '../../scripts/shared.js';
 
 function addIcon(beforeElement, iconName) {
   const span = document.createElement('span');
@@ -51,4 +55,53 @@ export default async function decorate(main) {
   decorateBlock(block);
   await loadBlock(block);
   decorateIcons(block);
+
+  const authorName = getMetadata('author');
+  const newsLink = document.createElement('h2');
+  const label = `Latest News from ${authorName}`;
+  newsLink.innerHTML = `
+    <a href="/news/" title="${label}" aria-label="${label}">
+      ${label}
+    </a>
+  `;
+  defaultContent.append(newsLink);
+
+  const articles = await getArticlesByAuthor(authorName);
+  articles.sort(comparePublishDate);
+
+  const ul = document.createElement('ul');
+  articles.slice(0, 15)
+    .forEach((article) => {
+      const li = document.createElement('li');
+      const articleUrl = `${window.location.protocol}//${window.location.host}${article.path}`;
+      li.innerHTML = `
+        <a href="${articleUrl}" title="${article.title}" aria-label="${article.title}">
+          ${articleUrl}
+        </a>
+      `;
+      ul.append(li);
+    });
+
+  const cards = buildBlock('article-cards', { elems: [ul] });
+  defaultContent.append(cards);
+  decorateBlock(cards);
+  await loadBlock(cards);
+
+  const adIdLabel = document.createElement('div');
+  adIdLabel.innerText = 'id';
+  const adId = document.createElement('div');
+  adId.innerText = 'unit-1659132512259';
+  const adTypeLabel = document.createElement('div');
+  adTypeLabel.innerText = 'type';
+  const adType = document.createElement('div');
+  adType.innerText = 'Advertisement';
+  const ad = buildBlock('ad', [[{ elems: [adIdLabel, adId] }, { elems: [adTypeLabel, adType] }]]);
+  defaultContent.append(ad);
+  decorateBlock(ad);
+  await loadBlock(ad);
+
+  const navigation = buildBlock('category-navigation', { elems: [] });
+  defaultContent.append(navigation);
+  decorateBlock(navigation);
+  await loadBlock(navigation);
 }

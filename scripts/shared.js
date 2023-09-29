@@ -330,6 +330,16 @@ export async function getArticlesByCategory(categoryName) {
 }
 
 /**
+ * Retrieves all articles by a given author.
+ * @param {string} authorName Author whose articles should be retrieved.
+ * @returns {Promise<Array<QueryIndexRecord>>} Resolves with an array of matching
+ *  articles.
+ */
+export async function getArticlesByAuthor(authorName) {
+  return queryIndex((record) => record.author === authorName && isArticle(record));
+}
+
+/**
  * Retrieves the record whose path matches a given value.
  * @param {string} path Path to retrieve from the site's index.
  * @returns {Promise<QueryIndexRecord>} Resolves with the information for the matching
