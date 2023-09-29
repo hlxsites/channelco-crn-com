@@ -128,10 +128,8 @@ export default function decorate(block) {
       
       newsItem.appendChild(dot);
       newsItem.appendChild(link);
-      console.log(link);
       slide.appendChild(newsItem);
       handle.appendChild(slide);
-      
     });
 
     const grayBackground = document.createElement('div');
