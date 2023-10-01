@@ -1,3 +1,4 @@
+/* eslint-disable no-plusplus */
 import { getMetadata, decorateIcons } from '../../scripts/lib-franklin.js';
 import { decorateLinkedPictures } from '../../scripts/shared.js';
 
@@ -85,6 +86,28 @@ function toggleMenu(nav, navSections, forceExpanded = null) {
     window.removeEventListener('keydown', closeOnEscape);
   }
 }
+
+function menuDrop() {
+  const menuItems = document.querySelectorAll('.nav-drop');
+
+  menuItems.forEach((menuItem) => {
+    menuItem.addEventListener('click', function func() {
+      const container = document.getElementById('menu-container');
+      const navContent = this.querySelector('.nav-content').innerHTML;
+      // update content in menu-container
+      container.innerHTML = navContent;
+      // toggle container visibility
+      if (container.style.maxHeight && container.style.maxHeight !== '0px') {
+        container.style.maxHeight = '0px';
+        container.setAttribute('aria-expanded', 'false');
+        container.innerHTML = '';
+      } else {
+        container.style.maxHeight = `${container.scrollHeight}px`;
+        container.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+}
 /**
  * decorates the header, mainly the nav
  * @param {Element} block The header block element
@@ -110,9 +133,19 @@ export default async function decorate(block) {
       if (section) section.classList.add(`nav-${c}`);
     });
 
+    let contentIDCounter = 0;
     const navSections = nav.querySelector('.nav-sections');
     if (navSections) {
       navSections.querySelectorAll(':scope > ul > li').forEach((navSection) => {
+        // add nav-content class & data-content attribute
+        const innerUL = navSection.querySelector('ul');
+        if (innerUL) {
+          navSection.classList.add('nav-drop');
+          innerUL.classList.add('nav-content');
+          const contentID = contentIDCounter++;
+          navSection.setAttribute('data-content-id', contentID);
+        }
+
         if (navSection.querySelector('ul')) navSection.classList.add('nav-drop');
         navSection.addEventListener('click', () => {
           if (isDesktop.matches) {
@@ -167,5 +200,11 @@ export default async function decorate(block) {
         element.id = classNames[i];
       }
     }
+    const menuItems = document.querySelector('.nav-sections ul');
+    menuItems.className = 'menu-items';
+    const menuContainer = document.createElement('div');
+    menuContainer.id = 'menu-container';
+    navSections.append(menuContainer);
+    menuDrop();
   }
 }
