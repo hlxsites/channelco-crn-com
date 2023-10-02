@@ -21,7 +21,7 @@
   padding: 0.375rem 0.75rem;
 }
 
-.search-results form input[type=search] {
+.search-results form input[type="search"] {
   flex: 1;
   font-size: var(--body-font-size-l);
   border-radius: 0.25rem;
