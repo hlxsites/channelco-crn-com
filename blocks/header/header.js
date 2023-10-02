@@ -4,6 +4,10 @@ import { decorateLinkedPictures } from '../../scripts/shared.js';
 // media query match that indicates mobile/tablet width
 const isDesktop = window.matchMedia('(min-width: 900px)');
 
+function closeSearch() {
+  document.querySelector('nav .nav-search').classList.remove('active');
+}
+
 function closeOnEscape(e) {
   if (e.code === 'Escape') {
     const nav = document.getElementById('nav');
@@ -17,6 +21,11 @@ function closeOnEscape(e) {
       // eslint-disable-next-line no-use-before-define
       toggleMenu(nav, navSections);
       nav.querySelector('button').focus();
+    }
+
+    const search = document.querySelector('nav .nav-search');
+    if (search && search.classList.contains('active')) {
+      closeSearch();
     }
   }
 }
@@ -44,6 +53,45 @@ function focusNavSection() {
 function toggleAllNavSections(sections, expanded = false) {
   sections.querySelectorAll('.nav-sections > ul > li').forEach((section) => {
     section.setAttribute('aria-expanded', expanded);
+  });
+}
+
+/**
+ * Modifies the DOM to support the site's search UI.
+ * @param {HTMLElement} nav The site's nav section, as defined in the nav content
+ *  fragment.
+ */
+function decorateSearch(nav) {
+  const search = nav.querySelector('.icon.icon-search');
+  if (!search) {
+    return;
+  }
+
+  const searchDiv = document.createElement('div');
+  searchDiv.classList.add('nav-search');
+  searchDiv.innerHTML = `
+    <div class="nav-search-container">
+      <p class="nav-search-title">Search<span class="icon icon-close"></span></p>
+      <form action="/search" class="nav-search-form">
+        <input type="search" name="query" placeholder="Search" aria-label="Search" size="1" />
+        <button type="submit">Search</button>
+      </form>
+      <button id="nav-search-container-close">Close</button>
+    </div>
+  `;
+  nav.append(searchDiv);
+
+  search.addEventListener('click', () => {
+    searchDiv.classList.add('active');
+    searchDiv.focus();
+  });
+
+  nav.querySelector('#nav-search-container-close').addEventListener('click', (e) => {
+    e.preventDefault();
+    closeSearch();
+  });
+  nav.querySelector('.nav-search-container .icon.icon-close').addEventListener('click', () => {
+    closeSearch();
   });
 }
 
@@ -137,6 +185,7 @@ export default async function decorate(block) {
     toggleMenu(nav, navSections, isDesktop.matches);
     isDesktop.addEventListener('change', () => toggleMenu(nav, navSections, isDesktop.matches));
 
+    decorateSearch(nav);
     decorateIcons(nav);
     const navWrapper = document.createElement('div');
     navWrapper.className = 'nav-wrapper';

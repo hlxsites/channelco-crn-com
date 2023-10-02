@@ -751,3 +751,31 @@ export async function getRelatedArticles(article, relatedCount = 5) {
     // only return the record itself
     .map((relevanceRecord) => relevanceRecord.record);
 }
+
+/**
+ * Builds an article-cards block from a list of articles, and adds the
+ * block to the DOM.
+ * @param {Array<QueryIndexRecord>} articles Records from which article cards
+ *  will be built.
+ * @param {function} addBlockToDom Will be invoked when the block needs to be
+ *  added to the DOM. Will receive a single argument: the block's HTMLElement.
+ * @returns {Promise} Resolves when the block is complete.
+ */
+export async function buildArticleCardsBlock(articles, addBlockToDom) {
+  const ul = document.createElement('ul');
+  articles.forEach((article) => {
+    const li = document.createElement('li');
+    const articleUrl = `${window.location.protocol}//${window.location.host}${article.path}`;
+    li.innerHTML = `
+      <a href="${articleUrl}" title="${article.title}" aria-label="${article.title}">
+        ${articleUrl}
+      </a>
+    `;
+    ul.append(li);
+  });
+
+  const cards = buildBlock('article-cards', { elems: [ul] });
+  addBlockToDom(cards);
+  decorateBlock(cards);
+  await loadBlock(cards);
+}
