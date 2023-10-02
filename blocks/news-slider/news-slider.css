@@ -153,6 +153,7 @@ main .section.news-slider-container {
   overflow-x: hidden;
   overflow-y: hidden;
   display: inline-block;
+  cursor: pointer;
 }
 
 .news-slider-wrapper .slider-title {
