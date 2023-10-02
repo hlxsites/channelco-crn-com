@@ -119,7 +119,6 @@ export default function decorate(block) {
 
   if (isTabsBlock) {
     const { title } = readBlockConfig(block);
-    console.log(title);
     h1 = document.createElement('h1');
     h1.textContent = title;
     h1.className = 'slider-title';
@@ -196,7 +195,7 @@ export default function decorate(block) {
       fadeEffect.className = 'fade-effect';
       carousel.appendChild(fadeEffect);
     });
-  }    
+  }
 
   const grayBackground = document.createElement('div');
   grayBackground.className = 'dragdealer-background';
@@ -214,7 +213,7 @@ export default function decorate(block) {
   swipeText.className = 'swipe-text';
   swipeText.textContent = '< SWIPE >';
 
-  if(isTabsBlock && h1) {
+  if (isTabsBlock && h1) {
     newsSlider.parentNode.insertBefore(h1, newsSlider);
   }
 

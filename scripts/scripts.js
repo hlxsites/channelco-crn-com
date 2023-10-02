@@ -150,15 +150,15 @@ async function createContentAndAdsSections(doc) {
     Array.from(main.children)
       .filter(
         (child) => child !== topAdSection
-          && child !== breadcrumb
+          && child !== breadcrumb,
       )
       .forEach((section) => {
-        contentSection.appendChild(section)
+        contentSection.appendChild(section);
       });
 
     mainContainer.appendChild(contentAndAdsContainer);
 
-    if(newsWrapper) {
+    if (newsWrapper) {
       contentAndAdsContainer.prepend(newsWrapper);
       const newsContainer = main.querySelector('.news-slider-container');
       if (newsContainer) {

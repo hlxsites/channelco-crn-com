@@ -178,17 +178,16 @@ main .section.news-slider-container {
   /* bottom: 2px; */
 }
 
-
-#inthetaxonomies-carousel .handle li.slide:first-child::before {
-  margin-left: 0px;
-  margin-right: 10px;
-  content: "";
-}
-
 #inthetaxonomies-carousel .handle li.slide::before {
   margin-left: 8px;
   margin-right: 10px;
   content: "|";
+}
+
+#inthetaxonomies-carousel .handle li.slide:first-child::before {
+  margin-left: 0;
+  margin-right: 10px;
+  content: "";
 }
 
 #inthetaxonomies-carousel .handle .nav {
