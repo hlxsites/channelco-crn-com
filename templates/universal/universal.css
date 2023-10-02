@@ -133,6 +133,8 @@ main .back-top-top-section-header {
 
   main .content-and-ads-container .news-slider-wrapper {
     grid-area: news;
+    grid-template:
+      ". content ads ." / auto 1fr 330px auto;
   }
 
   main .content-and-ads-container .content-section {

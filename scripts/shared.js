@@ -14,21 +14,6 @@ const DEFAULT_CATEGORY_NAME = 'News';
 const EMAIL_REGEX = /\S+[a-z0-9]@[a-z0-9.]+/img;
 
 /**
- * Builds hero block and prepends to main in a new section.
- * @param {Element} main The container element
- */
-function buildHeroBlock(main) {
-  const h1 = main.querySelector('h1');
-  const picture = main.querySelector('picture');
-  // eslint-disable-next-line no-bitwise
-  if (h1 && picture && (h1.compareDocumentPosition(picture) & Node.DOCUMENT_POSITION_PRECEDING)) {
-    const section = document.createElement('div');
-    section.append(buildBlock('hero', { elems: [picture, h1] }));
-    main.prepend(section);
-  }
-}
-
-/**
  * Builds breadcrumb menu and prepends to main in a new section
  * @param {Element} main The container element
  */
@@ -42,6 +27,33 @@ function buildBreadcrumb(main) {
   const div = document.createElement('div');
   div.append(buildBlock('breadcrumb', { elems: [] }));
   main.prepend(div);
+}
+
+/**
+ * Builds an embed to Flipbook and Issuu when either of their links are detected in main
+ * @param {Element} main The container element
+ */
+function buildEmbed(main) {
+  const regex = /(https?:\/\/(.+?\.)?(flippingbook|issuu)\.com(\/[A-Za-z0-9\-._~:/?#[\]@!$&'()*+,;=]*)?)/;
+  main.querySelectorAll('a').forEach((a) => {
+    if (regex.test(a.href)) {
+      const observer = new IntersectionObserver((entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          const html = `
+            <div class="embed-container">
+              <div>
+                  <iframe loading="lazy" allow="encrypted-media" allowfullscreen="allowfullscreen" src="${a.href}"></iframe>
+              </div>
+            </div>
+          `;
+          a.innerHTML = html;
+          observer.disconnect();
+        }
+      });
+      observer.observe(a);
+      a.textContent = '';
+    }
+  });
 }
 
 /**
@@ -67,8 +79,8 @@ function buildPageDivider(main) {
  */
 function buildAutoBlocks(main) {
   try {
-    buildHeroBlock(main);
     buildBreadcrumb(main);
+    buildEmbed(main);
     buildPageDivider(main);
   } catch (error) {
     // eslint-disable-next-line no-console
@@ -253,6 +265,18 @@ export function getCategoryName(record) {
  * @property {string} lastModified Unix timestamp of the last time the index record was modified.
  */
 
+/**
+ * Determines whether a given record from the site's query index is an article.
+ * @param {QueryIndexRecord} record Record to test.
+ * @returns {boolean} True if the record is an article, false otherwise.
+ */
+export function isArticle(record) {
+  // the record is an article if its path starts with /news/, and its template is
+  // either empty or "article"
+  return (!record.template || String(record.template).toLowerCase() === 'article')
+    && String(record.path).startsWith('/news/');
+}
+
 let cachedIndex;
 /**
  * Queries the site's index and only includes those records that match a given filter.
@@ -293,6 +317,26 @@ export async function getRecordsByPath(paths) {
   const pathLookup = {};
   paths.forEach((path) => { pathLookup[path] = true; });
   return queryIndex((record) => !!pathLookup[record.path]);
+}
+
+/**
+ * Retrieves all articles in a given category.
+ * @param {string} categoryName Category whose articles should be retrieved.
+ * @returns {Promise<Array<QueryIndexRecord>>} Resolves with an array of matching
+ *  articles.
+ */
+export async function getArticlesByCategory(categoryName) {
+  return queryIndex((record) => record.category === categoryName && isArticle(record));
+}
+
+/**
+ * Retrieves all articles by a given author.
+ * @param {string} authorName Author whose articles should be retrieved.
+ * @returns {Promise<Array<QueryIndexRecord>>} Resolves with an array of matching
+ *  articles.
+ */
+export async function getArticlesByAuthor(authorName) {
+  return queryIndex((record) => record.author === authorName && isArticle(record));
 }
 
 /**
@@ -465,6 +509,18 @@ export async function buildAuthorBlades(target, authors, bioLength = 0) {
 }
 
 /**
+ * Parses a comma-separate list of keywords into an array of keyword values.
+ * @param {string} keywords Keywords to parse.
+ * @returns {Array<string>} List of keywords.
+ */
+function parseKeywords(keywords) {
+  return String(keywords)
+    .split(',')
+    .map((keyword) => keyword.trim())
+    .filter((keyword) => !!keyword);
+}
+
+/**
  * Builds a learn-more block based on a given list of keywords, then adds it
  * as a child of a given element.
  * @param {HTMLElement} target Element to which the block will be added.
@@ -474,9 +530,7 @@ export async function buildAuthorBlades(target, authors, bioLength = 0) {
  */
 export async function buildLearnMore(target, keywords) {
   const ul = document.createElement('ul');
-  const items = String(keywords)
-    .split(',')
-    .map((keyword) => keyword.trim());
+  const items = parseKeywords(keywords);
   items.forEach((keyword) => {
     const li = document.createElement('li');
     li.innerHTML = `
@@ -496,17 +550,17 @@ export async function buildLearnMore(target, keywords) {
  * Dynamically creates a related content block based on a given list of
  * article paths, then appends the new block to a given element.
  * @param {HTMLElement} target Element to which related content block will be added.
- * @param {Array<string>} articlePaths List of full article paths to use as
+ * @param {Array<QueryIndexRecord>} articles List of articles to use as
  *  related items.
  * @returns {Promise} Resolves when the operation is complete.
  */
-export async function buildRelatedContent(target, articlePaths) {
+export async function buildRelatedContent(target, articles) {
   const ul = document.createElement('ul');
-  articlePaths.forEach((article) => {
+  articles.forEach((article) => {
     const item = document.createElement('li');
     item.innerHTML = `
-      <a href="${article}">
-        ${article}
+      <a href="${article.path}" title="${article.title}" aria-label="${article.title}">
+        ${article.title}
       </a>
     `;
     ul.append(item);
@@ -529,4 +583,171 @@ export async function buildSocialShare(insertAfter) {
   insertAfter.parentElement.insertBefore(socialShare, insertBefore);
   decorateBlock(socialShare);
   return loadBlock(socialShare);
+}
+
+function buildKeywordLookup(keywords) {
+  const map = {};
+  parseKeywords(keywords)
+    .forEach((keyword) => { map[keyword] = true; });
+  return map;
+}
+
+/**
+ * Calculates a score based on how many keywords in a list match a
+ * given keyword lookup.
+ * @param {object} keywordLookup Simple object whose keys are keywords. Used
+ *  as the keywords to match against.
+ * @param {QueryIndexRecord} record Record whose score should be calculated.
+ * @returns {number} Score based on how many keywords match.
+ */
+function calculateScore(keywordLookup, record) {
+  // calculate relevance by determining how many of the given keywords each
+  // article has
+  let matchCount = 0;
+  const currRecordKeywords = parseKeywords(record.keywords);
+  currRecordKeywords.forEach((keyword) => {
+    if (keywordLookup[keyword]) {
+      matchCount += 1;
+    }
+  });
+  return matchCount;
+}
+
+/**
+ * @typedef QueryIndexRecordRelevance
+ * @property {QueryIndexRecord} record Record from the query index to which
+ *  the relevance score applies.
+ * @property {number} relevance Relevance score for the record.
+ */
+
+/**
+ * Queries the site's index and builds relevance scores for each record based
+ * on a master set of keywords to match against.
+ * @param {object} keywordLookup Simple object whose keys are the keywords to
+ *  match.
+ * @returns {Promise<Array<QueryIndexRecordRelevance>>} Resolves with relevance
+ *  scores for applicable records.
+ */
+async function buildRelevanceScores(keywordLookup) {
+  const relevanceScores = [];
+  await queryIndex((record) => {
+    if (!record.keywords || !isArticle(record)) {
+      return false;
+    }
+    // calculate relevance by determining how many of the given keywords each
+    // article has
+    const relevance = calculateScore(keywordLookup, record);
+    if (relevance > 0) {
+      relevanceScores.push({
+        record,
+        relevance,
+      });
+    }
+    return false;
+  });
+  return relevanceScores;
+}
+
+/**
+ * Compares two relevance-related records and returns a value depending
+ * on their relation.
+ * @param {QueryIndexRecordRelevance} a Record from the index to compare.
+ * @param {QueryIndexRecordRelevance} b Record from the index to compare.
+ * @returns {number} Returns -1 if b has a higher score than a, 1 if a
+ *  has a higher score than b, or 0 if the two are the same.
+ */
+function compareRelevance(a, b) {
+  if (a.relevance > b.relevance) {
+    return -1;
+  }
+  if (a.relevance < b.relevance) {
+    return 1;
+  }
+  return 0;
+}
+
+/**
+ * Compares two records and returns a value depending on a comparison of
+ * their publish dates.
+ * @param {QueryIndexRecord} a Record from the index to compare.
+ * @param {QueryIndexRecord} b Record from the index to compare.
+ * @returns {number} Returns -1 if b has a more recent date than a, 1 if a
+ *  has a more recent date than b, or 0 if the two are the same.
+ */
+export function comparePublishDate(a, b) {
+  if (!a.publisheddate && !b.publisheddate) {
+    // records are the same when neither has a publish date
+    return 0;
+  }
+  if (!a.publisheddate && b.publisheddate) {
+    // b has a more recent date if it has a date but a doesn't
+    return -1;
+  }
+  if (a.publisheddate && !b.publisheddate) {
+    // a has a more recent date if it has a date but b doesn't
+    return 1;
+  }
+
+  try {
+    const date1 = Date.parse(a.publisheddate);
+    const date2 = Date.parse(b.publisheddate);
+    if (date1 < date2) {
+      // both have dates, b is more recent than a
+      return 1;
+    }
+    if (date1 > date2) {
+      // both have dates, a is more recent than b
+      return -1;
+    }
+  } catch {
+    // don't compare dates if parsing fails
+  }
+  // there was either an error, or both dates are the same
+  return 0;
+}
+
+/**
+ * Sorts an array of relevance records _in place_, so that the most relevant
+ * records are first. When relevance scores are the same, records with
+ * newer publish dates will come first.
+ * @param {Array<QueryIndexRecordRelevance>} relevanceScores Scores to be
+ *  sorted.
+ */
+function sortByMostRelevant(relevanceScores) {
+  relevanceScores.sort((a, b) => {
+    const relevance = compareRelevance(a, b);
+    if (relevance !== 0) {
+      // relevance score should take priority
+      return relevance;
+    }
+
+    return comparePublishDate(a.record, b.record);
+  });
+}
+
+/**
+ * Retrieves articles related to an article. Articles with more matching
+ * keywords will have a higher relation score, and articles with a newer
+ * publish date will have a higher score when the relation score is the same.
+ * @param {QueryIndexRecord} article Article whose related articles should be
+ *  retrieved.
+ * @param {number} [relatedCount] Optional number of items to return. Default: 5.
+ * @returns {Promise<Array<QueryIndexRecord>>} Resolves with the most related articles.
+ */
+export async function getRelatedArticles(article, relatedCount = 5) {
+  // this method will almost certainly need to be optimized as the number of articles
+  // grows. As is, it will:
+  // 1. Potentially read a very large number of articles into memory.
+  // 2. Query the full index.
+  // 3. Sort a very large number of articles.
+  const lookup = buildKeywordLookup(article.keywords);
+  const related = await buildRelevanceScores(lookup);
+  sortByMostRelevant(related);
+  return related
+    // make sure the article itself isn't included
+    .filter((relevanceRecord) => relevanceRecord.record.path !== article.path)
+    // return the requested number of articles
+    .slice(0, relatedCount)
+    // only return the record itself
+    .map((relevanceRecord) => relevanceRecord.record);
 }

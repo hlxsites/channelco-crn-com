@@ -1,11 +1,22 @@
-function addDragEvents(handle, carousel) {
+import { readBlockConfig } from '../../scripts/lib-franklin.js';
+
+function addDragEvents(handle, carousel, isTabsBlock) {
   const RESISTANCE_FACTOR = 5;
   const DRAG_TOLERANCE = 10;
+  let BOUNDARY_RIGHT;
 
-  let BOUNDARY_RIGHT = window.innerWidth <= 768 ? -930 : -2590;
+  if (isTabsBlock) {
+    BOUNDARY_RIGHT = window.innerWidth <= 768 ? -1330 : -3276;
+  } else {
+    BOUNDARY_RIGHT = window.innerWidth <= 768 ? -930 : -2590;
+  }
 
   function adjustBoundary() {
-    BOUNDARY_RIGHT = window.innerWidth <= 768 ? -930 : -2590;
+    if (isTabsBlock) {
+      BOUNDARY_RIGHT = window.innerWidth <= 768 ? -1330 : -3276;
+    } else {
+      BOUNDARY_RIGHT = window.innerWidth <= 768 ? -930 : -2590;
+    }
   }
 
   let isDragging = false;
@@ -99,57 +110,102 @@ function addDragEvents(handle, carousel) {
 }
 
 export default function decorate(block) {
-  const newsItems = Array.from(block.querySelectorAll('ul li a'));
+  const isTabsBlock = block.classList.contains('tabs');
+  let newsItems;
+  let newsSlider;
+  let carousel;
+  let handle;
+  let h1;
 
-  // Create the main container
-  const newsSlider = document.createElement('div');
-  newsSlider.id = 'inthenews';
+  if (isTabsBlock) {
+    const { title } = readBlockConfig(block);
+    console.log(title);
+    h1 = document.createElement('h1');
+    h1.textContent = title;
+    h1.className = 'slider-title';
 
-  const header = document.createElement('div');
-  header.className = 'inthenews-header';
-  header.textContent = 'In the News:';
-  newsSlider.appendChild(header);
+    // Query for anchor tags only when 'tabs' class is present
+    newsItems = Array.from(block.querySelectorAll('ul li'));
 
-  const carousel = document.createElement('div');
-  carousel.id = 'inthenews-carousel';
-  carousel.className = 'dragdealer masked active';
+    newsSlider = document.createElement('div');
+    newsSlider.id = 'inthesubtaxonomies';
 
-  const handle = document.createElement('div');
-  handle.className = 'handle';
+    carousel = document.createElement('div');
+    carousel.id = 'inthetaxonomies-carousel';
+    carousel.className = 'dragdealer active';
 
-  newsItems.forEach((item) => {
-    const slide = document.createElement('div');
-    slide.className = 'slide';
+    handle = document.createElement('div');
+    handle.className = 'handle';
 
-    const newsItem = document.createElement('span');
-    newsItem.className = 'inthenews-item';
+    const ul = document.createElement('ul');
+    ul.className = 'section-sub-nav nav';
 
-    const dot = document.createElement('span');
-    dot.className = 'inthenews-dot';
+    newsItems.forEach((item) => {
+      const li = document.createElement('li');
+      li.className = 'slide';
 
-    const link = document.createElement('a');
-    link.href = item.href;
-    link.textContent = item.title;
+      const link = document.createElement('a');
+      link.href = item.href || '#';
+      link.className = 'eyebrow-link';
+      link.textContent = item.textContent;
 
-    newsItem.appendChild(dot);
-    newsItem.appendChild(link);
-    slide.appendChild(newsItem);
-    handle.appendChild(slide);
-  });
+      li.appendChild(link);
+      ul.appendChild(li);
+    });
+
+    handle.appendChild(ul);
+    newsSlider.appendChild(carousel);
+  } else {
+    newsItems = Array.from(block.querySelectorAll('ul li a'));
+
+    newsSlider = document.createElement('div');
+    newsSlider.id = 'inthenews';
+
+    const header = document.createElement('div');
+    header.className = 'inthenews-header';
+    header.textContent = 'In the News:';
+    newsSlider.appendChild(header);
+
+    carousel = document.createElement('div');
+    carousel.id = 'inthenews-carousel';
+    carousel.className = 'dragdealer masked active';
+
+    handle = document.createElement('div');
+    handle.className = 'handle';
+
+    newsItems.forEach((item) => {
+      const slide = document.createElement('div');
+      slide.className = 'slide';
+
+      const newsItem = document.createElement('span');
+      newsItem.className = 'inthenews-item';
+
+      const dot = document.createElement('span');
+      dot.className = 'inthenews-dot';
+
+      const link = document.createElement('a');
+      link.href = item.href;
+      link.textContent = item.title;
+
+      newsItem.appendChild(dot);
+      newsItem.appendChild(link);
+      slide.appendChild(newsItem);
+      handle.appendChild(slide);
+
+      const fadeEffect = document.createElement('div');
+      fadeEffect.className = 'fade-effect';
+      carousel.appendChild(fadeEffect);
+    });
+  }    
 
   const grayBackground = document.createElement('div');
   grayBackground.className = 'dragdealer-background';
 
-  const fadeEffect = document.createElement('div');
-  fadeEffect.className = 'fade-effect';
-
   carousel.appendChild(grayBackground);
-  carousel.appendChild(fadeEffect);
   carousel.appendChild(handle);
 
-  carousel.appendChild(handle);
   newsSlider.appendChild(carousel);
-  addDragEvents(handle, carousel);
+  addDragEvents(handle, carousel, isTabsBlock);
 
   // Replace the original block with our decorated one
   block.replaceWith(newsSlider);
@@ -157,6 +213,10 @@ export default function decorate(block) {
   const swipeText = document.createElement('div');
   swipeText.className = 'swipe-text';
   swipeText.textContent = '< SWIPE >';
+
+  if(isTabsBlock && h1) {
+    newsSlider.parentNode.insertBefore(h1, newsSlider);
+  }
 
   newsSlider.parentNode.appendChild(swipeText);
 }

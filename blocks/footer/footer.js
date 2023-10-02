@@ -61,4 +61,11 @@ export default async function decorate(block) {
 
     footerSocials.appendChild(socialIcons);
   }
+
+  block.querySelector('.footer-brand a').setAttribute('aria-label', 'Navigate to homepage');
+  block.querySelectorAll('.footer-social a').forEach((a) => {
+    a.setAttribute('target', '_blank');
+    a.setAttribute('rel', 'noopener noreferrer');
+    a.setAttribute('aria-label', `Open our ${a.firstElementChild.classList[1].substring(5)} page in a new tab.`);
+  });
 }

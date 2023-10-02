@@ -126,7 +126,6 @@ async function createContentAndAdsSections(doc) {
   closeIcon.src = '/styles/icons/close-ribbon.png';
   closeIcon.alt = 'Close'; // Accessibility
 
-  // Add event listener to close the bottom ad section when the close icon is clicked
   closeIcon.addEventListener('click', () => {
     bottomAdSection.style.display = 'none';
   });
@@ -147,9 +146,7 @@ async function createContentAndAdsSections(doc) {
       main.prepend(topAdSection);
     }
 
-
-    console.log('children', main.children);
-    // Move remaining sections in main to contentSection using array iteration
+    // Move remaining sections in main to contentSection
     Array.from(main.children)
       .filter(
         (child) => child !== topAdSection
@@ -160,8 +157,15 @@ async function createContentAndAdsSections(doc) {
       });
 
     mainContainer.appendChild(contentAndAdsContainer);
-    contentAndAdsContainer.prepend(newsWrapper);
-    // Append the "TO TOP" section to the mainContainer (Outside of the flex container)
+
+    if(newsWrapper) {
+      contentAndAdsContainer.prepend(newsWrapper);
+      const newsContainer = main.querySelector('.news-slider-container');
+      if (newsContainer) {
+        newsContainer.classList.remove('news-slider-container');
+      }
+    }
+
     const toTopSection = createToTopSection();
     mainContainer.appendChild(toTopSection);
 

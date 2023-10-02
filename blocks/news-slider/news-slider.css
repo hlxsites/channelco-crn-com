@@ -37,16 +37,6 @@ main .section.news-slider-container {
   overflow-y: hidden;
 }
 
-.dragdealer-background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #e1e1e1;
-  z-index: 1;
-}
-
 .handle {
   z-index: 2;
   position: relative;
@@ -110,6 +100,16 @@ main .section.news-slider-container {
   z-index: 2; /* Ensure gradient is on top of the content */
 }
 
+.dragdealer-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #e1e1e1;
+  z-index: 1;
+}
+
 .fade-effect::before,
 .fade-effect::after {
   content: "";
@@ -135,6 +135,77 @@ main .section.news-slider-container {
   text-align: right;
   font-size: 12px;
   color: #777;
+}
+
+#inthesubtaxonomies {
+  position: relative;
+  width: 100%;
+  height: 60px;
+  border-top: 1px solid #8c8c8c;
+  border-bottom: 1px solid #8c8c8c;
+}
+
+#inthetaxonomies-carousel {
+  height: 60px;
+  width: 100%;
+  border-radius: 0;
+  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  display: inline-block;
+}
+
+.news-slider-wrapper .slider-title {
+  font-family: inherit;
+  font-size: 1.750rem;
+  font-weight: 600;
+  color: #ed1c24;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+#inthetaxonomies-carousel .handle .slide a {
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #ed1c24;
+}
+
+#inthetaxonomies-carousel .handle ul {
+  margin-top: 0;
+}
+
+#inthesubtaxonomies .dragdealer-background {
+  /* bottom: 2px; */
+}
+
+
+#inthetaxonomies-carousel .handle li.slide:first-child::before {
+  margin-left: 0px;
+  margin-right: 10px;
+  content: "";
+}
+
+#inthetaxonomies-carousel .handle li.slide::before {
+  margin-left: 8px;
+  margin-right: 10px;
+  content: "|";
+}
+
+#inthetaxonomies-carousel .handle .nav {
+  display: flex;
+  flex-wrap: wrap;
+  padding-left: 0;
+  margin-bottom: 0;
+  list-style: none;
+}
+
+#inthetaxonomies-carousel .handle .slide {
+  float: left;
+  position: relative;
+  background-repeat: no-repeat;
+  background-position: center center;
+  height: 50px;
+  background-color: #fff;
 }
 
 @media (min-width: 768px) {

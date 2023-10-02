@@ -142,6 +142,7 @@ export default async function decorate(block) {
     navWrapper.className = 'nav-wrapper';
     navWrapper.append(nav);
     decorateLinkedPictures(navWrapper);
+    nav.querySelector('.nav-brand a').setAttribute('aria-label', 'Navigate to homepage');
     block.append(navWrapper);
   }
 }

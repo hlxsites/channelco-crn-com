@@ -1,5 +1,4 @@
 import { decorateIcons } from '../../scripts/lib-franklin.js';
-import { getRecordsFromBlock } from '../../scripts/shared.js';
 
 /**
  * Modifies the block's DOM as necessary.
@@ -16,21 +15,9 @@ export default async function decorate(block) {
 
   const list = document.createElement('div');
   list.classList.add('related-content-list');
+  list.append(ul);
 
   target.append(icon, list);
 
   decorateIcons(block);
-
-  const articles = await getRecordsFromBlock(block);
-  const articleList = document.createElement('ul');
-  articles.forEach((article) => {
-    const articleItem = document.createElement('li');
-    articleItem.innerHTML = `
-      <a href="${article.path}" title="${article.title}" aria-label="${article.title}">
-        ${article.title}
-      </a>
-    `;
-    articleList.append(articleItem);
-  });
-  list.append(articleList);
 }
