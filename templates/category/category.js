@@ -7,6 +7,7 @@ import {
   getArticlesByCategory,
   getRecordByPath,
   comparePublishDate,
+  buildArticleCardsBlock,
 } from '../../scripts/shared.js';
 
 function appendElementBeforeLast(target, last, toAppend) {
@@ -15,22 +16,6 @@ function appendElementBeforeLast(target, last, toAppend) {
   } else {
     target.append(toAppend);
   }
-}
-
-function buildArticleCards(articles) {
-  const ul = document.createElement('ul');
-  articles.forEach((article) => {
-    const li = document.createElement('li');
-    const articleUrl = `${window.location.protocol}//${window.location.host}${article.path}`;
-    li.innerHTML = `
-      <a href="${articleUrl}" title="${article.title}" aria-label="${article.title}">
-          ${articleUrl}
-      </a>
-    `;
-    ul.append(li);
-  });
-
-  return buildBlock('article-cards', { elems: [ul] });
 }
 
 /**
@@ -59,11 +44,10 @@ export default async function decorate(main) {
   const articles = await getArticlesByCategory(category.title);
   articles.sort(comparePublishDate);
 
-  const leadCards = buildArticleCards(articles.slice(0, 5));
-  leadCards.classList.add('lead-article');
-  appendElementBeforeLast(main, lastElement, leadCards);
-  decorateBlock(leadCards);
-  await loadBlock(leadCards);
+  buildArticleCardsBlock(articles.slice(0, 5), (leadCards) => {
+    leadCards.classList.add('lead-article');
+    appendElementBeforeLast(main, lastElement, leadCards);
+  });
 
   const newsLinkText = `${category.title} News`;
   const newsLink = document.createElement('a');
@@ -76,10 +60,9 @@ export default async function decorate(main) {
   newsHeading.append(newsLink);
   appendElementBeforeLast(main, lastElement, newsHeading);
 
-  const cards = buildArticleCards(articles.slice(5, 13));
-  appendElementBeforeLast(main, lastElement, cards);
-  decorateBlock(cards);
-  await loadBlock(cards);
+  buildArticleCardsBlock(articles.slice(5, 13), (cards) => {
+    appendElementBeforeLast(main, lastElement, cards);
+  });
 
   const categoryNavigation = buildBlock('category-navigation', { elems: [] });
   main.append(categoryNavigation);

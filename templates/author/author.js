@@ -9,6 +9,7 @@ import {
   createOptimizedPicture,
   getArticlesByAuthor,
   comparePublishDate,
+  buildArticleCardsBlock,
 } from '../../scripts/shared.js';
 
 function addIcon(beforeElement, iconName) {
@@ -69,23 +70,10 @@ export default async function decorate(main) {
   const articles = await getArticlesByAuthor(authorName);
   articles.sort(comparePublishDate);
 
-  const ul = document.createElement('ul');
-  articles.slice(0, 15)
-    .forEach((article) => {
-      const li = document.createElement('li');
-      const articleUrl = `${window.location.protocol}//${window.location.host}${article.path}`;
-      li.innerHTML = `
-        <a href="${articleUrl}" title="${article.title}" aria-label="${article.title}">
-          ${articleUrl}
-        </a>
-      `;
-      ul.append(li);
-    });
-
-  const cards = buildBlock('article-cards', { elems: [ul] });
-  defaultContent.append(cards);
-  decorateBlock(cards);
-  await loadBlock(cards);
+  await buildArticleCardsBlock(
+    articles.slice(0, 15),
+    (articleCards) => defaultContent.append(articleCards),
+  );
 
   const adIdLabel = document.createElement('div');
   adIdLabel.innerText = 'id';
