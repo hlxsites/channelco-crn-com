@@ -30,6 +30,7 @@ async function loadFonts() {
   }
 }
 
+let template;
 /**
  * Run template specific decoration code.
  * @param {Element} main The container element
@@ -48,15 +49,15 @@ async function decorateTemplates(main) {
       await universalMod.default(main);
     }
 
-    const template = toClassName(getMetadata('template'));
+    const templateName = toClassName(getMetadata('template'));
     const templates = TEMPLATE_LIST;
-    if (templates.includes(template)) {
-      const mod = await import(`../templates/${template}/${template}.js`);
+    if (templates.includes(templateName)) {
+      template = await import(`../templates/${templateName}/${templateName}.js`);
       loadCSS(
-        `${window.hlx.codeBasePath}/templates/${template}/${template}.css`,
+        `${window.hlx.codeBasePath}/templates/${templateName}/${templateName}.css`,
       );
-      if (mod.default) {
-        await mod.default(main);
+      if (template.loadEager) {
+        await template.loadEager(main);
       }
     }
   } catch (error) {
@@ -184,9 +185,9 @@ async function loadEager(doc) {
   decorateTemplateAndTheme();
   const main = doc.querySelector('main');
   if (main) {
+    await decorateTemplates(main);
     decorateMain(main);
     document.body.classList.add('appear');
-    await decorateTemplates(main);
     await waitForLCP(LCP_BLOCKS);
   }
 
@@ -206,6 +207,13 @@ async function loadEager(doc) {
  */
 async function loadLazy(doc) {
   const main = doc.querySelector('main');
+  if (template) {
+    if (template.default) {
+      template.default(main);
+    } else if (template.loadLazy) {
+      template.loadLazy(main);
+    }
+  }
   await loadBlocks(main);
 
   const { hash } = window.location;
@@ -229,7 +237,12 @@ async function loadLazy(doc) {
  */
 function loadDelayed() {
   // eslint-disable-next-line import/no-cycle
-  window.setTimeout(() => import('./delayed.js'), 3000);
+  window.setTimeout(() => {
+    if (template && template.loadDelayed) {
+      template.loadDelayed(document.querySelector('main'));
+    }
+    import('./delayed.js');
+  }, 3000);
   // load anything that can be postponed to the latest here
 }
 
