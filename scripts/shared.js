@@ -753,6 +753,66 @@ export async function getRelatedArticles(article, relatedCount = 5) {
 }
 
 /**
+ * Builds and adds the DOM structure for the article-cards block based on a list
+ * of articles.
+ * @param {Array<QueryIndexRecord>} articles Records from which article cards
+ *  will be built.
+ * @param {HTMLElement} target Element to which the block content will be
+ *  added.
+ */
+export function buildArticleCardsContent(articles, target) {
+  const addlArticleContainer = document.createElement('div');
+  addlArticleContainer.classList.add('sub-article');
+  // add article cards for each article
+  articles.forEach((article, index) => {
+    const cardDiv = document.createElement('div');
+    cardDiv.classList.add('article-card');
+
+    const category = document.createElement('h3');
+    category.classList.add('article-card-category');
+    const categoryName = getCategoryName(article);
+    category.innerHTML = `
+      <a href="${getCategoryPath(article.path)}" class="link-arrow" aria-label="${categoryName}">${categoryName}</a>
+    `;
+
+    const title = document.createElement('h5');
+    title.classList.add('article-card-title');
+    title.innerHTML = `
+      <a href="${article.path}" class="uncolored-link" aria-label="${article.title}">${article.title}</a>
+    `;
+
+    const author = buildArticleAuthor(article);
+    const description = document.createElement('p');
+    description.classList.add('article-card-description');
+    description.innerText = article.description;
+
+    const infoDiv = document.createElement('div');
+    infoDiv.append(category);
+    infoDiv.append(title);
+    infoDiv.append(author);
+    infoDiv.append(description);
+
+    const articlePictureLink = document.createElement('a');
+    articlePictureLink.href = article.path;
+    articlePictureLink.setAttribute('aria-label', article.title);
+    const articlePicture = createOptimizedPicture(article.image, article.title, index === 0);
+    articlePictureLink.append(articlePicture);
+    const articleImage = articlePicture.querySelector('img');
+    articleImage.title = article.title;
+    cardDiv.append(articlePictureLink);
+    cardDiv.append(infoDiv);
+
+    if (index > 0) {
+      addlArticleContainer.append(cardDiv);
+    } else {
+      cardDiv.classList.add('featured-article');
+      target.append(cardDiv);
+    }
+  });
+  target.append(addlArticleContainer);
+}
+
+/**
  * Builds an article-cards block from a list of articles, and adds the
  * block to the DOM.
  * @param {Array<QueryIndexRecord>} articles Records from which article cards
@@ -762,22 +822,13 @@ export async function getRelatedArticles(article, relatedCount = 5) {
  * @returns {Promise} Resolves when the block is complete.
  */
 export async function buildArticleCardsBlock(articles, addBlockToDom) {
-  const ul = document.createElement('ul');
-  articles.forEach((article) => {
-    const li = document.createElement('li');
-    const articleUrl = `${window.location.protocol}//${window.location.host}${article.path}`;
-    li.innerHTML = `
-      <a href="${articleUrl}" title="${article.title}" aria-label="${article.title}">
-        ${articleUrl}
-      </a>
-    `;
-    ul.append(li);
-  });
-
-  const cards = buildBlock('article-cards', { elems: [ul] });
-  addBlockToDom(cards);
-  decorateBlock(cards);
-  await loadBlock(cards);
+  const block = document.createElement('div');
+  block.classList.add('article-cards', 'block');
+  block.setAttribute('data-block-name', 'article-cards');
+  block.innerHTML = '<div><div></div></div>';
+  await buildArticleCardsContent(articles, block.children.item(0).children.item(0));
+  addBlockToDom(block);
+  loadBlock(block);
 }
 
 /**

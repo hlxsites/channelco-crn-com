@@ -31,6 +31,6 @@ export default async function decorate(main) {
   const tag = buildBlock('tag', { elems: [] });
   main.insertBefore(tag, lastElement);
   decorateBlock(tag);
-  await loadBlock(tag);
-  await createTemplateWithArticles(main, `${category.title} News`, articles, lastElement);
+  loadBlock(tag);
+  createTemplateWithArticles(main, `${category.title} News`, articles, lastElement);
 }
