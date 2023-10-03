@@ -17,8 +17,9 @@ export default async function decorate(main) {
     return;
   }
 
-  const companyName = company['company-names'];
-  const articles = await queryIndex((record) => isArticle(record) && commaSeparatedListContains(record['company-names'], companyName));
+  const companyName = company.companynames;
+  const articles = await queryIndex((record) => isArticle(record)
+    && commaSeparatedListContains(record.companynames, companyName));
   articles.sort(comparePublishDate);
 
   const lastElement = main.children.length ? main.children.item(main.children.length - 1) : null;

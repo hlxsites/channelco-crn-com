@@ -259,9 +259,9 @@ export function getCategoryName(record) {
  * @property {string} authordescription Bio information for the record's author.
  * @property {string} publisheddate Full, human-readable date when the record was published.
  * @property {string} keywords Comma-separated list of keywords associated with the index record.
- * @property {string} company-names Comma-separated list of companies to which the index record
+ * @property {string} companynames Comma-separated list of companies to which the index record
  *  applies.
- * @property {string} company-webpages Comma-separated list of websites for the index's companies.
+ * @property {string} companywebpages Comma-separated list of websites for the index's companies.
  * @property {string} lastModified Unix timestamp of the last time the index record was modified.
  */
 
