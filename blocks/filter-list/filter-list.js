@@ -23,9 +23,10 @@ export default async function decorate(block) {
   currentUrlArray[currentUrlArray.length - 1] = `${currentUrlArray[currentUrlArray.length - 1]}-${year}details`;
   const detailsUrl = currentUrlArray.join('/');
 
-  // Create filter
-  console.log(dataMap);
-  
+  // Create cache for data in details and filters
+  const cacheName = `${dataSource}-${year}`;
+  const cache = await caches.open(cacheName);
+
   // Create table
   const table = document.createElement('table');
   const thead = document.createElement('thead');
@@ -45,13 +46,18 @@ export default async function decorate(block) {
     const row = document.createElement('tr');
     const isEvenRow = i % 2 === 0;
     row.classList.add(isEvenRow ? 'row2' : 'row1');
-    tableFields.forEach((field) => {
+    tableFields.forEach(async (field) => {
       const isDetailsLink = field.includes('(link)');
       const value = isDetailsLink ? item[field.replace('(link)', '').trim()] : item[field];
       const cell = buildCell(1);
       if (isDetailsLink) {
+        const cacheData = new Response(JSON.stringify({
+          data: item,
+        }), { headers: { 'Content-Type': 'application/json' } });
+        await cache.put(`${item.Pkey}-details`, cacheData);
+
         const a = document.createElement('a');
-        a.href = `${detailsUrl}?key=${item.Pkey}&reportCode=${spreadsheet}&year`;
+        a.href = `${detailsUrl}?key=${item.Pkey}&cache=${cacheName}`;
         a.innerText = value;
         cell.append(a);
       } else {

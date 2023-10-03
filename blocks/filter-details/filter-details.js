@@ -1,14 +1,30 @@
 import ffetch from '../../scripts/ffetch.js';
 
-export default async function decorate(block) {
+async function getFilterDetails() {
   const urlSearchParams = new URLSearchParams(window.location.search);
-  console.log(urlSearchParams);
   const key = urlSearchParams.get('key');
-  const dataSource = urlSearchParams.get('dataSource');
-  const year = urlSearchParams.get('year');
-  const data = await ffetch(dataSource)
+  const cacheName = urlSearchParams.get('cache');
+  const cache = await caches.open(cacheName);
+  const cacheResponse = await cache.match(`${key}-details`);
+
+  if (cacheResponse) {
+    const { data } = await cacheResponse.json();
+    return data;
+  }
+
+  // No cache data found, we fetch data from backend
+  const [dataSource, year] = cacheName.split('-');
+  const spreadsheet = `/data-source/${dataSource}/${dataSource}-data.json`;
+  const dataMapSheet = `/data-source/${dataSource}/data-mapping.json`;
+  const data = await ffetch(spreadsheet)
     .sheet(year)
-    .map(({ Pkey }) => Pkey)
-    .filter((Pkey) => Pkey === key);
-  console.log(data.next());
+    .map((item) => item)
+    .filter((item) => item.Pkey === key);
+  const { value } = await data.next();
+  return value;
+}
+
+export default async function decorate(block) {
+  const data = await getFilterDetails();
+  console.log(data);
 }
