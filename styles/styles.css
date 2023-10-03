@@ -160,7 +160,7 @@ a:hover {
   text-decoration: none;
 }
 
-a.link-arrow::after {
+.link-arrow::after {
   content: '▶';
   display: inline-block;
   margin-left: .5rem;

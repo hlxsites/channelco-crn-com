@@ -1,10 +1,13 @@
 .category main h1 {
   color: var(--link-color);
+  margin-top: 0;
+  padding-top: 0;
 }
 
-.category main .content-section > h2 {
+.category main .content-section > a > h2 {
   color: var(--link-color);
   text-transform: uppercase;
+  display: inline-block;
 }
 
 .category main .article-card-title a {

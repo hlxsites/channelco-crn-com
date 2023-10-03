@@ -9,7 +9,7 @@ import {
   loadBlocks,
 } from './lib-franklin.js';
 
-const DEFAULT_CATEGORY_PATH = '/news';
+const DEFAULT_CATEGORY_PATH = '/news/';
 const DEFAULT_CATEGORY_NAME = 'News';
 const EMAIL_REGEX = /\S+[a-z0-9]@[a-z0-9.]+/img;
 
@@ -229,7 +229,7 @@ export function getCategoryPath(path) {
     // fall back to default category if unexpected path format
     return DEFAULT_CATEGORY_PATH;
   }
-  return pathStr.substring(0, lastSlash);
+  return pathStr.substring(0, lastSlash + 1);
 }
 
 /**
@@ -778,4 +778,63 @@ export async function buildArticleCardsBlock(articles, addBlockToDom) {
   addBlockToDom(cards);
   decorateBlock(cards);
   await loadBlock(cards);
+}
+
+/**
+ * Creates a page template that consists of a set of lead article cards, with
+ * a sub set of additional article cards.
+ *
+ * Everything that the template adds to the DOM will be inserted before a given
+ * element.
+ * @param {HTMLElement} main Element intto which the content will be inserted.
+ * @param {string} subTitle Title text that will appear before the sub set of articles.
+ * @param {Array<QueryIndexRecord>} articles Article data that will be used to build
+ *  the article cards.
+ * @param {HTMLElement} [lastElement] If given, the element before which the template
+ *  elements will be added. If not provided, the template's elements will be appended
+ *  to the end.
+ */
+export async function createTemplateWithArticles(main, subTitle, articles, lastElement = null) {
+  buildArticleCardsBlock(articles.slice(0, 5), (leadCards) => {
+    leadCards.classList.add('lead-article');
+    main.insertBefore(leadCards, lastElement);
+  });
+
+  const newsLink = document.createElement('a');
+  newsLink.href = getCategoryPath('');
+  newsLink.title = subTitle;
+  newsLink.ariaLabel = subTitle;
+  newsLink.classList.add('link-arrow');
+
+  const newsHeading = document.createElement('h2');
+  newsHeading.innerText = subTitle;
+  newsLink.append(newsHeading);
+  main.insertBefore(newsLink, lastElement);
+
+  buildArticleCardsBlock(articles.slice(5, 13), (cards) => {
+    main.insertBefore(cards, lastElement);
+  });
+
+  const categoryNavigation = buildBlock('category-navigation', { elems: [] });
+  main.append(categoryNavigation);
+  decorateBlock(categoryNavigation);
+  await loadBlock(categoryNavigation);
+}
+
+/**
+ * Determines whether a given value is in a list of comma-separated values.
+ * @param {string} list Comma-separated list to check.
+ * @param {string} value Value to look for.
+ * @returns {boolean} True if the given value is in the comma-separated
+ *  list, false otherwise.
+ */
+export function commaSeparatedListContains(list, value) {
+  if (!list || !value) {
+    return false;
+  }
+  const listStr = String(list);
+
+  return listStr.split(',')
+    .map((item) => item.trim())
+    .includes(value);
 }
