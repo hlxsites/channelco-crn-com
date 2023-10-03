@@ -33,6 +33,7 @@
   --fixed-font-family: "Roboto Mono", menlo, consolas, "Liberation Mono", monospace;
 
   /* body sizes */
+  --body-font-size-l: 1.125rem;
   --body-font-size-m: 1.115rem;
   --body-font-size-s: 1.025rem;
   --body-font-size-ms: 0.825rem;
@@ -293,7 +294,15 @@ main .divider {
   padding: 0;
   font-size: var(--heading-font-size-ms);
 }
- 
+
+main .back-top-top-section-header {
+  text-transform: uppercase;
+}
+
+main .back-top-top-section-header::before {
+  content: '▲';
+}
+
 @media (min-width: 576px) {
   main .section > div {
     max-width: 540px;
@@ -325,4 +334,18 @@ main .divider {
 /* section metadata */
 main .section.highlight {
   background-color: var(--highlight-background-color);
+}
+
+.embed-container {
+  aspect-ratio: 16 / 9;
+}
+
+.embed-container div {
+  width: 100%;
+  height: 100%;
+}
+
+.embed-container iframe {
+  width: 100%;
+  height: 100%;
 }

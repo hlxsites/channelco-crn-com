@@ -7,7 +7,6 @@
   border: 4px solid #ed1c24;
   background-color: #fff;
   flex-shrink: 0;
-  width: 100%;
   max-width: 100%;
   padding-right: calc(var(--custom-gutter-x) * .5);
   padding-left: calc(var(--custom-gutter-x) * .5);

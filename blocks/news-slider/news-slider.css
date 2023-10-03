@@ -1,0 +1,231 @@
+main .section.news-slider-container {
+  margin-top: 0;
+}
+
+.news-slider-wrapper {
+  padding-left: var(--padding-spacer-x, 0.75rem);
+  padding-right: var(--padding-spacer-x, 0.75rem);
+}
+
+#inthenews {
+  width: 100%;
+  border-bottom: 1px solid #8c8c8c;
+  display: flex;
+  align-items: center;
+
+  --custom-gutter-x: 1.5rem;
+  --custom-gutter-y: 0;
+}
+
+.inthenews-header {
+  text-transform: uppercase;
+  color: #ed1c24;
+  font-weight: 600;
+  width: 34%;
+  vertical-align: middle;
+  float: none;
+}
+
+#inthenews-carousel {
+  position: relative;
+  cursor: pointer;
+  height: 64px;
+  width: 66%;
+  border-radius: 0;
+  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+.handle {
+  z-index: 2;
+  position: relative;
+  backface-visibility: hidden;
+  transform: translateX(0);
+  perspective: 1000px;
+  width: 520%;
+  height: 64px;
+  border-radius: 0;
+  background-color: #fff;
+  transition: transform 0.3s;
+}
+
+.slide {
+  float: left;
+  position: relative;
+  background-repeat: no-repeat;
+  background-position: center center;
+  height: 50px;
+  padding-top: 20px;
+  padding-bottom: 12px;
+  padding-right: 10px;
+  background-color: #fff;
+}
+
+.inthenews-item {
+  text-transform: uppercase;
+  color: #8c8c8c;
+  width: 200px;
+  margin-right: 1rem;
+}
+
+.inthenews-dot {
+  height: 8px;
+  width: 8px;
+  margin-right: 8px;
+  margin-bottom: 1px;
+  background-color: #ed1c24;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.inthenews-item a {
+  text-decoration: none;
+  color: #8c8c8c;
+}
+
+.inthenews-item a:hover {
+  color: red;
+}
+
+/* Create a fade-out effect on both ends of the carousel */
+#inthenews-carousel::before,
+#inthenews-carousel::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50px;
+  pointer-events: none; /* Make sure the gradient doesn't interfere with dragging */
+  z-index: 2; /* Ensure gradient is on top of the content */
+}
+
+.dragdealer-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #e1e1e1;
+  z-index: 1;
+}
+
+.fade-effect::before,
+.fade-effect::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50px;
+  pointer-events: none;
+  z-index: 4; /* Ensure this stays on top of everything else */
+}
+
+.fade-effect::before {
+  left: 0;
+  background: linear-gradient(to right, #fff 0%, transparent 100%);
+}
+
+.fade-effect::after {
+  right: 0;
+  background: linear-gradient(to left, #fff 0%, transparent 100%);
+}
+
+.swipe-text {
+  text-align: right;
+  font-size: 12px;
+  color: #777;
+}
+
+#inthesubtaxonomies {
+  position: relative;
+  width: 100%;
+  height: 60px;
+  border-top: 1px solid #8c8c8c;
+  border-bottom: 1px solid #8c8c8c;
+}
+
+#inthetaxonomies-carousel {
+  height: 60px;
+  width: 100%;
+  border-radius: 0;
+  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.news-slider-wrapper .slider-title {
+  font-family: inherit;
+  font-size: 1.750rem;
+  font-weight: 600;
+  color: #ed1c24;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+#inthetaxonomies-carousel .handle .slide a {
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #ed1c24;
+}
+
+#inthetaxonomies-carousel .handle ul {
+  margin-top: 0;
+}
+
+#inthesubtaxonomies .dragdealer-background {
+  /* bottom: 2px; */
+}
+
+#inthetaxonomies-carousel .handle li.slide::before {
+  margin-left: 8px;
+  margin-right: 10px;
+  content: "|";
+}
+
+#inthetaxonomies-carousel .handle li.slide:first-child::before {
+  margin-left: 0;
+  margin-right: 10px;
+  content: "";
+}
+
+#inthetaxonomies-carousel .handle .nav {
+  display: flex;
+  flex-wrap: wrap;
+  padding-left: 0;
+  margin-bottom: 0;
+  list-style: none;
+}
+
+#inthetaxonomies-carousel .handle .slide {
+  float: left;
+  position: relative;
+  background-repeat: no-repeat;
+  background-position: center center;
+  height: 50px;
+  background-color: #fff;
+}
+
+@media (min-width: 768px) {
+  .news-slider-wrapper {
+    padding: 0;
+  }
+
+  .inthenews-header {
+    width: 19%;
+    padding-top: 19px;
+    padding-left: 10px;
+    height: 40px;
+  }
+
+  #inthenews-carousel {
+    width: 79%;
+    height: 60px;
+  }
+
+  .handle {
+    width: 400%;
+  }
+}

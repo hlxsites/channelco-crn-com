@@ -14,7 +14,7 @@ import { decorateMain } from './shared.js';
 
 const LCP_BLOCKS = []; // add your LCP blocks to the list
 
-const TEMPLATE_LIST = ['category', 'article'];
+const TEMPLATE_LIST = ['category', 'article', 'author'];
 
 /**
  * load fonts.css and set a session storage flag
@@ -22,7 +22,9 @@ const TEMPLATE_LIST = ['category', 'article'];
 async function loadFonts() {
   await loadCSS(`${window.hlx.codeBasePath}/styles/fonts.css`);
   try {
-    if (!window.location.hostname.includes('localhost')) sessionStorage.setItem('fonts-loaded', 'true');
+    if (!window.location.hostname.includes('localhost')) {
+      sessionStorage.setItem('fonts-loaded', 'true');
+    }
   } catch (e) {
     // do nothing
   }
@@ -36,8 +38,12 @@ async function decorateTemplates(main) {
   try {
     // Load the universal template for every page
     const universalTemplate = 'universal';
-    const universalMod = await import(`../templates/${universalTemplate}/${universalTemplate}.js`);
-    loadCSS(`${window.hlx.codeBasePath}/templates/${universalTemplate}/${universalTemplate}.css`);
+    const universalMod = await import(
+      `../templates/${universalTemplate}/${universalTemplate}.js`
+    );
+    loadCSS(
+      `${window.hlx.codeBasePath}/templates/${universalTemplate}/${universalTemplate}.css`,
+    );
     if (universalMod.default) {
       await universalMod.default(main);
     }
@@ -46,7 +52,9 @@ async function decorateTemplates(main) {
     const templates = TEMPLATE_LIST;
     if (templates.includes(template)) {
       const mod = await import(`../templates/${template}/${template}.js`);
-      loadCSS(`${window.hlx.codeBasePath}/templates/${template}/${template}.css`);
+      loadCSS(
+        `${window.hlx.codeBasePath}/templates/${template}/${template}.css`,
+      );
       if (mod.default) {
         await mod.default(main);
       }
@@ -77,12 +85,7 @@ function createToTopSection() {
 
   const toTopHeader = document.createElement('h3');
   toTopHeader.className = 'back-top-top-section-header';
-
-  const toTopIcon = document.createElement('img');
-  toTopIcon.className = 'triangle-fill';
-  toTopIcon.src = '/styles/icons/triangle-fill.svg';
-  toTopHeader.appendChild(toTopIcon);
-  toTopHeader.appendChild(document.createTextNode(' TO TOP'));
+  toTopHeader.innerText = 'To Top';
 
   toTopLink.appendChild(toTopHeader);
   toTopContent.appendChild(toTopLink);
@@ -123,7 +126,6 @@ async function createContentAndAdsSections(doc) {
   closeIcon.src = '/styles/icons/close-ribbon.png';
   closeIcon.alt = 'Close'; // Accessibility
 
-  // Add event listener to close the bottom ad section when the close icon is clicked
   closeIcon.addEventListener('click', () => {
     bottomAdSection.style.display = 'none';
   });
@@ -136,19 +138,34 @@ async function createContentAndAdsSections(doc) {
 
   if (main) {
     const breadcrumb = main.querySelector('.breadcrumb-container');
+    const newsWrapper = main.querySelector('.news-slider-wrapper');
+
     if (breadcrumb) {
-      main.insertBefore(topAdSection, breadcrumb); // Place the ad section before breadcrumb
+      main.insertBefore(topAdSection, breadcrumb);
     } else {
       main.prepend(topAdSection);
     }
 
-    // Move remaining sections in main to contentSection using array iteration
-    Array.from(main.children).filter((child) => child !== topAdSection && child !== breadcrumb)
-      .forEach((section) => contentSection.appendChild(section));
+    // Move remaining sections in main to contentSection
+    Array.from(main.children)
+      .filter(
+        (child) => child !== topAdSection
+          && child !== breadcrumb,
+      )
+      .forEach((section) => {
+        contentSection.appendChild(section);
+      });
 
     mainContainer.appendChild(contentAndAdsContainer);
 
-    // Append the "TO TOP" section to the mainContainer (Outside of the flex container)
+    if (newsWrapper) {
+      contentAndAdsContainer.prepend(newsWrapper);
+      const newsContainer = main.querySelector('.news-slider-container');
+      if (newsContainer) {
+        newsContainer.classList.remove('news-slider-container');
+      }
+    }
+
     const toTopSection = createToTopSection();
     mainContainer.appendChild(toTopSection);
 

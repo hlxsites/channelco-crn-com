@@ -130,6 +130,100 @@ header nav .nav-sections ul {
   font-weight: 500;
 }
 
+header nav .nav-search-container {
+  background-color: #fff;
+  border: 1px solid rgba(0 0 0 / 20%);
+  border-radius: 0.3rem;
+  position: absolute;
+  left: 0;
+  right: 0;
+  padding: 0;
+  margin: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+header nav .nav-search-container > * {
+  padding: 1rem;
+}
+
+header nav .nav-search-container > p {
+  display: flex;
+  align-items: center;
+  font-size: var(--heading-font-size-xl);
+}
+
+header nav .nav-search-container > p .icon-close {
+  width: 1em;
+  height: 1em;
+  color: #000;
+  opacity: .5;
+  cursor: pointer;
+  position: absolute;
+  right: 1rem;
+}
+
+header nav .nav-search-container > p .icon-close:hover {
+  opacity: .75;
+}
+
+header nav .nav-search-container form {
+  border-top: 1px solid #dee2e6;
+  border-bottom: 1px solid #dee2e6;
+  display: flex;
+  gap: .5rem;
+}
+
+header nav .nav-search-container form input[type="search"] {
+  flex: 1;
+  font-size: var(--body-font-size-l);
+  border-radius: 0.25rem;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid #ced4da;
+}
+
+header nav .nav-search-container button {
+  padding: 0.5rem;
+  min-width: 90px;
+  background-color: #fff;
+  border-radius: 0.25rem;
+  text-transform: none;
+  font-size: var(--body-font-size-l);
+}
+
+header nav .nav-search-container > button {
+  margin: 1rem 1rem 1rem auto;
+  background-color: #333;
+  border: 2px solid #333;
+  color: #fff;
+}
+
+header nav .nav-search-container button[type="submit"] {
+  color: #24ed1c;
+  border: 2px solid #24ed1c;
+}
+
+header nav .nav-search-container button[type="submit"]:hover {
+  background-color: #24ed1c;
+  color: #000;
+}
+
+header nav .nav-search {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background-color: rgba(0 0 0 / 50%);
+}
+
+header nav .nav-search.active {
+  display: block;
+}
+
+header nav .icon.icon-search {
+  cursor: pointer;
+}
+
 @media (min-width: 900px) {
   header nav .nav-sections {
     display: block;
@@ -371,6 +465,11 @@ header nav .nav-sections ul {
     font-size: var(--body-font-size-s);
     padding-left: 30px;
     font-weight: normal;
+  }
+
+  header nav .nav-search-container {
+    max-width: 900px;
+    margin: 1rem auto;
   }
 }
 
