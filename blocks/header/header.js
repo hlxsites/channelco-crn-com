@@ -137,7 +137,8 @@ function toggleMenu(nav, navSections, forceExpanded = null) {
 }
 
 function menuDrop() {
-  const menuItems = document.querySelectorAll('.nav-drop');
+  const menuItems = document.querySelectorAll('.menu-items');
+  const main = document.querySelector('main');
 
   menuItems.forEach((menuItem) => {
     menuItem.addEventListener('click', function func() {
@@ -150,9 +151,11 @@ function menuDrop() {
         container.style.maxHeight = '0px';
         container.setAttribute('aria-expanded', 'false');
         container.innerHTML = '';
+        main.style.marginTop = '0px';
       } else {
         container.style.maxHeight = `${container.scrollHeight}px`;
         container.setAttribute('aria-expanded', 'true');
+        main.style.marginTop = `${container.scrollHeight}px`;
       }
     });
   });

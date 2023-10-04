@@ -13,6 +13,7 @@ header nav {
   justify-content: space-evenly;
   box-sizing: border-box;
   border-top: 2px solid black;
+  border-bottom: 4px solid red;
   align-items: center;
   max-width: 1264px;
   height: var(--nav-height);
@@ -224,6 +225,11 @@ header nav .icon.icon-search {
   cursor: pointer;
 }
 
+header nav .nav-search-container {
+  max-width: 900px;
+  margin: 1rem auto;
+}
+
 @media (min-width: 900px) {
   header nav .nav-sections {
     display: block;
@@ -353,10 +359,10 @@ header nav .icon.icon-search {
     width: 95%;
     padding: 1em;
     overflow: hidden;
+    max-height: 0;
     transition: max-height 0.5s ease-out;
     background-color: #f3f3f3;
     border: 1px solid #8f8f8f;
-    z-index: 10;
   }
 }
 
@@ -439,6 +445,12 @@ header nav .icon.icon-search {
 
   /* ...  */
 
+  header nav[aria-expanded='false'] .nav-sections {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+  }
+
   header nav[aria-expanded='true'] .nav-sections {
     box-sizing: border-box;
     display: block;
@@ -447,6 +459,8 @@ header nav .icon.icon-search {
     z-index: 10;
     background-color: #fff;
     grid-column: 1 / -1;
+    max-height: 1000px;
+    transition: max-height 0.3s ease-in;
   }
 
   header nav .nav-sections .nav-drop { 
