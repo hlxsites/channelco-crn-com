@@ -9,13 +9,11 @@ import {
   loadBlocks,
 } from './lib-franklin.js';
 
-import {
-  getElementsFromUrl
-} from '../util/constants.js';
+import getElementsFromUrl from '../util/constants.js';
 
 const DEFAULT_CATEGORY_PATH = '/news';
 const DEFAULT_CATEGORY_NAME = 'News';
-const EMAIL_REGEX = /\S+[a-z0-9]@[a-z0-9.]+/img;
+const EMAIL_REGEX = /\S+[a-z0-9]@[a-z0-9.]+/gim;
 
 /**
  * Builds breadcrumb menu and prepends to main in a new section
@@ -40,7 +38,7 @@ function buildList(name, elements) {
   h1.innerText = name;
   ul.appendChild(h1);
 
-  elements.forEach(element => {
+  elements.forEach((element) => {
     const li = document.createElement('li');
     li.innerText = element;
     ul.appendChild(li);
@@ -58,7 +56,7 @@ function buildNewsSlider(main) {
   const title = document.querySelector('h1');
 
   // Match paths like '/news', '/news/', '/news/something' but not '/news/something/else'
-  const newsPathRegex = /^\/news(\/[^\/]+)?\/?$/;
+  const newsPathRegex = /^\/news(\/[^]+)?\/?$/;
 
   if (!newsPathRegex.test(path) || (title && title.innerText === '404')) {
     return;
@@ -74,7 +72,7 @@ function buildNewsSlider(main) {
 
   const div = document.createElement('div');
   const newsSliderBlock = buildBlock('news-slider', { elems: [ul] });
-  newsSliderBlock.classList.add('tabbed');  // Adding the "tabbed" class
+  newsSliderBlock.classList.add('tabbed'); // Adding the "tabbed" class
 
   div.append(newsSliderBlock);
   main.prepend(div);
@@ -204,7 +202,9 @@ export async function fetchFragment(path, blocksExist) {
  */
 export function getOrigin() {
   const { location } = window;
-  return location.href === 'about:srcdoc' ? window.parent.location.origin : location.origin;
+  return location.href === 'about:srcdoc'
+    ? window.parent.location.origin
+    : location.origin;
 }
 
 /**
@@ -229,7 +229,15 @@ export function getHref() {
  * @param {Array} [breakpoints] Breakpoints and corresponding params (eg. width)
  * @returns {Element} The picture element
  */
-export function createOptimizedPicture(src, alt = '', eager = false, breakpoints = [{ media: '(min-width: 600px)', width: '2000' }, { width: '750' }]) {
+export function createOptimizedPicture(
+  src,
+  alt = '',
+  eager = false,
+  breakpoints = [
+    { media: '(min-width: 600px)', width: '2000' },
+    { width: '750' },
+  ],
+) {
   const url = new URL(src, getHref());
   const picture = document.createElement('picture');
   const { pathname } = url;
@@ -240,7 +248,10 @@ export function createOptimizedPicture(src, alt = '', eager = false, breakpoints
     const source = document.createElement('source');
     if (br.media) source.setAttribute('media', br.media);
     source.setAttribute('type', 'image/webp');
-    source.setAttribute('srcset', `${pathname}?width=${br.width}&format=webply&optimize=medium`);
+    source.setAttribute(
+      'srcset',
+      `${pathname}?width=${br.width}&format=webply&optimize=medium`,
+    );
     picture.appendChild(source);
   });
 
@@ -249,14 +260,20 @@ export function createOptimizedPicture(src, alt = '', eager = false, breakpoints
     if (i < breakpoints.length - 1) {
       const source = document.createElement('source');
       if (br.media) source.setAttribute('media', br.media);
-      source.setAttribute('srcset', `${pathname}?width=${br.width}&format=${ext}&optimize=medium`);
+      source.setAttribute(
+        'srcset',
+        `${pathname}?width=${br.width}&format=${ext}&optimize=medium`,
+      );
       picture.appendChild(source);
     } else {
       const img = document.createElement('img');
       img.setAttribute('loading', eager ? 'eager' : 'lazy');
       img.setAttribute('alt', alt);
       picture.appendChild(img);
-      img.setAttribute('src', `${pathname}?width=${br.width}&format=${ext}&optimize=medium`);
+      img.setAttribute(
+        'src',
+        `${pathname}?width=${br.width}&format=${ext}&optimize=medium`,
+      );
     }
   });
 
@@ -325,8 +342,10 @@ export function getCategoryName(record) {
 export function isArticle(record) {
   // the record is an article if its path starts with /news/, and its template is
   // either empty or "article"
-  return (!record.template || String(record.template).toLowerCase() === 'article')
-    && String(record.path).startsWith('/news/');
+  return (
+    (!record.template || String(record.template).toLowerCase() === 'article')
+    && String(record.path).startsWith('/news/')
+  );
 }
 
 let cachedIndex;
@@ -367,7 +386,9 @@ export async function queryIndex(filter) {
  */
 export async function getRecordsByPath(paths) {
   const pathLookup = {};
-  paths.forEach((path) => { pathLookup[path] = true; });
+  paths.forEach((path) => {
+    pathLookup[path] = true;
+  });
   return queryIndex((record) => !!pathLookup[record.path]);
 }
 
@@ -378,7 +399,9 @@ export async function getRecordsByPath(paths) {
  *  articles.
  */
 export async function getArticlesByCategory(categoryName) {
-  return queryIndex((record) => record.category === categoryName && isArticle(record));
+  return queryIndex(
+    (record) => record.category === categoryName && isArticle(record),
+  );
 }
 
 /**
@@ -388,7 +411,9 @@ export async function getArticlesByCategory(categoryName) {
  *  articles.
  */
 export async function getArticlesByAuthor(authorName) {
-  return queryIndex((record) => record.author === authorName && isArticle(record));
+  return queryIndex(
+    (record) => record.author === authorName && isArticle(record),
+  );
 }
 
 /**
@@ -411,7 +436,9 @@ export async function getRecordByPath(path) {
  * @returns {Promise<QueryIndexRecord>} Resolves author information.
  */
 export async function getAuthorByName(authorName) {
-  const records = await queryIndex((record) => record.path.startsWith('/authors/') && record.author === authorName);
+  const records = await queryIndex(
+    (record) => record.path.startsWith('/authors/') && record.author === authorName,
+  );
   if (!records.length) {
     return undefined;
   }
@@ -434,17 +461,21 @@ export function getRecordsFromBlock(block) {
   [...uls].forEach((ul) => {
     ul.remove();
     const records = ul.querySelectorAll('li');
-    const recordPaths = [...records].map((article) => {
-      try {
-        const url = new URL(article.textContent);
-        const recordPath = url.pathname;
-        return recordPath;
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.log('unable to process block li due to invalid URL content', e);
-      }
-      return false;
-    })
+    const recordPaths = [...records]
+      .map((article) => {
+        try {
+          const url = new URL(article.textContent);
+          const recordPath = url.pathname;
+          return recordPath;
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.log(
+            'unable to process block li due to invalid URL content',
+            e,
+          );
+        }
+        return false;
+      })
       .filter((path) => !!path);
     paths = paths.concat(paths, recordPaths);
   });
@@ -466,7 +497,8 @@ export function buildArticleAuthor(article) {
   author.classList.add('article-author');
   // attempting to predict the URL to the author. may need to change to query
   // author information from index
-  const authorId = String(article.author).toLowerCase()
+  const authorId = String(article.author)
+    .toLowerCase()
     .replaceAll(/[^0-9a-z ]/g, '')
     .replaceAll(/[^0-9a-z]/g, '-');
   author.innerHTML = `
@@ -501,7 +533,8 @@ function createAuthorLink(author) {
 export function createMailToLinks(text) {
   let modifiedText = text;
   const uniqueEmails = {};
-  const emailAddresses = modifiedText.match(EMAIL_REGEX)
+  const emailAddresses = modifiedText
+    .match(EMAIL_REGEX)
     .filter((email) => {
       if (uniqueEmails[email]) {
         return false;
@@ -510,10 +543,16 @@ export function createMailToLinks(text) {
       return true;
     })
     // escape special characters for regex
-    .map((email) => ({ email, regex: email.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&') }));
+    .map((email) => ({
+      email,
+      regex: email.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'),
+    }));
   // replace email address in bio with mailto link
   emailAddresses.forEach((emailInfo) => {
-    modifiedText = modifiedText.replaceAll(new RegExp(emailInfo.regex, 'g'), `<a href="mailto:${emailInfo.email}">${emailInfo.email}</a>`);
+    modifiedText = modifiedText.replaceAll(
+      new RegExp(emailInfo.regex, 'g'),
+      `<a href="mailto:${emailInfo.email}">${emailInfo.email}</a>`,
+    );
   });
   return modifiedText;
 }
@@ -543,7 +582,9 @@ export async function buildAuthorBlades(target, authors, bioLength = 0) {
 
     let bioStr = String(author.authordescription);
     if (bioLength && bioStr.length > bioLength) {
-      bioStr = `${bioStr.substring(0, bioLength)}... <a href="${author.path}" title="Read more" aria-label="Read more">Read more</a>`;
+      bioStr = `${bioStr.substring(0, bioLength)}... <a href="${
+        author.path
+      }" title="Read more" aria-label="Read more">Read more</a>`;
     } else {
       bioStr = createMailToLinks(bioStr);
     }
@@ -639,8 +680,9 @@ export async function buildSocialShare(insertAfter) {
 
 function buildKeywordLookup(keywords) {
   const map = {};
-  parseKeywords(keywords)
-    .forEach((keyword) => { map[keyword] = true; });
+  parseKeywords(keywords).forEach((keyword) => {
+    map[keyword] = true;
+  });
   return map;
 }
 
@@ -795,13 +837,15 @@ export async function getRelatedArticles(article, relatedCount = 5) {
   const lookup = buildKeywordLookup(article.keywords);
   const related = await buildRelevanceScores(lookup);
   sortByMostRelevant(related);
-  return related
-    // make sure the article itself isn't included
-    .filter((relevanceRecord) => relevanceRecord.record.path !== article.path)
-    // return the requested number of articles
-    .slice(0, relatedCount)
-    // only return the record itself
-    .map((relevanceRecord) => relevanceRecord.record);
+  return (
+    related
+      // make sure the article itself isn't included
+      .filter((relevanceRecord) => relevanceRecord.record.path !== article.path)
+      // return the requested number of articles
+      .slice(0, relatedCount)
+      // only return the record itself
+      .map((relevanceRecord) => relevanceRecord.record)
+  );
 }
 
 /**
