@@ -9,6 +9,10 @@ import {
   loadBlocks,
 } from './lib-franklin.js';
 
+import {
+  getElementsFromUrl
+} from '../util/constants.js';
+
 const DEFAULT_CATEGORY_PATH = '/news';
 const DEFAULT_CATEGORY_NAME = 'News';
 const EMAIL_REGEX = /\S+[a-z0-9]@[a-z0-9.]+/img;
@@ -20,12 +24,59 @@ const EMAIL_REGEX = /\S+[a-z0-9]@[a-z0-9.]+/img;
 function buildBreadcrumb(main) {
   const path = window.location.pathname;
   const title = document.querySelector('h1');
+
   if (path === '/' || (title && title.innerText === '404')) {
     return;
   }
 
   const div = document.createElement('div');
   div.append(buildBlock('breadcrumb', { elems: [] }));
+  main.prepend(div);
+}
+
+function buildList(name, elements) {
+  const ul = document.createElement('ul');
+  const h1 = document.createElement('h1');
+  h1.innerText = name;
+  ul.appendChild(h1);
+
+  elements.forEach(element => {
+    const li = document.createElement('li');
+    li.innerText = element;
+    ul.appendChild(li);
+  });
+
+  return ul;
+}
+
+/**
+ * Builds breadcrumb menu and prepends to main in a new section
+ * @param {Element} main The container element
+ */
+function buildNewsSlider(main) {
+  const path = window.location.pathname;
+  const title = document.querySelector('h1');
+
+  // Match paths like '/news', '/news/', '/news/something' but not '/news/something/else'
+  const newsPathRegex = /^\/news(\/[^\/]+)?\/?$/;
+
+  if (!newsPathRegex.test(path) || (title && title.innerText === '404')) {
+    return;
+  }
+
+  const mappingInfo = getElementsFromUrl(path);
+  if (!mappingInfo) {
+    console.log('No mapping found for this URL.');
+    return;
+  }
+
+  const ul = buildList(mappingInfo.name, mappingInfo.elements);
+
+  const div = document.createElement('div');
+  const newsSliderBlock = buildBlock('news-slider', { elems: [ul] });
+  newsSliderBlock.classList.add('tabbed');  // Adding the "tabbed" class
+
+  div.append(newsSliderBlock);
   main.prepend(div);
 }
 
@@ -80,6 +131,7 @@ function buildPageDivider(main) {
 function buildAutoBlocks(main) {
   try {
     buildBreadcrumb(main);
+    buildNewsSlider(main);
     buildEmbed(main);
     buildPageDivider(main);
   } catch (error) {

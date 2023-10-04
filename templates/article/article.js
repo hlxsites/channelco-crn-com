@@ -1,4 +1,10 @@
 import {
+  buildBlock,
+  loadBlock,
+  decorateBlock
+} from '../../scripts/lib-franklin.js';
+
+import {
   getRecordByPath,
   getCategoryName,
   getCategoryPath,
@@ -18,6 +24,7 @@ import {
  */
 export default async function loadTemplate(main) {
   const path = window.location.pathname;
+
   const article = await getRecordByPath(path);
   if (!article) {
     return;
