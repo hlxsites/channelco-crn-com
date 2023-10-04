@@ -177,14 +177,18 @@ const createAuthorBio = (main, document) => {
       authorbio.remove();
     }
   });
-  main.querySelector('.author-name-md').parentNode.remove();
+  const authorNameMD = main.querySelector('.author-name-md');
+  if(null != authorNameMD.parentNode.id && 'news-article' === authorNameMD.parentNode.id) {
+    authorNameMD.remove();
+  } else {
+    authorNameMD.parentNode.remove();
+  }
 };
 
 const createAdBlock = (adBlock, main, document) => {
  
   adBlock.querySelectorAll('.int-ads').forEach((ad) => {
-    const div = ad.querySelector(':scope > div');
-    
+    const div = ad.querySelector(':scope > div');    
     const cells = [
       ['AD'],
       ['id', div.id],
@@ -192,7 +196,10 @@ const createAdBlock = (adBlock, main, document) => {
     ];
     const table = WebImporter.DOMUtils.createTable(cells, document);
     ad.parentNode.innerHTML = '';
-    const article = main.querySelector('.article');
+    let article = main.querySelector('.article');
+    if(!article) {
+      article = document.getElementById('news-article');      
+    }
     const p = article.querySelector('p:nth-of-type(5)');
     if (p) {
       p.after(table); 
