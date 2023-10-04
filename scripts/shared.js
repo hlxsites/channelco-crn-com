@@ -38,11 +38,16 @@ function buildList(name, elements) {
   h1.innerText = name;
   ul.appendChild(h1);
 
-  elements.forEach((element) => {
-    const li = document.createElement('li');
-    li.innerText = element;
-    ul.appendChild(li);
-  });
+  // Only append li elements if elements array is not empty
+  if (elements && elements.length > 0) {
+    elements.forEach((element) => {
+      const li = document.createElement('li');
+      li.innerText = element;
+      ul.appendChild(li);
+    });
+  } else {
+    return h1;  // Return only h1 if elements array is empty
+  }
 
   return ul;
 }
@@ -68,10 +73,10 @@ function buildNewsSlider(main) {
     return;
   }
 
-  const ul = buildList(mappingInfo.name, mappingInfo.elements);
+  const listOrH1 = buildList(mappingInfo.name, mappingInfo.elements);
 
   const div = document.createElement('div');
-  const newsSliderBlock = buildBlock('news-slider', { elems: [ul] });
+  const newsSliderBlock = buildBlock('news-slider', { elems: [listOrH1] });
   newsSliderBlock.classList.add('tabbed'); // Adding the "tabbed" class
 
   div.append(newsSliderBlock);

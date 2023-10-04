@@ -134,6 +134,14 @@ export default function decorate(block) {
     newsSlider = document.createElement('div');
     newsSlider.id = 'inthesubtaxonomies';
 
+    // If only h1 exists in the block, skip generating other elements
+    if (newsItems.length === 0) {
+      h1 = block.querySelector('h1'); 
+      h1.className = 'slider-title'
+      newsSlider.parentNode.insertBefore(h1, newsSlider);
+      return;
+    }
+
     carousel = document.createElement('div');
     carousel.id = 'inthetaxonomies-carousel';
     carousel.className = 'dragdealer active';

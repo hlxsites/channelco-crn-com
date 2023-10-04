@@ -1,4 +1,13 @@
 const urlToNameMapping = {
+  '/news/': {
+    name: 'News',
+  },
+  '/news/internet-of-things': {
+    name: 'Internet of Things',
+  },
+  '/news/managed-services': {
+    name: 'Managed Services',
+  },
   '/news/components-peripherals/': {
     name: 'Components & Peripherals',
     elements: [
@@ -76,6 +85,16 @@ const urlToNameMapping = {
       'Power/Heating and Cooling',
       'Servers',
     ],
+  '/news/computing/': {
+    name: 'Computing',
+    elements: [
+      'Desktop-Clients',
+      'Notebooks',
+      'Smart Phones',
+      'Tablets',
+      'Wearables',
+    ]
+  }
   },
   // ... you can add more URLs here
 };
