@@ -11,6 +11,15 @@
  */
 /* global WebImporter */
 /* eslint-disable no-console, class-methods-use-this */
+const captializeFirstLetter = (str) => {
+const arr = str.split(" ");
+for (let i = 0; i < arr.length; i++) {
+    arr[i] = arr[i].charAt(0).toUpperCase() + arr[i].slice(1);
+
+}
+const str2 = arr.join(" ");
+return str2;
+}
 
 const createMetadata = (main, document) => {
   const meta = {};
@@ -36,7 +45,12 @@ const createMetadata = (main, document) => {
 
   const category = document.querySelector('.home');
   if(category != null) {
-    meta.Category = category.textContent;
+    const categoryValue = captializeFirstLetter(category.textContent);
+    if ('Channel News' != categoryValue.trim() && categoryValue.includes('News')) {
+      meta.category = categoryValue.replace('News' , '');
+    } else {
+    meta.category = categoryValue;
+    }
     category.parentNode.remove();
   }
 
@@ -59,12 +73,12 @@ const createMetadata = (main, document) => {
 
   const CompanyNames = document.querySelector('[name="CompanyNames"]');
   if(CompanyNames) {
-    meta.CompanyNames = CompanyNames.content; 
+    meta.companynames = CompanyNames.content; 
   }
 
   const CompanyWebpages = document.querySelector('[name="CompanyWebpages"]');
   if(CompanyNames) {
-    meta.CompanyWebpages = CompanyWebpages.content; 
+    meta.companywebpages = CompanyWebpages.content; 
   }
 
 
@@ -80,6 +94,8 @@ const createMetadata = (main, document) => {
 
   return meta;
 };
+
+
 
 const createFetchMetadata = (main, document) => {
   const meta = {};
@@ -102,14 +118,18 @@ const createFetchMetadata = (main, document) => {
 
   const CompanyNames = document.querySelector('[name="CompanyNames"]');
   if(CompanyNames) {
-    meta.CompanyNames = CompanyNames.content; 
+    meta.companynames = CompanyNames.content; 
   }
 
   const CompanyWebpages = document.querySelector('[name="CompanyWebpages"]');
   if(CompanyNames) {
-    meta.CompanyWebpages = CompanyWebpages.content; 
+    meta.companynames = CompanyWebpages.content; 
   }
 
+  const keywords = document.querySelector('[name="keywords"]');
+  if (keywords) {
+    meta.Keywords = keywords.content;
+  }
   
   const block = WebImporter.Blocks.getMetadataBlock(document, meta);
   main.append(block);
