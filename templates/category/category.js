@@ -8,6 +8,7 @@ import {
   getRecordByPath,
   comparePublishDate,
   buildArticleCardsBlock,
+  buildNewsSlider,
 } from '../../scripts/shared.js';
 
 function appendElementBeforeLast(target, last, toAppend) {
@@ -32,14 +33,8 @@ export default async function decorate(main) {
     lastElement = main.children.item(0);
   }
 
-  const h1 = document.createElement('h1');
-  h1.innerText = category.title;
-  appendElementBeforeLast(main, lastElement, h1);
-
-  const tag = buildBlock('tag', { elems: [] });
-  appendElementBeforeLast(main, lastElement, tag);
-  decorateBlock(tag);
-  await loadBlock(tag);
+  const newsSlider = buildNewsSlider(main, category.title);
+  decorateBlock(newsSlider);
 
   const articles = await getArticlesByCategory(category.title);
   articles.sort(comparePublishDate);
