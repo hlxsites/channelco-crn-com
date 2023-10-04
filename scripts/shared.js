@@ -60,13 +60,13 @@ function buildNewsSlider(main) {
     return;
   }
 
-  const name = getMetadata('template');
+  const name = getMetadata('og:title');
   const elements = getMetadata('keywords');
 
-  if (!name || !elements) {
-    console.log('No metadata found.');
-    return;
-  }
+  // if (!name || !elements) {
+  //   console.log('No metadata found.');
+  //   return;
+  // }
 
   const listOrH1 = buildList(name, elements);
 

@@ -110,6 +110,7 @@ function addDragEvents(handle, carousel, isTabsBlock) {
 }
 
 export default function decorate(block) {
+  console.log('block', block);
   const isTabsBlock = block.classList.contains('tabbed');
   let newsItems;
   let newsSlider;
