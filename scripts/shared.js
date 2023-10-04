@@ -7,13 +7,12 @@ import {
   decorateButtons,
   decorateIcons,
   loadBlocks,
+  getMetadata,
 } from './lib-franklin.js';
-
-import getElementsFromUrl from '../util/constants.js';
 
 const DEFAULT_CATEGORY_PATH = '/news';
 const DEFAULT_CATEGORY_NAME = 'News';
-const EMAIL_REGEX = /\S+[a-z0-9]@[a-z0-9.]+/gim;
+const EMAIL_REGEX = /\S+[a-z0-9]@[a-z0-9.]+/img;
 
 /**
  * Builds breadcrumb menu and prepends to main in a new section
@@ -38,46 +37,42 @@ function buildList(name, elements) {
   h1.innerText = name;
   ul.appendChild(h1);
 
-  // Only append li elements if elements array is not empty
   if (elements && elements.length > 0) {
-    elements.forEach((element) => {
+    elements.split(',').forEach((element) => {
       const li = document.createElement('li');
-      li.innerText = element;
+      li.innerText = element.trim();
       ul.appendChild(li);
     });
   } else {
-    return h1; // Return only h1 if elements array is empty
+    return h1;
   }
 
   return ul;
 }
 
-/**
- * Builds news-slider and prepends to main in a new section
- * @param {Element} main The container element
- */
 function buildNewsSlider(main) {
   const path = window.location.pathname;
   const title = document.querySelector('h1');
 
-  // Match paths like '/news', '/news/', '/news/something' but not '/news/something/else'
   const newsPathRegex = /^\/news(\/[^]+)?\/?$/;
 
   if (!newsPathRegex.test(path) || (title && title.innerText === '404')) {
     return;
   }
 
-  const mappingInfo = getElementsFromUrl(path);
-  if (!mappingInfo) {
-    console.log('No mapping found for this URL.');
+  const name = getMetadata('template');
+  const elements = getMetadata('keywords');
+
+  if (!name || !elements) {
+    console.log('No metadata found.');
     return;
   }
 
-  const listOrH1 = buildList(mappingInfo.name, mappingInfo.elements);
+  const listOrH1 = buildList(name, elements);
 
   const div = document.createElement('div');
   const newsSliderBlock = buildBlock('news-slider', { elems: [listOrH1] });
-  newsSliderBlock.classList.add('tabbed'); // Adding the "tabbed" class
+  newsSliderBlock.classList.add('tabbed');
 
   div.append(newsSliderBlock);
   main.prepend(div);
