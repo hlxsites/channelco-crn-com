@@ -20,7 +20,10 @@ const createMetadata = (main, document) => {
     meta.Title = title.textContent.replace(/[\n\t]/gm, '');
   }
 
-
+  const templateType = document.querySelector('[name="templateType"]');
+  if(templateType){
+    meta.Template = templateType.content;
+  }
   const desc = document.querySelector('[property="og:description"]');
   if (desc) {
     meta.Description = desc.content;
@@ -78,6 +81,42 @@ const createMetadata = (main, document) => {
   return meta;
 };
 
+const createFetchMetadata = (main, document) => {
+  const meta = {};
+
+  const title = document.querySelector('.page-title');
+  if (title) {
+    meta.Title = title.textContent;
+  }
+
+  const templateType = document.querySelector('[name="templateType"]');
+  if(templateType){
+    meta.Template = templateType.content;
+  }
+  const desc = document.querySelector('[property="og:description"]');
+  if (desc) {
+    meta.Description = desc.content;
+  }
+
+  
+
+  const CompanyNames = document.querySelector('[name="CompanyNames"]');
+  if(CompanyNames) {
+    meta.CompanyNames = CompanyNames.content; 
+  }
+
+  const CompanyWebpages = document.querySelector('[name="CompanyWebpages"]');
+  if(CompanyNames) {
+    meta.CompanyWebpages = CompanyWebpages.content; 
+  }
+
+  
+  const block = WebImporter.Blocks.getMetadataBlock(document, meta);
+  main.append(block);
+
+  return meta;
+};
+
 /** create Columns Banner block */
 const createBreadCrumbs = (main, document) => {
   const selector = '.breadcrumb';
@@ -119,7 +158,7 @@ const createAuthorBio = (main, document) => {
   main.querySelector('.author-name-md').remove();
 };
 
-const createAdBlock = (adBlock, document) => {
+const createAdBlock = (adBlock, main, document) => {
  
   adBlock.querySelectorAll('.int-ads').forEach((ad) => {
     const div = ad.querySelector(':scope > div');
@@ -131,7 +170,9 @@ const createAdBlock = (adBlock, document) => {
     ];
     const table = WebImporter.DOMUtils.createTable(cells, document);
     ad.parentNode.innerHTML = '';
-    adBlock.append(table);
+    const article = main.querySelector('.article');
+    const p = article.querySelector('p:nth-of-type(5)');
+    p.after(table);
   });
 };
 
@@ -164,12 +205,19 @@ export default {
     // use helper method to remove header, footer, etc.
     const templateType = document.querySelector('[name="templateType"]');
     if(templateType.content === 'article') {
-    createAuthorBio(main, document); 
-    }
+    createAuthorBio(main, document);     
     const adBlock = document.getElementById('imu1forarticles');
-    createAdBlock(adBlock, document);
+    if(adBlock) {
+    createAdBlock(adBlock, main, document);
+    }
     createMetadata(main, document);
     removeLearnMore(main, document);
+    } else if(templateType.content === 'company'){
+      createFetchMetadata(main, document);
+      WebImporter.DOMUtils.remove(main, [
+        '.container.parent' 
+      ]);    
+    }
     WebImporter.DOMUtils.remove(main, [
       'nav',
       'footer',
@@ -184,7 +232,7 @@ export default {
       '.breadcrumb',
       '.modal',
       '.ribbon',
-      '.back-to-top'
+      '.back-to-top'      
     ]);    
     // create the metadata block and append it to the main element
     
