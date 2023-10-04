@@ -36,7 +36,7 @@ const createMetadata = (main, document) => {
 
   const category = document.querySelector('.home');
   if(category != null) {
-    meta.Category = category.parentNode.getAttribute('aria-label');
+    meta.Category = category.textContent;
     category.parentNode.remove();
   }
 
@@ -150,12 +150,14 @@ const pagination = (main, document) => {
 
 /** create AuthorBio block */
 const createAuthorBio = (main, document) => {
-  main.querySelectorAll('.card.mb-3').forEach((authorbio) => {
-    if(authorbio.querySelector('.author-bio-blurb')) {
+  main.querySelectorAll('.card.mb-3').forEach((authorbio) => {    
+    if(authorbio.querySelector('.author-bio-blurb')) {      
       authorbio.remove();
-    }   
+    } else if (authorbio.querySelector('.author-name-md')){
+      authorbio.remove();
+    }
   });
-  main.querySelector('.author-name-md').remove();
+  main.querySelector('.author-name-md').parentNode.remove();
 };
 
 const createAdBlock = (adBlock, main, document) => {
@@ -172,7 +174,11 @@ const createAdBlock = (adBlock, main, document) => {
     ad.parentNode.innerHTML = '';
     const article = main.querySelector('.article');
     const p = article.querySelector('p:nth-of-type(5)');
-    p.after(table);
+    if (p) {
+      p.after(table); 
+    } else {
+      adBlock.replaceWith(table);
+    }
   });
 };
 
@@ -232,7 +238,8 @@ export default {
       '.breadcrumb',
       '.modal',
       '.ribbon',
-      '.back-to-top'      
+      '.back-to-top',
+      '.GLadv-728'    
     ]);    
     // create the metadata block and append it to the main element
     
