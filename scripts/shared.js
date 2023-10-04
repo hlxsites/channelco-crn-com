@@ -51,7 +51,7 @@ function buildList(name, elements) {
 }
 
 export function buildNewsSlider(main, title) {
-  const name = title
+  const name = title;
   const elements = getMetadata('keywords');
 
   const listOrH1 = buildList(name, elements);
