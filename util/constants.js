@@ -85,16 +85,16 @@ const urlToNameMapping = {
       'Power/Heating and Cooling',
       'Servers',
     ],
-  '/news/computing/': {
-    name: 'Computing',
-    elements: [
-      'Desktop-Clients',
-      'Notebooks',
-      'Smart Phones',
-      'Tablets',
-      'Wearables',
-    ]
-  }
+    '/news/computing/': {
+      name: 'Computing',
+      elements: [
+        'Desktop-Clients',
+        'Notebooks',
+        'Smart Phones',
+        'Tablets',
+        'Wearables',
+      ],
+    },
   },
   // ... you can add more URLs here
 };

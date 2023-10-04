@@ -136,8 +136,8 @@ export default function decorate(block) {
 
     // If only h1 exists in the block, skip generating other elements
     if (newsItems.length === 0) {
-      h1 = block.querySelector('h1'); 
-      h1.className = 'slider-title'
+      h1 = block.querySelector('h1');
+      h1.className = 'slider-title';
       newsSlider.parentNode.insertBefore(h1, newsSlider);
       return;
     }

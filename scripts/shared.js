@@ -46,7 +46,7 @@ function buildList(name, elements) {
       ul.appendChild(li);
     });
   } else {
-    return h1;  // Return only h1 if elements array is empty
+    return h1; // Return only h1 if elements array is empty
   }
 
   return ul;
