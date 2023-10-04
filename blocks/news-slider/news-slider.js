@@ -125,7 +125,7 @@ export default function decorate(block) {
 
     h1 = block.querySelector('ul h1'); //overwrite h1 if its in the block
     if (h1) {
-      h1.className = 'slider-title'; // set its class to 'slider-title'
+      h1.className = 'slider-title';
     }
 
     // Query for anchor tags only when 'tabs' class is present

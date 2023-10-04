@@ -50,7 +50,7 @@ function buildList(name, elements) {
 }
 
 /**
- * Builds breadcrumb menu and prepends to main in a new section
+ * Builds news-slider and prepends to main in a new section
  * @param {Element} main The container element
  */
 function buildNewsSlider(main) {
