@@ -209,7 +209,7 @@ main .section.news-slider-container {
 }
 
 .eyebrow-link.active-tab {
-  background-color: #ffffff;
+  background-color: #fff;
   border: none !important;
   font-weight: bold;
 }
