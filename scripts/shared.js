@@ -50,23 +50,9 @@ function buildList(name, elements) {
   return ul;
 }
 
-function buildNewsSlider(main) {
-  const path = window.location.pathname;
-  const title = document.querySelector('h1');
-
-  const newsPathRegex = /^\/news(\/[^]+)?\/?$/;
-
-  if (!newsPathRegex.test(path) || (title && title.innerText === '404')) {
-    return;
-  }
-
-  const name = getMetadata('og:title');
+export function buildNewsSlider(main, title) {
+  const name = title
   const elements = getMetadata('keywords');
-
-  // if (!name || !elements) {
-  //   console.log('No metadata found.');
-  //   return;
-  // }
 
   const listOrH1 = buildList(name, elements);
 
@@ -76,6 +62,8 @@ function buildNewsSlider(main) {
 
   div.append(newsSliderBlock);
   main.prepend(div);
+
+  return newsSliderBlock;
 }
 
 /**
@@ -129,7 +117,6 @@ function buildPageDivider(main) {
 function buildAutoBlocks(main) {
   try {
     buildBreadcrumb(main);
-    buildNewsSlider(main);
     buildEmbed(main);
     buildPageDivider(main);
   } catch (error) {

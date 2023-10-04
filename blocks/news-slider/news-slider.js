@@ -161,6 +161,14 @@ export default function decorate(block) {
       link.className = 'eyebrow-link';
       link.textContent = item.textContent;
 
+      link.addEventListener('click', function(event) {
+        event.preventDefault();
+        document.querySelectorAll('.eyebrow-link').forEach((el) => {
+          el.classList.remove('active-tab');
+        });
+        this.classList.add('active-tab');
+      });
+
       li.appendChild(link);
       ul.appendChild(li);
     });
