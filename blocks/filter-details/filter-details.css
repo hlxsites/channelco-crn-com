@@ -1,0 +1,46 @@
+.filter-details .details-header {
+  text-align: center;
+}
+
+.filter-details .details-header .heading-row {
+  flex-direction: row;
+  display: flex;
+  justify-content: space-between;  
+}
+
+.filter-details .details .details-heading {
+  border-top: 4px solid #ed1c24;
+  font-weight: bold;
+  padding: 0.6em;
+  padding-left: 1em;
+  text-align: left;
+  vertical-align: top;
+  margin-top: 1.5em;
+  text-transform: uppercase;
+  background: linear-gradient(180deg, rgba(185,185,185,1) 0%, rgba(255,255,255,1) 100%);
+}
+
+.filter-details .details .prompt {
+  border-top: 1px solid #ed1c24;
+  font-weight: bold;
+  text-align: left;
+  vertical-align: top;
+  margin-top: 0.1em;
+  padding-left: 1em;
+  padding-top: 5px;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  background: linear-gradient(90deg, rgba(185,185,185,1) 0%, rgba(255,255,255,1) 100%);
+}
+
+.filter-details .details .answer {
+  vertical-align: top;
+  background-color: #ffffff;
+  line-height: 100%;
+  text-align: left;
+  padding-top: 0.25em;
+  padding-left: 1.25em;
+  padding-bottom: 0.5rem;
+  font-size: .95rem;
+  margin-bottom: 0.5rem;
+}
