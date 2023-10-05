@@ -1,4 +1,7 @@
-import { decorateBlock, loadBlock } from '../../scripts/lib-franklin.js';
+import {
+  decorateBlock,
+  loadBlock,
+} from '../../scripts/lib-franklin.js';
 import {
   getRecordsByPath,
   buildBreadcrumb,
@@ -90,7 +93,7 @@ export default function loadLazy(main) {
  * the site's layout.
  * @param {HTMLElement} main The document's main element.
  */
-export function loadEager(main) {
+export async function loadEager(main) {
   const topSection = document.createElement('div');
   topSection.classList.add('top-section');
 
@@ -103,7 +106,14 @@ export function loadEager(main) {
   if (breadcrumb) {
     topSection.appendChild(breadcrumb);
     decorateBlock(breadcrumb);
-    loadBlock(breadcrumb);
+    await loadBlock(breadcrumb);
+  }
+
+  const newsWrapper = main.querySelector('.news-slider-wrapper');
+  if (newsWrapper) {
+    newsWrapper.parentElement.classList.remove('news-slider-container');
+    topSection.classList.add('news-slider-container');
+    topSection.appendChild(newsWrapper);
   }
 
   main.prepend(topSection);

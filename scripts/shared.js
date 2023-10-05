@@ -50,7 +50,20 @@ function buildList(name, elements) {
   return ul;
 }
 
-export function buildNewsSlider(main, title) {
+/**
+ * Creates a news-slider block using a given title and the current page's
+ * keywords metadata. The block will be added to the correct location
+ * in the page's DOM.
+ * @param {HTMLElement} main The document's main element.
+ * @param {string} title Title of the page, to include in the news slider.
+ * @returns {Promise} Resolves after the news slider block has been fully
+ *  loaded.
+ */
+export async function buildNewsSlider(main, title) {
+  const top = main.querySelector('.top-section');
+  if (!top) {
+    return;
+  }
   const name = title;
   const elements = getMetadata('keywords');
 
@@ -61,9 +74,9 @@ export function buildNewsSlider(main, title) {
   newsSliderBlock.classList.add('tabbed');
 
   div.append(newsSliderBlock);
-  main.prepend(div);
-
-  return newsSliderBlock;
+  top.append(div);
+  decorateBlock(newsSliderBlock);
+  await loadBlock(newsSliderBlock);
 }
 
 /**

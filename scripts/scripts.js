@@ -90,29 +90,44 @@ async function loadDelayedTemplate(toLoad, main) {
 }
 
 /**
+ * Loads a template by concurrently requesting its CSS and javascript files, and invoking its
+ * eager loading phase.
+ * @param {string} templateName The name of the template to load.
+ * @param {HTMLElement} main The document's main element.
+ * @returns {Promise<Template>} Resolves with the imported module after the template's files are
+ *  loaded and its eager phase is complete.
+ */
+async function loadTemplate(templateName, main) {
+  const cssLoaded = loadCSS(
+    `${window.hlx.codeBasePath}/templates/${templateName}/${templateName}.css`,
+  );
+  let module;
+  const decorateComplete = new Promise((resolve) => {
+    (async () => {
+      module = await import(
+        `../templates/${templateName}/${templateName}.js`
+      );
+      await loadEagerTemplate(module, main);
+      resolve();
+    })();
+  });
+  await Promise.all([cssLoaded, decorateComplete]);
+  return module;
+}
+
+/**
  * Run template specific decoration code.
  * @param {Element} main The container element
  */
 async function decorateTemplates(main) {
   try {
     // Load the universal template for every page
-    const universalTemplateName = 'universal';
-    universalTemplate = await import(
-      `../templates/${universalTemplateName}/${universalTemplateName}.js`
-    );
-    loadCSS(
-      `${window.hlx.codeBasePath}/templates/${universalTemplateName}/${universalTemplateName}.css`,
-    );
-    loadEagerTemplate(universalTemplate, main);
+    universalTemplate = await loadTemplate('universal', main);
 
     const templateName = toClassName(getMetadata('template'));
     const templates = TEMPLATE_LIST;
     if (templates.includes(templateName)) {
-      template = await import(`../templates/${templateName}/${templateName}.js`);
-      loadCSS(
-        `${window.hlx.codeBasePath}/templates/${templateName}/${templateName}.css`,
-      );
-      loadEagerTemplate(template, main);
+      template = await loadTemplate(templateName, main);
     }
   } catch (error) {
     // eslint-disable-next-line no-console

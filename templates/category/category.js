@@ -12,26 +12,24 @@ import {
   loadTemplateArticleCards,
 } from '../../scripts/shared.js';
 
-/**
- * Modifies the DOM with additional elements required to display a category page.
- * @param {HTMLElement} main The page's main element.
- */
-export default async function decorate(main) {
+export async function loadEager(main) {
   const category = await getRecordByPath(window.location.pathname);
   if (!category) {
     return;
   }
-  const content = main.querySelector('.content-section');
+  const content = main.querySelector('.section');
   if (!content) {
     return;
   }
+
+  content.dataset.categoryName = category.title;
+
   let lastElement = null;
   if (content.children.length > 0) {
     lastElement = content.children.item(0);
   }
 
-  const newsSlider = buildNewsSlider(content, category.title);
-  decorateBlock(newsSlider);
+  await buildNewsSlider(main, category.title);
 
   await buildArticleCardsBlock(5, 'category', (leadCards) => {
     leadCards.classList.add('lead-article');
@@ -57,9 +55,18 @@ export default async function decorate(main) {
   content.append(categoryNavigation);
   decorateBlock(categoryNavigation);
   loadBlock(categoryNavigation);
+}
 
-  // page layout is in place, query and populate cards
-  const articles = await getArticlesByCategory(category.title);
+/**
+ * Modifies the DOM with additional elements required to display a category page.
+ * @param {HTMLElement} main The page's main element.
+ */
+export default async function decorate(main) {
+  const category = main.querySelector('div[data-category-name]');
+  if (!category) {
+    return;
+  }
+  const articles = await getArticlesByCategory(category.dataset.categoryName);
   articles.sort(comparePublishDate);
   loadTemplateArticleCards(main, 'category', articles);
 }

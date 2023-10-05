@@ -14,3 +14,7 @@
 .category main .article-cards:not(.lead-article) .article-card {
   border-bottom: 2px dotted var(--color-mid-grey);
 }
+
+.category main .news-slider-wrapper {
+  padding: 1rem var(--padding-spacer-x) 0;
+}
