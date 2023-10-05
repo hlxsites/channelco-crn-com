@@ -153,7 +153,7 @@ function createToTopSection() {
   return toTopContainer;
 }
 
-async function createContentAndAdsSections(doc) {
+function createContentAndAdsSections(doc) {
   const mainContainer = document.createElement('div');
   mainContainer.className = 'main-content-container';
 
@@ -240,8 +240,9 @@ async function loadEager(doc) {
   decorateTemplateAndTheme();
   const main = doc.querySelector('main');
   if (main) {
-    await decorateTemplates(main);
     decorateMain(main);
+    createContentAndAdsSections(document);
+    await decorateTemplates(main);
     document.body.classList.add('appear');
     await waitForLCP(LCP_BLOCKS);
   }
@@ -299,7 +300,6 @@ function loadDelayed() {
 async function loadPage() {
   await loadEager(document);
   await loadLazy(document);
-  await createContentAndAdsSections(document);
   loadDelayed();
 }
 

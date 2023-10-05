@@ -9,6 +9,7 @@ import {
   comparePublishDate,
   buildArticleCardsBlock,
   buildNewsSlider,
+  loadTemplateArticleCards,
 } from '../../scripts/shared.js';
 
 function appendElementBeforeLast(target, last, toAppend) {
@@ -28,20 +29,21 @@ export default async function decorate(main) {
   if (!category) {
     return;
   }
+  const content = main.querySelector('.content-section');
+  if (!content) {
+    return;
+  }
   let lastElement;
-  if (main.children.length > 0) {
-    lastElement = main.children.item(0);
+  if (content.children.length > 0) {
+    lastElement = content.children.item(0);
   }
 
-  const newsSlider = buildNewsSlider(main, category.title);
+  const newsSlider = buildNewsSlider(content, category.title);
   decorateBlock(newsSlider);
 
-  const articles = await getArticlesByCategory(category.title);
-  articles.sort(comparePublishDate);
-
-  buildArticleCardsBlock(articles.slice(0, 5), (leadCards) => {
+  await buildArticleCardsBlock(5, 'category', (leadCards) => {
     leadCards.classList.add('lead-article');
-    appendElementBeforeLast(main, lastElement, leadCards);
+    appendElementBeforeLast(content, lastElement, leadCards);
   });
 
   const newsLinkText = `${category.title} News`;
@@ -53,14 +55,19 @@ export default async function decorate(main) {
 
   const newsHeading = document.createElement('h2');
   newsHeading.append(newsLink);
-  appendElementBeforeLast(main, lastElement, newsHeading);
+  appendElementBeforeLast(content, lastElement, newsHeading);
 
-  buildArticleCardsBlock(articles.slice(5, 13), (cards) => {
-    appendElementBeforeLast(main, lastElement, cards);
+  await buildArticleCardsBlock(8, 'category', (cards) => {
+    appendElementBeforeLast(content, lastElement, cards);
   });
 
   const categoryNavigation = buildBlock('category-navigation', { elems: [] });
-  main.append(categoryNavigation);
+  content.append(categoryNavigation);
   decorateBlock(categoryNavigation);
-  await loadBlock(categoryNavigation);
+  loadBlock(categoryNavigation);
+
+  // page layout is in place, query and populate cards
+  const articles = await getArticlesByCategory(category.title);
+  articles.sort(comparePublishDate);
+  loadTemplateArticleCards(main, 'category', articles);
 }

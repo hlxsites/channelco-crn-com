@@ -10,6 +10,7 @@ import {
   getArticlesByAuthor,
   comparePublishDate,
   buildArticleCardsBlock,
+  loadTemplateArticleCards,
 } from '../../scripts/shared.js';
 
 function addIcon(beforeElement, iconName) {
@@ -24,7 +25,7 @@ function addIcon(beforeElement, iconName) {
  * @param {HTMLElement} main Main element of the page.
  */
 export default async function decorate(main) {
-  const defaultContent = main.querySelector('.default-content-wrapper');
+  const defaultContent = main.querySelector('.content-section');
   if (!defaultContent) {
     return;
   }
@@ -67,11 +68,9 @@ export default async function decorate(main) {
   `;
   defaultContent.append(newsLink);
 
-  const articles = await getArticlesByAuthor(authorName);
-  articles.sort(comparePublishDate);
-
   await buildArticleCardsBlock(
-    articles.slice(0, 15),
+    15,
+    'author',
     (articleCards) => defaultContent.append(articleCards),
   );
 
@@ -92,4 +91,9 @@ export default async function decorate(main) {
   defaultContent.append(navigation);
   decorateBlock(navigation);
   await loadBlock(navigation);
+
+  // page layout is in place, query articles
+  const articles = await getArticlesByAuthor(authorName);
+  articles.sort(comparePublishDate);
+  loadTemplateArticleCards(main, 'author', articles);
 }

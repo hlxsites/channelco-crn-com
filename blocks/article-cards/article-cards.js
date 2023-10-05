@@ -90,14 +90,15 @@ function createPicture(isFeatured, article = false) {
  * Creates an element containing all the information for an article. The card will either
  * be a placeholder, or display an article's actual information, depending on the provided
  * parameters.
- * @param {string} path Full path to the article represented by the card.
  * @param {boolean} isFeatured Should be true to create a card for the featured article.
+ * @param {string} [path] Full path to the article represented by the card. If provided,
+ *  will be set as the card's data-path.
  * @param {import('../../scripts/shared.js').QueryIndexRecord} [article] If provided, the
  *  card will contain the information from the given article. Otherwise the card will be
  *  a placeholder.
  * @returns {HTMLElement} Card information for an article.
  */
-function createCard(path, isFeatured, article = false) {
+function createCard(isFeatured, path = false, article = false) {
   const cardDiv = document.createElement('div');
   cardDiv.classList.add('article-card');
   if (isFeatured) {
@@ -106,7 +107,9 @@ function createCard(path, isFeatured, article = false) {
   if (!article) {
     cardDiv.classList.add('skeleton');
   }
-  cardDiv.dataset.path = path;
+  if (path) {
+    cardDiv.dataset.path = path;
+  }
 
   const category = createCategoryLink(article);
   const title = createTitle(article);
@@ -135,6 +138,9 @@ function createCard(path, isFeatured, article = false) {
  * content. Each placeholder card will have a data-path attribute containing the path to
  * the article represented by the card.
  *
+ * As an alternative to list items with article URLs, setting data-card-count on the
+ * block will instruct the block to create the specified number of card placeholders.
+ *
  * The cards rely on something setting each card's data-json attribute to the stringified
  * JSON of the article content that should be loaded into the card. Once this attribute is
  * set, the block will replace the placeholder card with an actual card based on the JSON.
@@ -145,12 +151,14 @@ function createCard(path, isFeatured, article = false) {
  * @param {HTMLElement} block The block's element on the page.
  */
 export default function decorate(block) {
-  const ul = block.querySelector('ul');
-  if (!ul) {
-    return;
-  }
   const paths = getPathsFromBlock(block);
-  if (!paths.length) {
+  let cardCount = paths.length;
+  if (!cardCount && block.dataset.cardCount) {
+    // if no paths found, fall back to data-card-count
+    cardCount = parseInt(block.dataset.cardCount);
+  }
+
+  if (!cardCount) {
     return;
   }
 
@@ -163,11 +171,11 @@ export default function decorate(block) {
   addlArticleContainer.classList.add('sub-article');
 
   // add article cards for each article. These will be placeholder cards.
-  const featured = createCard(paths[0], true);
-  paths.slice(1).forEach((path) => {
-    const card = createCard(path, false);
+  const featured = createCard(true, paths.length ? paths[0] : false);
+  for (let i = 1; i < cardCount; i += 1) {
+    const card = createCard(false, paths.length ? paths[i] : false);
     addlArticleContainer.append(card);
-  });
+  }
   blockTarget.append(featured);
   blockTarget.append(addlArticleContainer);
 
@@ -177,7 +185,7 @@ export default function decorate(block) {
     entries.forEach((entry) => {
       if (entry.type === 'attributes' && entry.target.classList.contains('skeleton') && entry.target.dataset.json) {
         const article = JSON.parse(entry.target.dataset.json);
-        const finalCard = createCard(article.path, entry.target.classList.contains('featured-article'), article);
+        const finalCard = createCard(entry.target.classList.contains('featured-article'), article.path, article);
         entry.target.parentNode.replaceChild(finalCard, entry.target);
       }
     });

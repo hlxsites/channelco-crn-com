@@ -7,6 +7,7 @@ import {
   queryIndex,
   isArticle,
   buildArticleCardsBlock,
+  loadTemplateArticleCards,
 } from '../../scripts/shared.js';
 
 const MAX_LIMIT = 50;
@@ -54,6 +55,17 @@ export default async function decorate(block) {
   resultCountLabel.innerText = 'Loading results...';
   block.append(resultCountLabel);
 
+  const termLabel = createSearchTermElement(searchTerm);
+  termLabel.classList.add('quoted');
+  resultCountLabel.append(termLabel);
+
+  await buildArticleCardsBlock(limit, 'search-results', (cards) => block.append(cards));
+  const nav = buildBlock('category-navigation', { elems: [] });
+  block.append(nav);
+  decorateBlock(nav);
+  await loadBlock(nav);
+
+  // layout is in place, perform search
   let results = [];
   if (searchTerm) {
     results = await queryIndex((record) => isArticle(record)
@@ -62,13 +74,5 @@ export default async function decorate(block) {
   }
 
   resultCountLabel.innerText = `${results.length} results for `;
-  const termLabel = createSearchTermElement(searchTerm);
-  termLabel.classList.add('quoted');
-  resultCountLabel.append(termLabel);
-
-  await buildArticleCardsBlock(results.slice(0, limit), (cards) => block.append(cards));
-  const nav = buildBlock('category-navigation', { elems: [] });
-  block.append(nav);
-  decorateBlock(nav);
-  await loadBlock(nav);
+  loadTemplateArticleCards(block, 'search-results', results);
 }
