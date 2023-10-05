@@ -134,6 +134,7 @@ async function loadShareThis() {
 await loadRightAdFragment();
 loadDelayedAds(document.querySelector('main'));
 loadShareThis();
+loadScript('/scripts/google-translate-init.js', { defer: true });
 
 // Core Web Vitals RUM collection
 sampleRUM('cwv');
