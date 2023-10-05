@@ -12,14 +12,6 @@ import {
   loadTemplateArticleCards,
 } from '../../scripts/shared.js';
 
-function appendElementBeforeLast(target, last, toAppend) {
-  if (last) {
-    target.insertBefore(toAppend, last);
-  } else {
-    target.append(toAppend);
-  }
-}
-
 /**
  * Modifies the DOM with additional elements required to display a category page.
  * @param {HTMLElement} main The page's main element.
@@ -33,7 +25,7 @@ export default async function decorate(main) {
   if (!content) {
     return;
   }
-  let lastElement;
+  let lastElement = null;
   if (content.children.length > 0) {
     lastElement = content.children.item(0);
   }
@@ -43,7 +35,7 @@ export default async function decorate(main) {
 
   await buildArticleCardsBlock(5, 'category', (leadCards) => {
     leadCards.classList.add('lead-article');
-    appendElementBeforeLast(content, lastElement, leadCards);
+    content.insertBefore(leadCards, lastElement);
   });
 
   const newsLinkText = `${category.title} News`;
@@ -55,10 +47,10 @@ export default async function decorate(main) {
 
   const newsHeading = document.createElement('h2');
   newsHeading.append(newsLink);
-  appendElementBeforeLast(content, lastElement, newsHeading);
+  content.insertBefore(newsHeading, lastElement);
 
   await buildArticleCardsBlock(8, 'category', (cards) => {
-    appendElementBeforeLast(content, lastElement, cards);
+    content.insertBefore(cards, lastElement);
   });
 
   const categoryNavigation = buildBlock('category-navigation', { elems: [] });
