@@ -1,7 +1,5 @@
-import {
-  sampleRUM,
-  loadScript,
-} from './lib-franklin.js';
+// eslint-disable-next-line import/no-cycle
+import { sampleRUM, loadScript } from './lib-franklin.js';
 
 import { fetchFragment } from './shared.js';
 
@@ -18,7 +16,10 @@ function addMartechStack() {
   window.TAS = window.TAS || { cmd: [] };
 
   // Add Adobe Analytics
-  loadScript('https://assets.adobedtm.com/9cfdfb0dd4d0/2d8aa33fcffa/launch-826786cb6e10.min.js', { async: '' });
+  loadScript(
+    'https://assets.adobedtm.com/9cfdfb0dd4d0/2d8aa33fcffa/launch-826786cb6e10.min.js',
+    { async: '' },
+  );
 
   // Add Google Tag Manager
   loadScript('/scripts/gtm-init.js', { defer: true });
@@ -29,11 +30,37 @@ function addMartechStack() {
 
 // Load Right Ad fragment
 async function loadRightAdFragment() {
-  const adFragmentContainer = document.getElementById('right-ad-fragment-container');
+  const adFragmentContainer = document.getElementById(
+    'right-ad-fragment-container',
+  );
   if (!adFragmentContainer) return;
 
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach(() => {
+      if (adFragmentContainer.querySelector('iframe')) {
+        const ads = adFragmentContainer.querySelectorAll('.right-ad');
+        ads.forEach((ad) => {
+          ad.classList.remove('fixed-height');
+        });
+        observer.disconnect();
+      }
+    });
+  });
+
+  observer.observe(adFragmentContainer, {
+    attributes: false,
+    childList: true,
+    subtree: true,
+  });
+
   try {
-    const fragmentHTML = await fetchFragment('/fragments/global-layout-right-fragment', true);
+    const fragmentHTML = await fetchFragment(
+      '/fragments/global-layout-right-fragment',
+      true,
+    );
+    // When ad finishes loading...
+    const loadingDiv = document.querySelector('.loading-animation');
+    loadingDiv.style.display = 'none';
     adFragmentContainer.innerHTML = '';
     adFragmentContainer.appendChild(fragmentHTML);
   } catch (error) {
@@ -93,8 +120,14 @@ function loadDelayedAds(main) {
 async function loadShareThis() {
   const shareThis = document.querySelector('.sharethis-inline-share-buttons');
   if (shareThis) {
-    await loadScript('https://platform-api.sharethis.com/js/sharethis.js#property=6436d2b545aa460012e10320&product=sop', { async: '' });
-    await loadScript('https://buttons-config.sharethis.com/js/6436d2b545aa460012e10320.js', { async: '' });
+    await loadScript(
+      'https://platform-api.sharethis.com/js/sharethis.js#property=6436d2b545aa460012e10320&product=sop',
+      { async: '' },
+    );
+    await loadScript(
+      'https://buttons-config.sharethis.com/js/6436d2b545aa460012e10320.js',
+      { async: '' },
+    );
   }
 }
 

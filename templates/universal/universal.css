@@ -21,7 +21,7 @@ main .main-content-container {
 
 .top-ad-section::before {
   z-index: 0;
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   border-bottom: 2px solid #ed1c24;
@@ -101,6 +101,26 @@ main .back-top-top-section-header {
   text-transform: uppercase;
 }
 
+.loading-animation {
+  animation: loading 1.5s infinite linear;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  height: 100%;
+}
+
+.fixed-height {
+  height: 626px;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
 @media (min-width: 576px) {
   .top-ad-section {
     min-height: 125px;
@@ -126,15 +146,14 @@ main .back-top-top-section-header {
     gap: var(--padding-spacer-x);
     grid-template-columns: auto 1fr 330px auto;
     grid-template-rows: auto auto;
-    grid-template-areas: 
-      ". news news ." 
-      ". content ads .";
+    grid-template-areas:
+      '. news news .'
+      '. content ads .';
   }
 
   main .content-and-ads-container .news-slider-wrapper {
     grid-area: news;
-    grid-template:
-      ". content ads ." / auto 1fr 330px auto;
+    grid-template: '. content ads .' / auto 1fr 330px auto;
   }
 
   main .content-and-ads-container .content-section {
