@@ -171,6 +171,10 @@ async function createContentAndAdsSections(doc) {
   rightAdSection.className = 'right-ad-section';
   rightAdSection.id = 'right-ad-fragment-container';
 
+  const loadingDiv = document.createElement('div');
+  loadingDiv.className = 'loading-animation';
+  rightAdSection.appendChild(loadingDiv);
+
   const bottomAdSection = document.createElement('div');
   bottomAdSection.className = 'bottom-ad-section';
   bottomAdSection.id = 'bottom-ad-fragment-container';
@@ -203,10 +207,7 @@ async function createContentAndAdsSections(doc) {
 
     // Move remaining sections in main to contentSection
     Array.from(main.children)
-      .filter(
-        (child) => child !== topAdSection
-          && child !== breadcrumb,
-      )
+      .filter((child) => child !== topAdSection && child !== breadcrumb)
       .forEach((section) => {
         contentSection.appendChild(section);
       });

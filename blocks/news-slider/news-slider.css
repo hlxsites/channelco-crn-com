@@ -208,6 +208,12 @@ main .section.news-slider-container {
   background-color: #fff;
 }
 
+.eyebrow-link.active-tab {
+  background-color: #fff;
+  border: none !important;
+  font-weight: bold;
+}
+
 @media (min-width: 768px) {
   .news-slider-wrapper {
     padding: 0;
