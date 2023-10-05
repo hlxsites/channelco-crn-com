@@ -37,7 +37,9 @@ export default async function decorate(block) {
   headerRow.classList.add('row1');
   tableFields.forEach((field) => {
     const cell = buildCell(0);
-    cell.innerText = field.includes('(link)') ? field.replace('(link)', '').trim() : field;
+    const rawValue = field.includes('(link)') ? field.replace('(link)', '').trim() : field;
+    const foundValue = dataMap.find((mapItem) => mapItem.key === rawValue);
+    cell.innerText = foundValue ? foundValue.value : rawValue;
     headerRow.append(cell);
   });
   thead.append(headerRow);
@@ -48,7 +50,9 @@ export default async function decorate(block) {
     row.classList.add(isEvenRow ? 'row2' : 'row1');
     tableFields.forEach(async (field) => {
       const isDetailsLink = field.includes('(link)');
-      const value = isDetailsLink ? item[field.replace('(link)', '').trim()] : item[field];
+      const rawValue = isDetailsLink ? item[field.replace('(link)', '').trim()] : item[field];
+      const foundValue = dataMap.find((mapItem) => mapItem.key === rawValue);
+      const value = foundValue ? foundValue.value : rawValue;
       const cell = buildCell(1);
       if (isDetailsLink) {
         const cacheData = new Response(JSON.stringify({

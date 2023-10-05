@@ -46,7 +46,11 @@ export default async function decorate(block) {
     row.classList.add('heading-row');
     values.forEach((value) => {
       const h = document.createElement('h2');
-      h.innerText = data[value.trim()];
+      console.log(dataMap);
+      console.log(data[value.trim()]);
+      // eslint-disable-next-line max-len
+      const foundHeader = dataMap.find((item) => item.key === data[value.trim()]);
+      h.innerText = foundHeader ? foundHeader.value : data[value.trim()];
       row.append(h);
     });
     headerDiv.append(row);
@@ -70,7 +74,8 @@ export default async function decorate(block) {
       parsedDetailItem = detailItem;
     }
     parsedDetailItem.split(',').map((item) => item.trim()).forEach((detail) => {
-      const prompt = dataMap.find((item) => item.key === detail).value || detail;
+      const foundPrompt = dataMap.find((item) => item.key === detail);
+      const prompt = foundPrompt ? foundPrompt.value : detail;
       const promptDiv = document.createElement('div');
       const answerDiv = document.createElement('div');
       promptDiv.classList.add('prompt');
