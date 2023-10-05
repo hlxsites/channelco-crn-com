@@ -30,7 +30,65 @@ async function loadFonts() {
   }
 }
 
+/**
+ * @typedef Template
+ * @property {function} [default] Default export of the template, which will be called in the lazy phase.
+ *  Expects a single argument: the document's <main> HTMLElement.
+ * @property {function} [loadLazy] If provided, will be called in the lazy phase. If both a default export
+ *  and loadLazy function are provided, only the default export will be called. Expects a single argument:
+ *  the document's <main> HTMLElement.
+ * @property {function} [loadEager] If provided, will be called in the eager phase. Expects a single
+ *  argument: the document's <main> HTMLElement.
+ * @property {function} [loadDelayed] If provided, will be called in the delayed phase. Expects a single
+ *  argument: the document's <main> HTMLElement.
+ */
+
+/**
+ * @type {Template}
+ */
+let universalTemplate;
+/**
+ * @type {Template}
+ */
 let template;
+
+/**
+ * Invokes a template's eager method, if specified.
+ * @param {Template} [toLoad] Template whose eager method should be invoked.
+ * @param {HTMLElement} main The document's main element.
+ */
+async function loadEagerTemplate(toLoad, main) {
+  if (toLoad && toLoad.loadEager) {
+    await toLoad.loadEager(main);
+  }
+}
+
+/**
+ * Invokes a template's lazy method, if specified.
+ * @param {Template} [toLoad] Template whose lazy method should be invoked.
+ * @param {HTMLElement} main The document's main element.
+ */
+async function loadLazyTemplate(toLoad, main) {
+  if (toLoad) {
+    if (toLoad.default) {
+      await toLoad.default(main);
+    } else if (toLoad.loadLazy) {
+      await toLoad.loadLazy(main);
+    }
+  }
+}
+
+/**
+ * Invokes a template's delayed method, if specified.
+ * @param {Template} [toLoad] Template whose delayed method should be invoked.
+ * @param {HTMLElement} main The document's main element.
+ */
+async function loadDelayedTemplate(toLoad, main) {
+  if (toLoad && toLoad.loadDelayed) {
+    await toLoad.loadDelayed(main);
+  }
+}
+
 /**
  * Run template specific decoration code.
  * @param {Element} main The container element
@@ -38,16 +96,14 @@ let template;
 async function decorateTemplates(main) {
   try {
     // Load the universal template for every page
-    const universalTemplate = 'universal';
-    const universalMod = await import(
-      `../templates/${universalTemplate}/${universalTemplate}.js`
+    const universalTemplateName = 'universal';
+    universalTemplate = await import(
+      `../templates/${universalTemplateName}/${universalTemplateName}.js`
     );
     loadCSS(
-      `${window.hlx.codeBasePath}/templates/${universalTemplate}/${universalTemplate}.css`,
+      `${window.hlx.codeBasePath}/templates/${universalTemplateName}/${universalTemplateName}.css`,
     );
-    if (universalMod.default) {
-      await universalMod.default(main);
-    }
+    loadEagerTemplate(universalTemplate, main);
 
     const templateName = toClassName(getMetadata('template'));
     const templates = TEMPLATE_LIST;
@@ -56,9 +112,7 @@ async function decorateTemplates(main) {
       loadCSS(
         `${window.hlx.codeBasePath}/templates/${templateName}/${templateName}.css`,
       );
-      if (template.loadEager) {
-        await template.loadEager(main);
-      }
+      loadEagerTemplate(template, main);
     }
   } catch (error) {
     // eslint-disable-next-line no-console
@@ -207,14 +261,9 @@ async function loadEager(doc) {
  */
 async function loadLazy(doc) {
   const main = doc.querySelector('main');
-  if (template) {
-    if (template.default) {
-      template.default(main);
-    } else if (template.loadLazy) {
-      template.loadLazy(main);
-    }
-  }
   await loadBlocks(main);
+  loadLazyTemplate(universalTemplate, main);
+  loadLazyTemplate(template, main);
 
   const { hash } = window.location;
   const element = hash ? doc.getElementById(hash.substring(1)) : false;
@@ -238,9 +287,9 @@ async function loadLazy(doc) {
 function loadDelayed() {
   // eslint-disable-next-line import/no-cycle
   window.setTimeout(() => {
-    if (template && template.loadDelayed) {
-      template.loadDelayed(document.querySelector('main'));
-    }
+    const main = document.querySelector('main');
+    loadDelayedTemplate(universalTemplate, main);
+    loadDelayedTemplate(template, main);
     import('./delayed.js');
   }, 3000);
   // load anything that can be postponed to the latest here

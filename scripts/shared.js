@@ -367,14 +367,13 @@ export async function getAuthorByName(authorName) {
 }
 
 /**
- * Processes the contents of a block and retrieves the records specified in the
- * block. The method assumes that the block's content consists of a <ul> whose
+ * Processes the contents of a block and retrieves the record paths specified 
+ * in its contents. The method assumes that the block's consists of a <ul> whose
  * list items are links to items in the site's query index.
  * @param {HTMLElement} block Block whose content will be used.
- * @returns {Promise<Array<QueryIndexRecord>>} Resolves with records that match all
- *  specified URLs in a block.
+ * @returns {Array<string>} The paths of all records in the block.
  */
-export function getRecordsFromBlock(block) {
+export function getPathsFromBlock(block) {
   const uls = block.querySelectorAll('ul');
   let paths = [];
 
@@ -396,6 +395,19 @@ export function getRecordsFromBlock(block) {
       .filter((path) => !!path);
     paths = paths.concat(paths, recordPaths);
   });
+  return paths;
+}
+
+/**
+ * Processes the contents of a block and retrieves the records specified in the
+ * block. The method assumes that the block's content consists of a <ul> whose
+ * list items are links to items in the site's query index.
+ * @param {HTMLElement} block Block whose content will be used.
+ * @returns {Promise<Array<QueryIndexRecord>>} Resolves with records that match all
+ *  specified URLs in a block.
+ */
+export function getRecordsFromBlock(block) {
+  let paths = getPathsFromBlock(block);
 
   // retrieve article information for all specified article paths
   return getRecordsByPath(paths);
@@ -404,26 +416,32 @@ export function getRecordsFromBlock(block) {
 /**
  * Creates an HTML element that contains an article author's name, a link to the
  * author's profile page, and the publish date of the article.
- * @param {QueryIndexRecord} article Article whose author information will be
- *  included.
+ * @param {QueryIndexRecord} [article] Article whose author information will be
+ *  included. If not provided, a skeleton structure will be created.
  * @returns {HTMLElement} Element containing summary information about the author of
  *  an article.
  */
 export function buildArticleAuthor(article) {
   const author = document.createElement('h5');
   author.classList.add('article-author');
-  // attempting to predict the URL to the author. may need to change to query
-  // author information from index
-  const authorId = String(article.author).toLowerCase()
-    .replaceAll(/[^0-9a-z ]/g, '')
-    .replaceAll(/[^0-9a-z]/g, '-');
-  author.innerHTML = `
-    <a href="/authors/${authorId}" class="link-arrow" aria-label="By ${article.author}"><span class="uncolored-link">By</span> ${article.author}</a>
-  `;
+
+  if (article) {
+    // attempting to predict the URL to the author. may need to change to query
+    // author information from index
+    const authorId = String(article.author).toLowerCase()
+      .replaceAll(/[^0-9a-z ]/g, '')
+      .replaceAll(/[^0-9a-z]/g, '-');
+    author.innerHTML = `
+      <a href="/authors/${authorId}" class="link-arrow" aria-label="By ${article.author}"><span class="uncolored-link">By</span> ${article.author}</a>
+    `;
+  }
 
   const date = document.createElement('h5');
   date.classList.add('article-date');
-  date.innerText = article.publisheddate;
+
+  if (article) {
+    date.innerText = article.publisheddate;
+  }
 
   const container = document.createElement('div');
   container.classList.add('article-author-container');
