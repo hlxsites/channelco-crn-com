@@ -16,7 +16,7 @@ import {
  * for all articles.
  * @param {HTMLElement} main The page's main content.
  */
-export default async function loadTemplate(main) {
+export async function loadEager(main) {
   const path = window.location.pathname;
 
   const article = await getRecordByPath(path);
@@ -60,6 +60,26 @@ export default async function loadTemplate(main) {
     }
   }
 
-  const related = await getRelatedArticles(article);
-  await buildRelatedContent(heading.parentElement, related);
+
+  main.dataset.article = JSON.stringify(article);
+}
+
+/**
+ * Processes the DOM as necessary in order to auto block items required
+ * for all articles.
+ * @param {HTMLElement} main The page's main content.
+ */
+export default async function loadTemplate(main) {
+  const articleJson = main.dataset.article;
+  if (!articleJson) {
+    return;
+  }
+
+  const content = document.querySelector('.content-section');
+  if (!content) {
+    return;
+  }
+
+  const related = await getRelatedArticles(JSON.parse(articleJson));
+  await buildRelatedContent(content, related);
 }
