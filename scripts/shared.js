@@ -15,20 +15,20 @@ const DEFAULT_CATEGORY_NAME = 'News';
 const EMAIL_REGEX = /\S+[a-z0-9]@[a-z0-9.]+/img;
 
 /**
- * Builds breadcrumb menu and prepends to main in a new section
+ * Builds breadcrumb menu and returns it if there should be one.
  * @param {Element} main The container element
+ * @returns {HTMLElement} The breadcrumb element, or undefined if
+ *  no breadcrumb to display.
  */
-function buildBreadcrumb(main) {
+export function buildBreadcrumb() {
   const path = window.location.pathname;
   const title = document.querySelector('h1');
 
   if (path === '/' || (title && title.innerText === '404')) {
-    return;
+    return undefined;
   }
 
-  const div = document.createElement('div');
-  div.append(buildBlock('breadcrumb', { elems: [] }));
-  main.prepend(div);
+  return buildBlock('breadcrumb', { elems: [] });
 }
 
 function buildList(name, elements) {
@@ -116,7 +116,6 @@ function buildPageDivider(main) {
  */
 function buildAutoBlocks(main) {
   try {
-    buildBreadcrumb(main);
     buildEmbed(main);
     buildPageDivider(main);
   } catch (error) {
@@ -433,7 +432,7 @@ export async function getAuthorByName(authorName) {
 }
 
 /**
- * Processes the contents of a block and retrieves the record paths specified 
+ * Processes the contents of a block and retrieves the record paths specified
  * in its contents. The method assumes that the block's consists of a <ul> whose
  * list items are links to items in the site's query index.
  * @param {HTMLElement} block Block whose content will be used.
@@ -477,10 +476,8 @@ export function getPathsFromBlock(block) {
  *  specified URLs in a block.
  */
 export function getRecordsFromBlock(block) {
-  let paths = getPathsFromBlock(block);
-
   // retrieve article information for all specified article paths
-  return getRecordsByPath(paths);
+  return getRecordsByPath(getPathsFromBlock(block));
 }
 
 /**

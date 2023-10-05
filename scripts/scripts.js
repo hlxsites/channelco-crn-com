@@ -32,15 +32,15 @@ async function loadFonts() {
 
 /**
  * @typedef Template
- * @property {function} [default] Default export of the template, which will be called in the lazy phase.
- *  Expects a single argument: the document's <main> HTMLElement.
- * @property {function} [loadLazy] If provided, will be called in the lazy phase. If both a default export
- *  and loadLazy function are provided, only the default export will be called. Expects a single argument:
- *  the document's <main> HTMLElement.
+ * @property {function} [default] Default export of the template, which will be called in the lazy
+ *  phase. Expects a single argument: the document's <main> HTMLElement.
+ * @property {function} [loadLazy] If provided, will be called in the lazy phase. If both a default
+ *  export and loadLazy function are provided, only the default export will be called. Expects a
+ *  single argument: the document's <main> HTMLElement.
  * @property {function} [loadEager] If provided, will be called in the eager phase. Expects a single
  *  argument: the document's <main> HTMLElement.
- * @property {function} [loadDelayed] If provided, will be called in the delayed phase. Expects a single
- *  argument: the document's <main> HTMLElement.
+ * @property {function} [loadDelayed] If provided, will be called in the delayed phase. Expects a
+ *  single argument: the document's <main> HTMLElement.
  */
 
 /**
@@ -120,117 +120,6 @@ async function decorateTemplates(main) {
   }
 }
 
-function scrollToTop(event) {
-  event.preventDefault();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function createToTopSection() {
-  const toTopContainer = document.createElement('div');
-  toTopContainer.className = 'back-to-top';
-
-  const toTopCol = document.createElement('div');
-  toTopCol.className = 'to-top-text';
-
-  const toTopContent = document.createElement('div');
-  const toTopLink = document.createElement('a');
-  toTopLink.href = '#top';
-  toTopLink.target = '_self';
-  toTopLink.ariaLabel = 'To Top';
-
-  const toTopHeader = document.createElement('h3');
-  toTopHeader.className = 'back-top-top-section-header';
-  toTopHeader.innerText = 'To Top';
-
-  toTopLink.appendChild(toTopHeader);
-  toTopContent.appendChild(toTopLink);
-  toTopCol.appendChild(toTopContent);
-  toTopContainer.appendChild(toTopCol);
-
-  // Event listener to scroll to top smoothly
-  toTopLink.addEventListener('click', scrollToTop);
-
-  return toTopContainer;
-}
-
-function createContentAndAdsSections(doc) {
-  const mainContainer = document.createElement('div');
-  mainContainer.className = 'main-content-container';
-
-  const contentSection = document.createElement('div');
-  contentSection.className = 'content-section';
-
-  const topAdSection = document.createElement('div');
-  topAdSection.className = 'top-ad-section';
-  topAdSection.id = 'top-ad-fragment-container';
-
-  const contentAndAdsContainer = document.createElement('div');
-  contentAndAdsContainer.className = 'content-and-ads-container';
-
-  const rightAdSection = document.createElement('div');
-  rightAdSection.className = 'right-ad-section';
-  rightAdSection.id = 'right-ad-fragment-container';
-
-  const loadingDiv = document.createElement('div');
-  loadingDiv.className = 'loading-animation';
-  rightAdSection.appendChild(loadingDiv);
-
-  const bottomAdSection = document.createElement('div');
-  bottomAdSection.className = 'bottom-ad-section';
-  bottomAdSection.id = 'bottom-ad-fragment-container';
-
-  // Create the close icon
-  const closeIcon = document.createElement('img');
-  closeIcon.className = 'close-icon';
-  closeIcon.src = '/styles/icons/close-ribbon.png';
-  closeIcon.alt = 'Close'; // Accessibility
-
-  closeIcon.addEventListener('click', () => {
-    bottomAdSection.style.display = 'none';
-  });
-
-  bottomAdSection.appendChild(closeIcon);
-  contentAndAdsContainer.appendChild(contentSection);
-  contentAndAdsContainer.appendChild(rightAdSection);
-
-  const main = doc.querySelector('main');
-
-  if (main) {
-    const breadcrumb = main.querySelector('.breadcrumb-container');
-    const newsWrapper = main.querySelector('.news-slider-wrapper');
-
-    if (breadcrumb) {
-      main.insertBefore(topAdSection, breadcrumb);
-    } else {
-      main.prepend(topAdSection);
-    }
-
-    // Move remaining sections in main to contentSection
-    Array.from(main.children)
-      .filter((child) => child !== topAdSection && child !== breadcrumb)
-      .forEach((section) => {
-        contentSection.appendChild(section);
-      });
-
-    mainContainer.appendChild(contentAndAdsContainer);
-
-    if (newsWrapper) {
-      contentAndAdsContainer.prepend(newsWrapper);
-      const newsContainer = main.querySelector('.news-slider-container');
-      if (newsContainer) {
-        newsContainer.classList.remove('news-slider-container');
-      }
-    }
-
-    const toTopSection = createToTopSection();
-    mainContainer.appendChild(toTopSection);
-
-    main.appendChild(mainContainer);
-  }
-
-  doc.body.appendChild(bottomAdSection);
-}
-
 /**
  * Loads everything needed to get to LCP.
  * @param {Element} doc The container element
@@ -241,7 +130,6 @@ async function loadEager(doc) {
   const main = doc.querySelector('main');
   if (main) {
     decorateMain(main);
-    createContentAndAdsSections(document);
     await decorateTemplates(main);
     document.body.classList.add('appear');
     await waitForLCP(LCP_BLOCKS);

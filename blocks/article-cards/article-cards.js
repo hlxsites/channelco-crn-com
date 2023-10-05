@@ -155,7 +155,7 @@ export default function decorate(block) {
   let cardCount = paths.length;
   if (!cardCount && block.dataset.cardCount) {
     // if no paths found, fall back to data-card-count
-    cardCount = parseInt(block.dataset.cardCount);
+    cardCount = parseInt(block.dataset.cardCount, 10);
   }
 
   if (!cardCount) {
@@ -179,8 +179,8 @@ export default function decorate(block) {
   blockTarget.append(featured);
   blockTarget.append(addlArticleContainer);
 
-  // listens for attribute modifications on child elements, and will replace a placeholder card with an
-  // actual card when a skeleton's data-json attribute is set
+  // listens for attribute modifications on child elements, and will replace a placeholder card
+  // with an actual card when a skeleton's data-json attribute is set
   const observer = new MutationObserver((entries) => {
     entries.forEach((entry) => {
       if (entry.type === 'attributes' && entry.target.classList.contains('skeleton') && entry.target.dataset.json) {
