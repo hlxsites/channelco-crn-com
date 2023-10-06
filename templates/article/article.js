@@ -60,7 +60,6 @@ export async function loadEager(main) {
     }
   }
 
-
   main.dataset.article = JSON.stringify(article);
 }
 
