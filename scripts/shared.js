@@ -23,7 +23,7 @@ export function buildBreadcrumb() {
   const title = document.querySelector('h1');
 
   if (path === '/' || (title && title.innerText === '404')) {
-    return;
+    return undefined;
   }
 
   const div = document.createElement('div');
@@ -52,7 +52,7 @@ function buildList(name, elements) {
   return ul;
 }
 
-export function buildNewsSlider(main, title) {
+export async function buildNewsSlider(main, title) {
   const name = title;
   const elements = getMetadata('keywords');
 
@@ -69,7 +69,7 @@ export function buildNewsSlider(main, title) {
   }
   topSection.append(div);
   decorateBlock(newsSliderBlock);
-  return loadBlock(newsSliderBlock);
+  await loadBlock(newsSliderBlock);
 }
 
 /**
