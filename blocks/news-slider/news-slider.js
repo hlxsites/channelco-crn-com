@@ -138,7 +138,7 @@ export default function decorate(block) {
     if (newsItems.length === 0) {
       h1 = block.querySelector('h1');
       h1.className = 'slider-title';
-      newsSlider.parentNode.insertBefore(h1, newsSlider);
+      block.replaceWith(h1);
       return;
     }
 

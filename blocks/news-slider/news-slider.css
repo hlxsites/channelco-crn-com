@@ -175,10 +175,6 @@ main .section.news-slider-container {
   margin-top: 0;
 }
 
-#inthesubtaxonomies .dragdealer-background {
-  /* bottom: 2px; */
-}
-
 #inthetaxonomies-carousel .handle li.slide::before {
   margin-left: 8px;
   margin-right: 10px;
@@ -215,10 +211,6 @@ main .section.news-slider-container {
 }
 
 @media (min-width: 768px) {
-  .news-slider-wrapper {
-    padding: 0;
-  }
-
   .inthenews-header {
     width: 19%;
     padding-top: 19px;

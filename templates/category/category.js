@@ -11,14 +11,6 @@ import {
   buildNewsSlider,
 } from '../../scripts/shared.js';
 
-function appendElementBeforeLast(target, last, toAppend) {
-  if (last) {
-    target.insertBefore(toAppend, last);
-  } else {
-    target.append(toAppend);
-  }
-}
-
 /**
  * Modifies the DOM with additional elements required to display a category page.
  * @param {HTMLElement} main The page's main element.
@@ -29,20 +21,34 @@ export async function loadEager(main) {
   if (!category) {
     return;
   }
-  let lastElement;
-  if (main.children.length > 0) {
-    lastElement = main.children.item(0);
-  }
+  buildNewsSlider(main, category.title);
+}
 
-  const newsSlider = buildNewsSlider(main, category.title);
-  decorateBlock(newsSlider);
+/**
+ * Modifies the DOM with additional elements required to display a category page.
+ * @param {HTMLElement} main The page's main element.
+ */
+// eslint-disable-next-line import/prefer-default-export
+export async function loadLazy(main) {
+  const category = await getRecordByPath(window.location.pathname);
+  if (!category) {
+    return;
+  }
+  let lastElement;
+  const contentSection = main.querySelector('.content-section');
+  if (!contentSection) {
+    return;
+  }
+  if (contentSection.children.length > 0) {
+    lastElement = contentSection.children.item(0);
+  }
 
   const articles = await getArticlesByCategory(category.title);
   articles.sort(comparePublishDate);
 
   buildArticleCardsBlock(articles.slice(0, 5), (leadCards) => {
     leadCards.classList.add('lead-article');
-    appendElementBeforeLast(main, lastElement, leadCards);
+    contentSection.insertBefore(leadCards, lastElement);
   });
 
   const newsLinkText = `${category.title} News`;
@@ -54,14 +60,14 @@ export async function loadEager(main) {
 
   const newsHeading = document.createElement('h2');
   newsHeading.append(newsLink);
-  appendElementBeforeLast(main, lastElement, newsHeading);
+  contentSection.insertBefore(newsHeading, lastElement);
 
   buildArticleCardsBlock(articles.slice(5, 13), (cards) => {
-    appendElementBeforeLast(main, lastElement, cards);
+    contentSection.insertBefore(cards, lastElement);
   });
 
   const categoryNavigation = buildBlock('category-navigation', { elems: [] });
-  main.append(categoryNavigation);
+  contentSection.append(categoryNavigation);
   decorateBlock(categoryNavigation);
   await loadBlock(categoryNavigation);
 }
