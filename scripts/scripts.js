@@ -48,7 +48,7 @@ async function loadFonts() {
 /**
  * @type {Template}
  */
-let universalTemplate = {
+const universalTemplate = {
   loadDelayed: universalLoadDelayed,
   loadEager: universalLoadEager,
   loadLazy: universalLoadLazy,
