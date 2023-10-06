@@ -35,7 +35,6 @@ async function getFilterDetails() {
 export default async function decorate(block) {
   const { data, dataMap } = await getFilterDetails();
   const { heading, details } = readBlockConfig(block);
-  console.log(readBlockConfig(block));
   block.innerHTML = '';
 
   const headerDiv = document.createElement('div');
@@ -46,8 +45,6 @@ export default async function decorate(block) {
     row.classList.add('heading-row');
     values.forEach((value) => {
       const h = document.createElement('h2');
-      console.log(dataMap);
-      console.log(data[value.trim()]);
       // eslint-disable-next-line max-len
       const foundHeader = dataMap.find((item) => item.key === data[value.trim()]);
       h.innerText = foundHeader ? foundHeader.value : data[value.trim()];
