@@ -23,7 +23,8 @@ function appendElementBeforeLast(target, last, toAppend) {
  * Modifies the DOM with additional elements required to display a category page.
  * @param {HTMLElement} main The page's main element.
  */
-export default async function decorate(main) {
+// eslint-disable-next-line import/prefer-default-export
+export async function loadEager(main) {
   const category = await getRecordByPath(window.location.pathname);
   if (!category) {
     return;
