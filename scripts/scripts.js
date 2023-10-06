@@ -32,10 +32,7 @@ async function loadFonts() {
 
 /**
  * @typedef Template
- * @property {function} [default] Default export of the template, which will be called in the lazy
- *  phase. Expects a single argument: the document's <main> HTMLElement.
- * @property {function} [loadLazy] If provided, will be called in the lazy phase. If both a default
- *  export and loadLazy function are provided, only the default export will be called. Expects a
+ * @property {function} [loadLazy] If provided, will be called in the lazy phase. Expects a
  *  single argument: the document's <main> HTMLElement.
  * @property {function} [loadEager] If provided, will be called in the eager phase. Expects a single
  *  argument: the document's <main> HTMLElement.
@@ -70,9 +67,7 @@ async function loadEagerTemplate(toLoad, main) {
  */
 async function loadLazyTemplate(toLoad, main) {
   if (toLoad) {
-    if (toLoad.default) {
-      await toLoad.default(main);
-    } else if (toLoad.loadLazy) {
+    if (toLoad.loadLazy) {
       await toLoad.loadLazy(main);
     }
   }
@@ -278,6 +273,8 @@ async function loadEager(doc) {
 async function loadLazy(doc) {
   const main = doc.querySelector('main');
   await loadBlocks(main);
+  await loadLazyTemplate(universalTemplate, main);
+  await loadLazyTemplate(template, main);
 
   const { hash } = window.location;
   const element = hash ? doc.getElementById(hash.substring(1)) : false;
@@ -300,7 +297,12 @@ async function loadLazy(doc) {
  */
 function loadDelayed() {
   // eslint-disable-next-line import/no-cycle
-  window.setTimeout(() => import('./delayed.js'), 3000);
+  window.setTimeout(async () => {
+    const main = document.querySelector('main');
+    await loadDelayedTemplate(universalTemplate, main);
+    await loadDelayedTemplate(template, main);
+    import('./delayed.js');
+  }, 3000);
   // load anything that can be postponed to the latest here
 }
 

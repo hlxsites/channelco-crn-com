@@ -16,6 +16,7 @@ import {
  * for all articles.
  * @param {HTMLElement} main The page's main content.
  */
+// eslint-disable-next-line import/prefer-default-export
 export async function loadEager(main) {
   const path = window.location.pathname;
 
