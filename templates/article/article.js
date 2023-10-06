@@ -16,7 +16,7 @@ import {
  * for all articles.
  * @param {HTMLElement} main The page's main content.
  */
-export default async function loadTemplate(main) {
+export async function loadEager(main) {
   const path = window.location.pathname;
 
   const article = await getRecordByPath(path);
