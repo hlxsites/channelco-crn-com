@@ -111,3 +111,11 @@ export async function loadLazy(main) {
 
   document.body.appendChild(bottomAdSection);
 }
+
+export function loadEager() {
+  // no eager functionality
+}
+
+export function loadDelayed() {
+  // no delayed functionality
+}

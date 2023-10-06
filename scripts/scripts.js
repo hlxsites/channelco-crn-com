@@ -11,6 +11,11 @@ import {
 } from './lib-franklin.js';
 
 import { decorateMain } from './shared.js';
+import {
+  loadEager as universalLoadEager,
+  loadLazy as universalLoadLazy,
+  loadDelayed as universalLoadDelayed,
+} from '../templates/universal/universal.js';
 
 const LCP_BLOCKS = []; // add your LCP blocks to the list
 
@@ -43,7 +48,11 @@ async function loadFonts() {
 /**
  * @type {Template}
  */
-let universalTemplate;
+let universalTemplate = {
+  loadDelayed: universalLoadDelayed,
+  loadEager: universalLoadEager,
+  loadLazy: universalLoadLazy,
+};
 /**
  * @type {Template}
  */
@@ -116,9 +125,6 @@ async function loadTemplate(templateName, main) {
  */
 async function decorateTemplates(main) {
   try {
-    // Load the universal template for every page
-    universalTemplate = await loadTemplate('universal', main);
-
     const templateName = toClassName(getMetadata('template'));
     const templates = TEMPLATE_LIST;
     if (templates.includes(templateName)) {
