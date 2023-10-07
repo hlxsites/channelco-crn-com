@@ -4,22 +4,10 @@ import { readBlockConfig } from '../../scripts/lib-franklin.js';
 async function getFilterDetails() {
   const urlSearchParams = new URLSearchParams(window.location.search);
   const key = urlSearchParams.get('key');
-  const cacheName = urlSearchParams.get('cache');
-  const cache = await caches.open(cacheName);
-  const cacheResponse = await cache.match(`${key}-details`);
-  const [dataSource, year] = cacheName.split('-');
+  const dataSource = urlSearchParams.get('dataSource');
+  const year = urlSearchParams.get('year');
   const dataMapSheet = `/data-source/${dataSource}/data-mapping.json`;
   const dataMap = await ffetch(dataMapSheet).sheet(year).all();
-
-  if (cacheResponse) {
-    const { data } = await cacheResponse.json();
-    return {
-      data,
-      dataMap,
-    };
-  }
-
-  // No cache data found, we fetch data from backend
   const spreadsheet = `/data-source/${dataSource}/${dataSource}-data.json`;
   const data = await ffetch(spreadsheet)
     .sheet(year)

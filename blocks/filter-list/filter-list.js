@@ -36,6 +36,41 @@ function getUniqueValuesByKeys(arr, keys, dataMap) {
   return uniqueValuesByKeys;
 }
 
+function populateTable(data, tableFields, dataMap, detailsUrl, dataSource, year, tbody) {
+  data.forEach((item, i) => {
+    const row = document.createElement('tr');
+    const isEvenRow = i % 2 === 0;
+    row.classList.add(isEvenRow ? 'row2' : 'row1');
+    tableFields.forEach(async (field) => {
+      const isDetailsLink = field.includes('(link)');
+      const rawValue = isDetailsLink ? item[field.replace('(link)', '').trim()] : item[field.trim()];
+      const value = dataMapLookup(dataMap, rawValue);
+      const cell = buildCell(1);
+      if (isDetailsLink) {
+        const a = document.createElement('a');
+        a.href = `${detailsUrl}?key=${item.Pkey}&dataSource=${dataSource}&year=${year}`;
+        a.innerText = value;
+        cell.append(a);
+      } else {
+        cell.innerText = value;
+      }
+      row.append(cell);
+    });
+    tbody.append(row);
+  });
+}
+
+async function loadMore(tableFields, dataMap, detailsUrl, dataSource, year, tbody, loadMoreDiv) {
+  const spreadsheet = `/data-source/${dataSource}/${dataSource}-data.json`;
+  const newData = await ffetch(spreadsheet).sheet(year).slice(20).all();
+
+  populateTable(newData, tableFields, dataMap, detailsUrl, dataSource, year, tbody);
+
+  if (loadMoreDiv) {
+    loadMoreDiv.remove();
+  }
+}
+
 export default async function decorate(block) {
   const config = readBlockConfig(block);
   const dataSource = config['data-source'];
@@ -45,21 +80,19 @@ export default async function decorate(block) {
   const filterFields = config['filter-fields'].split(',');
   const tableFields = config['table-fields'].split(',');
 
-  const data = await ffetch(spreadsheet).sheet(year).all();
+  const data = await ffetch(spreadsheet).sheet(year).limit(20).all();
   const dataMap = await ffetch(dataMapSheet).sheet(year).all();
 
   const currentUrlArray = window.location.href.split('/');
   currentUrlArray[currentUrlArray.length - 1] = `${currentUrlArray[currentUrlArray.length - 1]}-${year}details`;
   const detailsUrl = currentUrlArray.join('/');
 
-  // Create cache for data in details and filters
-  const cacheName = `${dataSource}-${year}`;
-  const cache = await caches.open(cacheName);
-
   // Clear block contents
   block.innerHTML = '';
 
   // Process and create filter fields
+  const filterDiv = document.createElement('div');
+  filterDiv.classList.add('filters');
   const alphaFields = {};
   const valueFields = [];
   filterFields.forEach((field) => {
@@ -95,9 +128,11 @@ export default async function decorate(block) {
   });
 
   // Create table
+  const tableDiv = document.createElement('div');
   const table = document.createElement('table');
   const thead = document.createElement('thead');
   const tbody = document.createElement('tbody');
+  tableDiv.classList.add('table');
   table.append(thead, tbody);
 
   const headerRow = document.createElement('tr');
@@ -110,31 +145,17 @@ export default async function decorate(block) {
   });
   thead.append(headerRow);
 
-  data.forEach((item, i) => {
-    const row = document.createElement('tr');
-    const isEvenRow = i % 2 === 0;
-    row.classList.add(isEvenRow ? 'row2' : 'row1');
-    tableFields.forEach(async (field) => {
-      const isDetailsLink = field.includes('(link)');
-      const rawValue = isDetailsLink ? item[field.replace('(link)', '').trim()] : item[field.trim()];
-      const value = dataMapLookup(dataMap, rawValue);
-      const cell = buildCell(1);
-      if (isDetailsLink) {
-        const cacheData = new Response(JSON.stringify({
-          data: item,
-        }), { headers: { 'Content-Type': 'application/json' } });
-        await cache.put(`${item.Pkey}-details`, cacheData);
+  populateTable(data, tableFields, dataMap, detailsUrl, dataSource, year, tbody);
+  tableDiv.append(table);
 
-        const a = document.createElement('a');
-        a.href = `${detailsUrl}?key=${item.Pkey}&cache=${cacheName}`;
-        a.innerText = value;
-        cell.append(a);
-      } else {
-        cell.innerText = value;
-      }
-      row.append(cell);
-    });
-    tbody.append(row);
-  });
-  block.append(table);
+  // Add load more... button
+  const loadMoreDiv = document.createElement('div');
+  loadMoreDiv.classList.add('load-more');
+  const loadMoreButton = document.createElement('button');
+  loadMoreButton.innerText = 'Load more...';
+  loadMoreButton.addEventListener('click', () => { loadMore(tableFields, dataMap, detailsUrl, dataSource, year, tbody, loadMoreDiv); });
+  loadMoreDiv.append(loadMoreButton);
+  tableDiv.append(loadMoreDiv);
+
+  block.append(tableDiv);
 }
