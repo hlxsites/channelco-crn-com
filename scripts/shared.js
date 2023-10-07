@@ -15,20 +15,22 @@ const DEFAULT_CATEGORY_NAME = 'News';
 const EMAIL_REGEX = /\S+[a-z0-9]@[a-z0-9.]+/img;
 
 /**
- * Builds breadcrumb menu and prepends to main in a new section
- * @param {Element} main The container element
+ * Builds breadcrumb menu and returns it.
+ * @returns {HTMLElement} Newly created bread crumb.
  */
-function buildBreadcrumb(main) {
+export function buildBreadcrumb() {
   const path = window.location.pathname;
   const title = document.querySelector('h1');
 
   if (path === '/' || (title && title.innerText === '404')) {
-    return;
+    return undefined;
   }
 
   const div = document.createElement('div');
-  div.append(buildBlock('breadcrumb', { elems: [] }));
-  main.prepend(div);
+  const breadcrumb = buildBlock('breadcrumb', { elems: [] });
+  div.append(breadcrumb);
+  decorateBlock(breadcrumb);
+  return div;
 }
 
 function buildList(name, elements) {
@@ -50,7 +52,7 @@ function buildList(name, elements) {
   return ul;
 }
 
-export function buildNewsSlider(main, title) {
+export async function buildNewsSlider(main, title) {
   const name = title;
   const elements = getMetadata('keywords');
 
@@ -61,9 +63,13 @@ export function buildNewsSlider(main, title) {
   newsSliderBlock.classList.add('tabbed');
 
   div.append(newsSliderBlock);
-  main.prepend(div);
-
-  return newsSliderBlock;
+  const topSection = main.querySelector('.top-section');
+  if (!topSection) {
+    return;
+  }
+  topSection.append(div);
+  decorateBlock(newsSliderBlock);
+  await loadBlock(newsSliderBlock);
 }
 
 /**
@@ -116,7 +122,6 @@ function buildPageDivider(main) {
  */
 function buildAutoBlocks(main) {
   try {
-    buildBreadcrumb(main);
     buildEmbed(main);
     buildPageDivider(main);
   } catch (error) {

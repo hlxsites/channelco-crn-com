@@ -5,10 +5,6 @@ main {
   overflow: hidden;
 }
 
-main .main-content-container {
-  margin-top: 0;
-}
-
 .top-ad-section {
   padding-bottom: 20px;
   border-top: 2px solid #000000;
@@ -34,13 +30,10 @@ main .main-content-container {
   position: relative;
 }
 
-main .section.breadcrumb-container {
+main .breadcrumb-wrapper {
   margin: 0;
-  padding: 0;
-}
-
-main .section.breadcrumb-container .breadcrumb-wrapper {
-  max-width: unset;
+  padding: 0.25rem 0;
+  min-height: 35px;
 }
 
 .ad-title {
@@ -112,6 +105,10 @@ main .back-top-top-section-header {
   height: 626px;
 }
 
+main .content-section .section:first-child {
+  margin-top: 0;
+}
+
 @keyframes loading {
   0% {
     background-position: 200% 0;
@@ -141,42 +138,53 @@ main .back-top-top-section-header {
 }
 
 @media (min-width: 992px) {
-  main .content-and-ads-container {
+  /* avoids CLS before the right ad section moves into place */
+  main > .section {
+    margin-right: 330px;
+    padding-right: var(--padding-spacer-x);
+  }
+
+  /* avoids CLS before the right ad section moves into place */
+  main .right-ad-section {
+    display: none;
+  }
+
+  /* shows the right ad section once it moves into place */
+  main.grid-layout .right-ad-section {
+    display: block;
+  }
+
+  main.grid-layout .section {
+    margin: 0;
+    padding: 0;
+  }
+
+  main.grid-layout {
     display: grid;
     gap: var(--padding-spacer-x);
     grid-template-columns: auto 1fr 330px auto;
     grid-template-rows: auto auto;
     grid-template-areas:
-      '. news news .'
-      '. content ads .';
+      'top top top top'
+      '. content ads .'
+      'to-top to-top to-top to-top';
   }
 
-  main .content-and-ads-container .news-slider-wrapper {
-    grid-area: news;
-    grid-template: '. content ads .' / auto 1fr 330px auto;
+  main .top-section {
+    grid-area: top;
   }
 
-  main .content-and-ads-container .content-section {
+  main .content-section {
     grid-area: content;
-    margin: 0;
-    padding: 0;
   }
 
-  main .content-and-ads-container .content-section .section {
-    margin: 0;
-    padding: 0;
+  main .back-to-top {
+    grid-area: to-top;
   }
 
-  main .content-and-ads-container .right-ad-section {
+  main .right-ad-section {
     grid-area: ads;
     min-height: 700px;
-    margin: 0;
-    padding: 0;
-  }
-
-  main .content-and-ads-container .right-ad-section .section {
-    margin: 0;
-    padding: 0;
   }
 }
 

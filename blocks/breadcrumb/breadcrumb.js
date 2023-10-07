@@ -9,6 +9,7 @@ function createBreadcrumbItem(href, label) {
 }
 
 export default function decorate(block) {
+  block.innerHTML = '';
   // If path ends with '/', pop the last item out. Then pop the current page
   const pathArr = window.location.pathname.split('/');
   if (pathArr[pathArr.length - 1] === '') pathArr.pop();

@@ -1,3 +1,5 @@
+import { buildBreadcrumb } from '../../scripts/shared.js';
+
 function scrollToTop(event) {
   event.preventDefault();
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -39,18 +41,34 @@ function createToTopSection() {
  */
 // eslint-disable-next-line import/prefer-default-export
 export async function loadLazy(main) {
-  const mainContainer = document.createElement('div');
-  mainContainer.className = 'main-content-container';
-
+  // move all sections into a single container so that they can be
+  // placed in the correct location in the page's grid
   const contentSection = document.createElement('div');
   contentSection.className = 'content-section';
+
+  const rightAds = main.querySelector('.right-ad-section');
+  if (!rightAds) {
+    return;
+  }
+
+  [...main.querySelectorAll('main > .section')].forEach((section) => {
+    contentSection.appendChild(section);
+  });
+  main.insertBefore(contentSection, rightAds);
+  main.classList.add('grid-layout');
+}
+
+/**
+ * Loads the template's general layout onto the page.
+ * @param {HTMLElement} main The document's main element.
+ */
+export function loadEager(main) {
+  const topSection = document.createElement('div');
+  topSection.classList.add('top-section');
 
   const topAdSection = document.createElement('div');
   topAdSection.className = 'top-ad-section';
   topAdSection.id = 'top-ad-fragment-container';
-
-  const contentAndAdsContainer = document.createElement('div');
-  contentAndAdsContainer.className = 'content-and-ads-container';
 
   const rightAdSection = document.createElement('div');
   rightAdSection.className = 'right-ad-section';
@@ -75,39 +93,24 @@ export async function loadLazy(main) {
   });
 
   bottomAdSection.appendChild(closeIcon);
-  contentAndAdsContainer.appendChild(contentSection);
-  contentAndAdsContainer.appendChild(rightAdSection);
 
-  const breadcrumb = main.querySelector('.breadcrumb-container');
+  const breadcrumb = buildBreadcrumb();
   const newsWrapper = main.querySelector('.news-slider-wrapper');
 
+  topSection.appendChild(topAdSection);
   if (breadcrumb) {
-    main.insertBefore(topAdSection, breadcrumb);
-  } else {
-    main.prepend(topAdSection);
+    topSection.appendChild(breadcrumb);
   }
-
-  // Move remaining sections in main to contentSection
-  Array.from(main.children)
-    .filter((child) => child !== topAdSection && child !== breadcrumb)
-    .forEach((section) => {
-      contentSection.appendChild(section);
-    });
-
-  mainContainer.appendChild(contentAndAdsContainer);
-
   if (newsWrapper) {
-    contentAndAdsContainer.prepend(newsWrapper);
-    const newsContainer = main.querySelector('.news-slider-container');
-    if (newsContainer) {
-      newsContainer.classList.remove('news-slider-container');
-    }
+    newsWrapper.parentElement.classList.remove('news-slider-container');
+    topSection.appendChild(newsWrapper);
+    newsWrapper.parentElement.classList.add('news-slider-container');
   }
+  main.prepend(topSection);
+  main.append(rightAdSection);
 
   const toTopSection = createToTopSection();
-  mainContainer.appendChild(toTopSection);
-
-  main.appendChild(mainContainer);
+  main.appendChild(toTopSection);
 
   document.body.appendChild(bottomAdSection);
 }
