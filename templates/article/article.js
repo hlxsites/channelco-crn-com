@@ -16,8 +16,10 @@ import {
  * for all articles.
  * @param {HTMLElement} main The page's main content.
  */
-export default async function loadTemplate(main) {
+// eslint-disable-next-line import/prefer-default-export
+export async function loadEager(main) {
   const path = window.location.pathname;
+
   const article = await getRecordByPath(path);
   if (!article) {
     return;
@@ -51,7 +53,9 @@ export default async function loadTemplate(main) {
   await buildLearnMore(heading.parentElement, article.keywords);
   if (author) {
     await buildAuthorBlades(heading.parentElement, [author]);
-    const authorLink = heading.parentElement.querySelector('.blade.author .blade-text a');
+    const authorLink = heading.parentElement.querySelector(
+      '.blade.author .blade-text a',
+    );
     if (authorLink) {
       authorLink.classList.add('link-arrow');
     }

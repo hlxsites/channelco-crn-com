@@ -110,7 +110,7 @@ function addDragEvents(handle, carousel, isTabsBlock) {
 }
 
 export default function decorate(block) {
-  const isTabsBlock = block.classList.contains('tabs');
+  const isTabsBlock = block.classList.contains('tabbed');
   let newsItems;
   let newsSlider;
   let carousel;
@@ -123,11 +123,24 @@ export default function decorate(block) {
     h1.textContent = title;
     h1.className = 'slider-title';
 
+    h1 = block.querySelector('ul h1'); // overwrite h1 if its in the block
+    if (h1) {
+      h1.className = 'slider-title';
+    }
+
     // Query for anchor tags only when 'tabs' class is present
     newsItems = Array.from(block.querySelectorAll('ul li'));
 
     newsSlider = document.createElement('div');
     newsSlider.id = 'inthesubtaxonomies';
+
+    // If only h1 exists in the block, skip generating other elements
+    if (newsItems.length === 0) {
+      h1 = block.querySelector('h1');
+      h1.className = 'slider-title';
+      block.replaceWith(h1);
+      return;
+    }
 
     carousel = document.createElement('div');
     carousel.id = 'inthetaxonomies-carousel';
@@ -147,6 +160,14 @@ export default function decorate(block) {
       link.href = item.href || '#';
       link.className = 'eyebrow-link';
       link.textContent = item.textContent;
+
+      link.addEventListener('click', (event) => {
+        event.preventDefault();
+        document.querySelectorAll('.eyebrow-link').forEach((el) => {
+          el.classList.remove('active-tab');
+        });
+        this.classList.add('active-tab');
+      });
 
       li.appendChild(link);
       ul.appendChild(li);
