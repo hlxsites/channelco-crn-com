@@ -73,6 +73,10 @@
   }
 }
 
+html {
+  overflow-y: scroll;
+}
+
 body {
   font-size: var(--body-font-size-m);
   margin-left: auto;

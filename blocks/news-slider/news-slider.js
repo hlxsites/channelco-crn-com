@@ -138,7 +138,7 @@ export default function decorate(block) {
     if (newsItems.length === 0) {
       h1 = block.querySelector('h1');
       h1.className = 'slider-title';
-      newsSlider.parentNode.insertBefore(h1, newsSlider);
+      block.replaceWith(h1);
       return;
     }
 
@@ -161,7 +161,7 @@ export default function decorate(block) {
       link.className = 'eyebrow-link';
       link.textContent = item.textContent;
 
-      link.addEventListener('click', function (event) {
+      link.addEventListener('click', (event) => {
         event.preventDefault();
         document.querySelectorAll('.eyebrow-link').forEach((el) => {
           el.classList.remove('active-tab');

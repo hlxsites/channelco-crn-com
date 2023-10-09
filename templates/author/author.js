@@ -23,7 +23,8 @@ function addIcon(beforeElement, iconName) {
  * Manipulates the DOM as necessary to format the template.
  * @param {HTMLElement} main Main element of the page.
  */
-export default async function decorate(main) {
+// eslint-disable-next-line import/prefer-default-export
+export async function loadEager(main) {
   const defaultContent = main.querySelector('.default-content-wrapper');
   if (!defaultContent) {
     return;
