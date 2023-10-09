@@ -172,8 +172,7 @@ footer {
   }
 
   .footer-social {
-    padding-right: calc(var(--custom-gutter-x) * 0.5);
-    padding-left: calc(var(--custom-gutter-x) * 0.5);
+    padding: 0;
   }
 
   .social-icons {
@@ -232,7 +231,6 @@ footer {
 
   .footer-sublinks {
     padding-right: calc(var(--custom-gutter-x) * 0.5);
-    width: 1;
   }
 
   .footer-sublinks ul li a {
@@ -266,12 +264,17 @@ footer {
   }
 
   .footer-main ul {
-    flex-direction: row nowrap;
+    flex-flow: row nowrap;
     justify-content: center;
     align-items: flex-start;
     padding-right: calc(var(--custom-gutter-x) * 0.5);
     padding-left: calc(var(--custom-gutter-x) * 0.5);
     margin-top: var(--custom-gutter-y);
+  }
+
+  .footer-sublinks li {
+    display: flex;
+    flex-wrap: wrap;
   }
 
   .footer-main li {
@@ -280,13 +283,9 @@ footer {
     text-align: center;
     white-space: normal; /* Allow text to wrap */
     line-height: 1.5rem;
-    margin: calc(-1 * var(--custom-gutter-y)) calc(0.5 * var(--custom-gutter-x))
-      10px calc(-0.5 * var(--custom-gutter-x));
-  }
-
-  .footer-sublinks li {
-    display: flex;
-    flex-wrap: wrap;
+    margin: calc(-1 * var(--custom-gutter-y))
+      calc(-0.5 * var(--custom-gutter-x)) 10px
+      calc(0.5 * var(--custom-gutter-x));
   }
 
   .footer-main ul > li {
@@ -330,6 +329,20 @@ footer {
 }
 
 @media (min-width: 992px) {
+  .footer {
+    flex-direction: row;
+  }
+
+  .footer-brand,
+  .footer-nav {
+    padding-right: calc(var(--custom-gutter-x) * 0.5);
+    padding-left: calc(var(--custom-gutter-x) * 0.5);
+  }
+
+  .footer-brand {
+    padding-top: 0;
+  }
+
   .footer-main ul > li {
     padding: 0 25px;
     width: 15%;
