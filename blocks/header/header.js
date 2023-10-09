@@ -265,7 +265,13 @@ export default async function decorate(block) {
     block.append(navWrapper);
     navSections.append(menuItems);
 
+    // nav container
     const main = document.querySelector('main');
-    main.prepend(menuContainer);
+    const parentElement = main.parentNode;
+    const menuEl = document.createElement('div');
+    menuEl.classList.add('nav-container');
+    parentElement.insertBefore(menuEl, main);
+
+    menuEl.append(menuContainer);
   }
 }

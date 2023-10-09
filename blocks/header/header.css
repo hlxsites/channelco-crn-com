@@ -1,24 +1,30 @@
 /* stylelint-disable no-descending-specificity */
 
 /* header and nav layout */
+header {
+  height: 120px;
+}
+
 header .nav-wrapper {
   background-color: var(--background-color);
   width: 100%;
   z-index: 2;
   border-top: 2px solid red;
-  margin-top: 40px;
+  margin-top: 35px;
 }
 
 header nav {
   display: flex;
-  justify-content: space-evenly;
+  justify-content: space-between;
   box-sizing: border-box;
   border-top: 2px solid black;
   border-bottom: 4px solid red;
   align-items: center;
   max-width: 1264px;
-  height: var(--nav-height);
+  height: 120px;
+  padding: 0;
 }
+
 
 @media (min-width: 900px) {
   header nav[aria-expanded='true'] {
@@ -117,9 +123,17 @@ header nav[aria-expanded='true'] .nav-hamburger-icon::after {
   }
 }
 
+header nav .nav-brand {
+  padding-left: 24px;
+}
+
 header nav .nav-brand img {
-  width: 128px;
-  height: auto;
+  width: 141px;
+  height: 80px;
+}
+
+.nav-tools {
+  padding-right: 24px;
 }
 
 .nav-drop ul > li > ul > li > a {
@@ -289,11 +303,43 @@ header nav .nav-search-container {
 
   header nav .menu-items {
     display: flex;
-    gap: 2em;
     margin: 0;
     font-size: var(--body-font-size-m);
     color: var(--clr-grey);
     cursor: pointer;
+    padding-top: 25px;
+  }
+
+  .menu-items div {
+    border-top: 1px solid transparent;
+    border-left: 1px solid transparent;
+    border-right: 1px solid transparent;
+    border-bottom: 1px solid transparent;
+    border-radius: 4px;
+    padding-top: 8px;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-bottom: 45px;
+    transition: border-color 0.3s ease;
+    z-index: 4;
+  }
+
+  .menu-items div:hover {
+    border-top: 1px solid #dedede;
+    border-left: 1px solid #dedede;
+    border-right: 1px solid #dedede;
+    border-bottom: 1px solid transparent;
+    color: black;
+  }
+
+  .menu-items div[aria-expanded='true'] {
+    color: black;
+    border-top: 1px solid #dedede;
+    border-left: 1px solid #dedede;
+    border-right: 1px solid #dedede;
+    border-bottom: 1px solid transparent;
+    background-color: #f3f3f3;
+    z-index: 20;
   }
 
   .desktop-menu {
@@ -331,8 +377,9 @@ header nav .nav-search-container {
     background-color: #f3f3f3;
     border: 1px solid #8f8f8f;
     justify-content: center;
-    padding-top: 30px;
+    padding-top: 50px;
     padding-left: 5px;
+    padding-bottom: 15px;
   }
 
   #menu-container u {
@@ -340,7 +387,7 @@ header nav .nav-search-container {
   }
 
   #menu-container ul {
-    padding-left: 15px;
+    padding-left: 20px;
     margin: 0;
   }
 
@@ -354,10 +401,16 @@ header nav .nav-search-container {
   }
 
   #menu-container > div > div > ul > li > ul li {
-    padding-bottom: 5px;
+    padding: 4px 12px;
     font-size: var(--body-font-size-s);
     font-weight: normal;
   }
+
+  #menu-container > div > div > ul > li > ul li:hover {
+    color: white;
+    background-color: red;
+  }
+
 
   /* stylelint-disable-next-line no-duplicate-selectors */
   .desktop-menu[aria-expanded='true'] {
@@ -411,7 +464,6 @@ header nav .nav-search-container {
       'brand tools hamburger' var(--nav-height)
       'sections sections sections' 1fr;
     align-items: center;
-    height: var(--nav-height);
     font-family: var(--body-font-family);
     justify-content: space-between;
   }
@@ -487,21 +539,21 @@ header nav .nav-search-container {
 
   /* ...  */
 
-  header nav[aria-expanded='false'] .nav-sections {
+  header nav .nav-sections {
     max-height: 0;
     overflow: hidden;
-  }
-
-  header nav[aria-expanded='true'] .nav-sections {
     box-sizing: border-box;
-    display: block;
-    visibility: visible;
+    visibility: hidden;
     align-self: start;
     background-color: #fff;
     grid-column: 1 / -1;
-    max-height: 1000px;
     z-index: 10;
     transition: max-height 0.35s ease;
+  }
+
+  header nav[aria-expanded='true'] .nav-sections {
+    max-height: 100vh;
+    visibility: visible;
   }
 
   header nav[aria-expanded='true'] .nav-sections .menu-item a {
@@ -556,18 +608,21 @@ header nav .nav-search-container {
     font-weight: normal;
     color: black;
     padding-left: 10px;
+    padding-top: 4px;
+    padding-bottom: 4px;
   }
 
   .mobile-menu[aria-expanded='true'] div ul li ul li:hover {
     font-weight: normal;
     color: white;
     background-color: red;
-    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
-      border-color 0.15s ease-in-out;
   }
 
   .mobile-menu[aria-expanded='true'] div ul li ul {
     padding-left: 10px;
+    padding-top: 10px;
+    padding-bottom: 0;
+    font-size: 16px;
   }
 
   .mobile-menu[aria-expanded='true'] ul {
