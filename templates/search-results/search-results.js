@@ -28,31 +28,42 @@ function createSearchTermElement(term) {
 }
 
 /**
- * Modifies the DOM with additional elements required to display
- * search results.
- * @param {HTMLElement} block Default DOM structure for the block.
+ * Modifies the DOM as needed for search results, and queries
+ * for the results.
+ * @param {HTMLElement} main The page's main element.
+ * @returns {Promise} Resolves when the template has finished
+ *  loading.
  */
-export default async function decorate(block) {
+// eslint-disable-next-line import/prefer-default-export
+export async function loadLazy(main) {
   const params = new URLSearchParams(window.location.search);
   const searchTerm = String(params.get('query') || '').trim();
   let limit = parseInt(params.get('limit'), 10);
   if (!limit || limit > MAX_LIMIT) {
     limit = MAX_LIMIT;
   }
-  block.innerHTML = `
-    <form action="/search">
-      <input type="search" name="query" placeholder="Search" aria-label="Search" size="1" />
-      <button type="submit">Search</button>
-    </form>
+
+  const section = main.querySelector('.section');
+  if (!section) {
+    return;
+  }
+
+  const form = document.createElement('form');
+  form.setAttribute('action', '/search');
+  form.innerHTML = `
+    <input type="search" name="query" placeholder="Search" aria-label="Search" size="1" />
+    <button type="submit">Search</button>
   `;
+  section.append(form);
+
   const h1 = document.createElement('h1');
   h1.innerText = 'Showing results for ';
   h1.append(createSearchTermElement(searchTerm));
-  block.append(h1);
+  section.append(h1);
 
   const resultCountLabel = document.createElement('h2');
   resultCountLabel.innerText = 'Loading results...';
-  block.append(resultCountLabel);
+  section.append(resultCountLabel);
 
   let results = [];
   if (searchTerm) {
@@ -66,9 +77,9 @@ export default async function decorate(block) {
   termLabel.classList.add('quoted');
   resultCountLabel.append(termLabel);
 
-  await buildArticleCardsBlock(results.slice(0, limit), (cards) => block.append(cards));
+  await buildArticleCardsBlock(results.slice(0, limit), (cards) => section.append(cards));
   const nav = buildBlock('category-navigation', { elems: [] });
-  block.append(nav);
+  section.append(nav);
   decorateBlock(nav);
   await loadBlock(nav);
 }
