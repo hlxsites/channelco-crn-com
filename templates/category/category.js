@@ -16,6 +16,9 @@ import {
  * @param {HTMLElement} main The page's main element.
  */
 // eslint-disable-next-line import/prefer-default-export
+let startIndex = 5;
+let endIndex = 13;
+let totalArtciles;
 export async function loadEager(main) {
   const category = await getRecordByPath(window.location.pathname);
   if (!category) {
@@ -24,14 +27,57 @@ export async function loadEager(main) {
   buildNewsSlider(main, category.title);
 }
 
+function buildCategoryNavigation(main){
+  const categoryNav = document.createElement('div');
+  categoryNav.classList.add('category-nav');
+  if(startIndex > 5) {
+    const prevDiv = document.createElement('div');
+    prevDiv.classList.add('previous');
+    prevDiv.id = 'previous-button';
+    const prevBtn = document.createElement('a');
+    prevBtn.classList.add('btn-on-white');
+    prevBtn.classList.add('white');
+    prevBtn.id = 'previous'
+    prevBtn.textContent = 'Prev';
+    prevDiv.appendChild(prevBtn);
+    categoryNav.append(prevDiv);
+    prevBtn.addEventListener('click', () =>{
+      startIndex = startIndex - 15;
+      endIndex = endIndex - 15;
+      loadArticle(main);
+    });
+  }
+  if(endIndex < totalArtciles) {
+    const nextDiv = document.createElement('div');
+    nextDiv.classList.add('load-more');
+    nextDiv.id = 'load-more-button';
+    const nextBtn = document.createElement('a');
+    nextBtn.classList.add('btn-on-white');
+    nextBtn.classList.add('white');
+    nextBtn.id = 'load-more'
+    nextBtn.textContent = 'Next';
+    nextDiv.appendChild(nextBtn);
+    categoryNav.append(nextDiv);
+    nextBtn.addEventListener('click', ()=>{
+      startIndex = startIndex + 15;
+      endIndex = endIndex + 15;
+      loadArticle(main);
+    });
+  }  
+  return categoryNav;    
+}
+
 /**
  * Modifies the DOM with additional elements required to display a category page.
  * @param {HTMLElement} main The page's main element.
  */
 // eslint-disable-next-line import/prefer-default-export
-export async function loadLazy(main) {
+
+async function loadArticle(main) {
+  console.log('inside loadArticle'+window.location.pathname);
   const category = await getRecordByPath(window.location.pathname);
   if (!category) {
+    console.log('inside if');
     return;
   }
   let lastElement;
@@ -44,13 +90,15 @@ export async function loadLazy(main) {
   }
 
   const articles = await getArticlesByCategory(category.title);
+  totalArtciles = articles.length;
+  console.log(category);
   articles.sort(comparePublishDate);
-
-  buildArticleCardsBlock(articles.slice(0, 5), (leadCards) => {
-    leadCards.classList.add('lead-article');
-    contentSection.insertBefore(leadCards, lastElement);
-  });
-
+  if(startIndex === 5) {
+    buildArticleCardsBlock(articles.slice(0, 5), (leadCards) => {
+      leadCards.classList.add('lead-article');
+      contentSection.insertBefore(leadCards, lastElement);
+    });
+}
   const newsLinkText = `${category.title} News`;
   const newsLink = document.createElement('a');
   newsLink.title = newsLinkText;
@@ -62,12 +110,14 @@ export async function loadLazy(main) {
   newsHeading.append(newsLink);
   contentSection.insertBefore(newsHeading, lastElement);
 
-  buildArticleCardsBlock(articles.slice(5, 13), (cards) => {
+  buildArticleCardsBlock(articles.slice(startIndex, endIndex), (cards) => {
     contentSection.insertBefore(cards, lastElement);
   });
 
-  const categoryNavigation = buildBlock('category-navigation', { elems: [] });
+  const categoryNavigation = buildCategoryNavigation(main);
   contentSection.append(categoryNavigation);
-  decorateBlock(categoryNavigation);
-  await loadBlock(categoryNavigation);
+}
+
+export async function loadLazy(main) {
+  loadArticle(main);
 }
