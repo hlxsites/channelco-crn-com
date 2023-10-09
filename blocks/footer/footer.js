@@ -36,8 +36,11 @@ export default async function decorate(block) {
     const footerMain = document.querySelector('.footer-main');
     const footerSublinks = document.querySelector('.footer-sublinks');
     const footerSocials = document.querySelector('.footer-social');
+    const spacer = document.createElement('div');
+    spacer.classList.add('spacer');
 
     row1.appendChild(footerMain);
+    row2.appendChild(spacer);
     row2.appendChild(footerSublinks);
     row2.appendChild(footerSocials);
 
@@ -62,10 +65,17 @@ export default async function decorate(block) {
     footerSocials.appendChild(socialIcons);
   }
 
-  block.querySelector('.footer-brand a').setAttribute('aria-label', 'Navigate to homepage');
+  block
+    .querySelector('.footer-brand a')
+    .setAttribute('aria-label', 'Navigate to homepage');
   block.querySelectorAll('.footer-social a').forEach((a) => {
     a.setAttribute('target', '_blank');
     a.setAttribute('rel', 'noopener noreferrer');
-    a.setAttribute('aria-label', `Open our ${a.firstElementChild.classList[1].substring(5)} page in a new tab.`);
+    a.setAttribute(
+      'aria-label',
+      `Open our ${a.firstElementChild.classList[1].substring(
+        5,
+      )} page in a new tab.`,
+    );
   });
 }
