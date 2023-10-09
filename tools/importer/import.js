@@ -114,9 +114,15 @@ const createFetchMetadata = (main, document) => {
   if (desc) {
     meta.Description = desc.content;
   }
-
+  if (templateType.content === 'webpage'){
+  const category = document.querySelector('.page-title');
+  if(category != null) {
+    const categoryValue = captializeFirstLetter(category.textContent);   
+    meta.category = categoryValue;
+  }
+  meta.Template = 'Category';
+  }
   
-
   const CompanyNames = document.querySelector('[name="CompanyNames"]');
   if(CompanyNames) {
     meta.companynames = CompanyNames.content; 
@@ -251,6 +257,12 @@ export default {
       WebImporter.DOMUtils.remove(main, [
         '.container.parent' 
       ]);    
+    }
+    else if (templateType.content === 'webpage'){
+      createFetchMetadata(main, document);
+      WebImporter.DOMUtils.remove(main, [
+        '.container.parent' 
+      ]);  
     }
     WebImporter.DOMUtils.remove(main, [
       'nav',
