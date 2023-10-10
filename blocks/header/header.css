@@ -273,6 +273,10 @@ header nav .nav-search-container {
     padding-bottom: 15px;
   }
 
+  #menu-container[aria-expanded='false'] {
+    display: none;
+  }
+
   #menu-container u {
     text-decoration: none;
   }
@@ -323,10 +327,6 @@ header nav .nav-search-container {
     color: black;
     font-weight: 700;
     list-style: none;
-  }
-
-  #menu-container[aria-expanded='false'] {
-    display: none;
   }
 
   .mobile-menu {

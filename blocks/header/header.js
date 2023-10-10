@@ -12,13 +12,9 @@ function closeMenu() {
   document.querySelectorAll('nav .menu-items div').forEach((el) => {
     el.setAttribute('aria-expanded', 'false');
   });
-  document.querySelectorAll('main #menu-container div').forEach((el) => {
+  document.querySelectorAll('.nav-container div').forEach((el) => {
     el.setAttribute('aria-expanded', 'false');
   });
-  const menuContainer = document.querySelector('main #menu-container');
-  if (menuContainer) {
-    menuContainer.setAttribute('aria-expanded', 'false');
-  }
 }
 
 function closeOnEscape(e) {
@@ -41,10 +37,7 @@ function closeOnEscape(e) {
     if (search && search.classList.contains('active')) {
       closeSearch();
     }
-    const menuItems = document.querySelectorAll('nav [aria-expanded="true"]');
-    if (menuItems.length > 0) {
-      closeMenu();
-    }
+    closeMenu();
   }
 }
 function openOnKeydown(e) {
@@ -271,7 +264,6 @@ export default async function decorate(block) {
     const menuEl = document.createElement('div');
     menuEl.classList.add('nav-container');
     parentElement.insertBefore(menuEl, main);
-
     menuEl.append(menuContainer);
   }
 }
