@@ -52,7 +52,7 @@ function buildList(name, elements) {
   return ul;
 }
 
-export async function buildNewsSlider(main, title) {
+export function buildNewsSlider(main, title) {
   const name = title;
   const elements = getMetadata('keywords');
 
@@ -69,7 +69,6 @@ export async function buildNewsSlider(main, title) {
   }
   topSection.append(div);
   decorateBlock(newsSliderBlock);
-  await loadBlock(newsSliderBlock);
 }
 
 /**
@@ -438,14 +437,14 @@ export async function getAuthorByName(authorName) {
 }
 
 /**
- * Processes the contents of a block and retrieves the records specified in the
+ * Processes the contents of a block and retrieves the paths specified in the
  * block. The method assumes that the block's content consists of a <ul> whose
  * list items are links to items in the site's query index.
  * @param {HTMLElement} block Block whose content will be used.
- * @returns {Promise<Array<QueryIndexRecord>>} Resolves with records that match all
- *  specified URLs in a block.
+ * @returns {Array<string>} Resolves with paths that are
+ *  specified in the block.
  */
-export function getRecordsFromBlock(block) {
+export function getPathsFromBlock(block) {
   const uls = block.querySelectorAll('ul');
   let paths = [];
 
@@ -471,15 +470,28 @@ export function getRecordsFromBlock(block) {
       .filter((path) => !!path);
     paths = paths.concat(paths, recordPaths);
   });
+  return paths;
+}
 
+/**
+ * Processes the contents of a block and retrieves the records specified in the
+ * block. The method assumes that the block's content consists of a <ul> whose
+ * list items are links to items in the site's query index.
+ * @param {HTMLElement} block Block whose content will be used.
+ * @returns {Promise<Array<QueryIndexRecord>>} Resolves with records that match all
+ *  specified URLs in a block.
+ */
+export function getRecordsFromBlock(block) {
   // retrieve article information for all specified article paths
-  return getRecordsByPath(paths);
+  const paths = getPathsFromBlock(block);
+  return getPathsFromBlock(paths);
 }
 
 /**
  * Creates an HTML element that contains an article author's name, a link to the
- * author's profile page, and the publish date of the article.
- * @param {QueryIndexRecord} article Article whose author information will be
+ * author's profile page, and the publish date of the article. If an article
+ * is not provided, the method will create placeholders.
+ * @param {QueryIndexRecord} [article] Article whose author information will be
  *  included.
  * @returns {HTMLElement} Element containing summary information about the author of
  *  an article.
@@ -487,19 +499,29 @@ export function getRecordsFromBlock(block) {
 export function buildArticleAuthor(article) {
   const author = document.createElement('h5');
   author.classList.add('article-author');
-  // attempting to predict the URL to the author. may need to change to query
-  // author information from index
-  const authorId = String(article.author)
-    .toLowerCase()
-    .replaceAll(/[^0-9a-z ]/g, '')
-    .replaceAll(/[^0-9a-z]/g, '-');
-  author.innerHTML = `
-    <a href="/authors/${authorId}" class="link-arrow" aria-label="By ${article.author}"><span class="uncolored-link">By</span> ${article.author}</a>
-  `;
 
   const date = document.createElement('h5');
   date.classList.add('article-date');
-  date.innerText = article.publisheddate;
+
+  if (article) {
+    // attempting to predict the URL to the author. may need to change to query
+    // author information from index
+    const authorId = String(article.author)
+      .toLowerCase()
+      .replaceAll(/[^0-9a-z ]/g, '')
+      .replaceAll(/[^0-9a-z]/g, '-');
+    author.innerHTML = `
+      <a href="/authors/${authorId}" class="link-arrow" aria-label="By ${article.author}"><span class="uncolored-link">By</span> ${article.author}</a>
+    `;
+
+    date.innerText = article.publisheddate;
+  } else {
+    author.classList.add('placeholder');
+    date.classList.add('placeholder');
+
+    author.innerText = 'Author Name';
+    date.innerText = 'Article published date';
+  }
 
   const container = document.createElement('div');
   container.classList.add('article-author-container');
@@ -841,29 +863,37 @@ export async function getRelatedArticles(article, relatedCount = 5) {
 }
 
 /**
- * Builds an article-cards block from a list of articles, and adds the
- * block to the DOM.
- * @param {Array<QueryIndexRecord>} articles Records from which article cards
- *  will be built.
+ * Builds an article-cards block with a given number of placeholders,
+ * adds the block to the DOM, and decorates it.
+ * @param {number} count The number of cards to add to the block.
  * @param {function} addBlockToDom Will be invoked when the block needs to be
  *  added to the DOM. Will receive a single argument: the block's HTMLElement.
- * @returns {Promise} Resolves when the block is complete.
+ * @returns {HTMLElement} The newly created block.
  */
-export async function buildArticleCardsBlock(articles, addBlockToDom) {
-  const ul = document.createElement('ul');
-  articles.forEach((article) => {
-    const li = document.createElement('li');
-    const articleUrl = `${window.location.protocol}//${window.location.host}${article.path}`;
-    li.innerHTML = `
-      <a href="${articleUrl}" title="${article.title}" aria-label="${article.title}">
-        ${articleUrl}
-      </a>
-    `;
-    ul.append(li);
-  });
-
-  const cards = buildBlock('article-cards', { elems: [ul] });
+export function buildArticleCardsBlock(count, templateName, addBlockToDom) {
+  const cards = buildBlock('article-cards', { elems: [] });
+  cards.dataset.cardCount = count;
+  cards.dataset.template = templateName;
   addBlockToDom(cards);
   decorateBlock(cards);
-  await loadBlock(cards);
+  return cards;
+}
+
+/**
+ * Loads a list of article records into a template's card placeholders.
+ * @param {HTMLElement} main The document's main element.
+ * @param {string} templateName Name of the template whose cards are being loaded.
+ * @param {Array<QueryIndexRecord>} articles Article records to load into the template's card
+ *  placeholders.
+ */
+export function loadTemplateArticleCards(main, templateName, articles) {
+  const placeholderCards = main.querySelectorAll(`.article-cards[data-template="${templateName}"] .article-card.skeleton`);
+  [...placeholderCards].forEach((card, index) => {
+    if (articles.length > index) {
+      card.dataset.json = JSON.stringify(articles[index]);
+    } else {
+      // placeholder not needed - not enough articles
+      card.remove();
+    }
+  });
 }

@@ -7,6 +7,7 @@ import {
   queryIndex,
   isArticle,
   buildArticleCardsBlock,
+  loadTemplateArticleCards,
 } from '../../scripts/shared.js';
 
 const MAX_LIMIT = 50;
@@ -28,16 +29,22 @@ function createSearchTermElement(term) {
 }
 
 /**
- * Modifies the DOM as needed for search results, and queries
- * for the results.
+ * Retrieves the search term as provided by a user.
+ * @returns {string} Search term value.
+ */
+function getSearchTerm() {
+  const params = new URLSearchParams(window.location.search);
+  return String(params.get('query') || '').trim();
+}
+
+/**
+ * Modifies the DOM as needed for search results
  * @param {HTMLElement} main The page's main element.
- * @returns {Promise} Resolves when the template has finished
- *  loading.
  */
 // eslint-disable-next-line import/prefer-default-export
-export async function loadLazy(main) {
+export function loadEager(main) {
   const params = new URLSearchParams(window.location.search);
-  const searchTerm = String(params.get('query') || '').trim();
+  const searchTerm = getSearchTerm();
   let limit = parseInt(params.get('limit'), 10);
   if (!limit || limit > MAX_LIMIT) {
     limit = MAX_LIMIT;
@@ -48,12 +55,22 @@ export async function loadLazy(main) {
     return;
   }
 
+  const search = document.createElement('input');
+  search.name = 'query';
+  search.type = 'search';
+  search.placeholder = 'Search';
+  search.ariaLabel = 'Search';
+  search.size = 1;
+  search.value = searchTerm;
+
+  const searchButton = document.createElement('button');
+  searchButton.type = 'submit';
+  searchButton.innerText = 'Search';
+
   const form = document.createElement('form');
   form.setAttribute('action', '/search');
-  form.innerHTML = `
-    <input type="search" name="query" placeholder="Search" aria-label="Search" size="1" />
-    <button type="submit">Search</button>
-  `;
+  form.append(search);
+  form.append(searchButton);
   section.append(form);
 
   const h1 = document.createElement('h1');
@@ -62,8 +79,31 @@ export async function loadLazy(main) {
   section.append(h1);
 
   const resultCountLabel = document.createElement('h2');
+  resultCountLabel.classList.add('result-count-label');
   resultCountLabel.innerText = 'Loading results...';
   section.append(resultCountLabel);
+
+  buildArticleCardsBlock(limit, 'search-results', (cards) => section.append(cards));
+}
+
+/**
+ * Modifies the DOM as needed for search results, and queries
+ * for the results.
+ * @param {HTMLElement} main The page's main element.
+ * @returns {Promise} Resolves when the template has finished
+ *  loading.
+ */
+// eslint-disable-next-line import/prefer-default-export
+export async function loadLazy(main) {
+  const searchTerm = getSearchTerm();
+  const section = main.querySelector('.section');
+  if (!section) {
+    return;
+  }
+  const resultCountLabel = main.querySelector('.search-results .result-count-label');
+  if (!resultCountLabel) {
+    return;
+  }
 
   let results = [];
   if (searchTerm) {
@@ -77,7 +117,8 @@ export async function loadLazy(main) {
   termLabel.classList.add('quoted');
   resultCountLabel.append(termLabel);
 
-  await buildArticleCardsBlock(results.slice(0, limit), (cards) => section.append(cards));
+  loadTemplateArticleCards(main, 'search-results', results);
+
   const nav = buildBlock('category-navigation', { elems: [] });
   section.append(nav);
   decorateBlock(nav);
