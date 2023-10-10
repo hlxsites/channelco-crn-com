@@ -114,7 +114,8 @@ function makeSticky() {
   const lastBanner = bannerWrappers[bannerWrappers.length - 1];
 
   // Calculate the initial position of the elements
-  const lastAdOffsetTop = lastAd.offsetTop;
+  // adding 300 to make up for ad expansion
+  const lastBannerOffsetTop = lastAd.offsetTop + 300;
 
   function handleScroll() {
     const { scrollY } = window;
