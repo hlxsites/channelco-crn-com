@@ -1,4 +1,7 @@
-import { buildBreadcrumb } from '../../scripts/shared.js';
+import {
+  buildBreadcrumb,
+  getRecordsByPath,
+} from '../../scripts/shared.js';
 
 function scrollToTop(event) {
   event.preventDefault();
@@ -34,6 +37,36 @@ function createToTopSection() {
 }
 
 /**
+ * Queries all placeholder article cards on the page, retrieves their
+ * article records, and replaces each card's placeholder content.
+ * @param {HTMLElement} main The page's main element.
+ * @returns {Promise} Resolves when cards have been loaded.
+ */
+async function loadArticleCards(main) {
+  // find all article cards with a data-path attribute and build a lookup for each unique path
+  const articleLookup = {};
+  [...main.querySelectorAll('.article-card.skeleton[data-path]')]
+    .forEach((articleCard) => {
+      const path = articleCard?.dataset?.path;
+      if (!articleLookup[path]) {
+        articleLookup[path] = [];
+      }
+      articleLookup[path].push(articleCard);
+    });
+
+  // set json data on any article cards from articles that were found
+  const records = await getRecordsByPath(Object.keys(articleLookup));
+  records.forEach((record) => {
+    const path = record?.path;
+    if (articleLookup[path]) {
+      articleLookup[path].forEach((articleCard) => {
+        articleCard.dataset.json = JSON.stringify(record);
+      });
+    }
+  });
+}
+
+/**
  * Creates the general layout of the website, including things like
  * the top ad, right ad, bottom ad, etc.
  * @param {HTMLElement} main The page's main element.
@@ -56,6 +89,11 @@ export async function loadLazy(main) {
   });
   main.insertBefore(contentSection, rightAds);
   main.classList.add('grid-layout');
+
+  const toTopSection = createToTopSection();
+  main.appendChild(toTopSection);
+
+  loadArticleCards(main);
 }
 
 /**
@@ -108,9 +146,6 @@ export function loadEager(main) {
   }
   main.prepend(topSection);
   main.append(rightAdSection);
-
-  const toTopSection = createToTopSection();
-  main.appendChild(toTopSection);
 
   document.body.appendChild(bottomAdSection);
 }

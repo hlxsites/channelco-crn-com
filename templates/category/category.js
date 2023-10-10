@@ -9,6 +9,7 @@ import {
   comparePublishDate,
   buildArticleCardsBlock,
   buildNewsSlider,
+  loadTemplateArticleCards,
 } from '../../scripts/shared.js';
 
 /**
@@ -22,6 +23,35 @@ export async function loadEager(main) {
     return;
   }
   buildNewsSlider(main, category.title);
+
+  let lastElement;
+  const firstSection = main.querySelector('.section');
+  if (!firstSection) {
+    return;
+  }
+  if (firstSection.children.length > 0) {
+    lastElement = firstSection.children.item(0);
+  }
+
+  buildArticleCardsBlock(5, 'category', (leadCards) => {
+    leadCards.classList.add('lead-article');
+    firstSection.insertBefore(leadCards, lastElement);
+  });
+
+  const newsLinkText = `${category.title} News`;
+  const newsLink = document.createElement('a');
+  newsLink.title = newsLinkText;
+  newsLink.ariaLabel = newsLinkText;
+  newsLink.classList.add('link-arrow');
+  newsLink.innerText = newsLinkText;
+
+  const newsHeading = document.createElement('h2');
+  newsHeading.append(newsLink);
+  firstSection.insertBefore(newsHeading, lastElement);
+
+  buildArticleCardsBlock(8, 'category', (cards) => {
+    firstSection.insertBefore(cards, lastElement);
+  });
 }
 
 /**
@@ -34,37 +64,15 @@ export async function loadLazy(main) {
   if (!category) {
     return;
   }
-  let lastElement;
   const contentSection = main.querySelector('.content-section');
   if (!contentSection) {
     return;
-  }
-  if (contentSection.children.length > 0) {
-    lastElement = contentSection.children.item(0);
   }
 
   const articles = await getArticlesByCategory(category.title);
   articles.sort(comparePublishDate);
 
-  buildArticleCardsBlock(articles.slice(0, 5), (leadCards) => {
-    leadCards.classList.add('lead-article');
-    contentSection.insertBefore(leadCards, lastElement);
-  });
-
-  const newsLinkText = `${category.title} News`;
-  const newsLink = document.createElement('a');
-  newsLink.title = newsLinkText;
-  newsLink.ariaLabel = newsLinkText;
-  newsLink.classList.add('link-arrow');
-  newsLink.innerText = newsLinkText;
-
-  const newsHeading = document.createElement('h2');
-  newsHeading.append(newsLink);
-  contentSection.insertBefore(newsHeading, lastElement);
-
-  buildArticleCardsBlock(articles.slice(5, 13), (cards) => {
-    contentSection.insertBefore(cards, lastElement);
-  });
+  loadTemplateArticleCards(main, 'category', articles);
 
   const categoryNavigation = buildBlock('category-navigation', { elems: [] });
   contentSection.append(categoryNavigation);
