@@ -26,6 +26,7 @@ function createNewsHeading(title, ...classes) {
   newsLink.ariaLabel = title;
   newsLink.classList.add('link-arrow');
   newsLink.innerText = title;
+  newsLink.href = '/news/';
 
   const newsHeading = document.createElement('h2');
   newsHeading.append(newsLink);

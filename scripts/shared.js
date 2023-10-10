@@ -290,7 +290,7 @@ export function getCategoryPath(path) {
     // fall back to default category if unexpected path format
     return DEFAULT_CATEGORY_PATH;
   }
-  return pathStr.substring(0, lastSlash);
+  return pathStr.substring(0, lastSlash + 1);
 }
 
 /**
