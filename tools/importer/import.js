@@ -30,7 +30,7 @@ const createMetadata = (main, document) => {
 
   const templateType = document.querySelector('[name="templateType"]');
   if (templateType) {
-    meta.Template = templateType.content;
+    meta.Template = 'article';
   }
   const desc = document.querySelector('[property="og:description"]');
   if (desc) {
