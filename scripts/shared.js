@@ -9,6 +9,7 @@ import {
   loadBlocks,
   getMetadata,
 } from './lib-franklin.js';
+import ffetch from './ffetch.js';
 
 const DEFAULT_CATEGORY_PATH = '/news';
 const DEFAULT_CATEGORY_NAME = 'News';
@@ -370,9 +371,22 @@ export function isArticle(record) {
   );
 }
 
-let cachedIndex;
+function buildFetch(filter, limit = 50) {
+  return ffetch('/query-index.json')
+    .filter(filter)
+    // setting a chunk size makes ffetch limit its requests to the specified number
+    // of records per request. so if chunks is 10 and there are 1000 records, ffetch
+    // would make 100 separate requests to retrieve all the data so it can filter
+    // it. so far it's been way _faster_ to have a large chunk size to reduce the
+    // number of requests, with the tradeoff that size of each response is larger.
+    // That will probably have implications on mobile that will need to be addressed.
+    .chunks(10000)
+    .limit(limit);
+}
+
 /**
- * Queries the site's index and only includes those records that match a given filter.
+ * Queries the site's index and only includes those records that match a given filter. This
+ * method is optimized to only return a maximum number of records.
  * @param {function} filter Filter through which each record will be sent. The function will
  *  receive a single argument: the current record's raw data. The function should return true
  *  to include the record in the final result, or false to exclude it from the result.
@@ -380,24 +394,36 @@ let cachedIndex;
  *  matching records.
  */
 export async function queryIndex(filter) {
-  let index = cachedIndex;
-  if (!index) {
-    // will need to be updated to use ffetch for performance.
-    const res = await fetch('/query-index.json');
-    if (res && res.ok) {
-      try {
-        index = await res.json();
-        // storing the query index in memory as a speed performance optimization.
-        // may need to revisit this if the query index gets very large.
-        cachedIndex = index;
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.log('Unable to parse query index json', e);
-      }
-    }
+  let data = [];
+  try {
+    data = await buildFetch(filter)
+      .all();
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.log('Unable to query index', e);
   }
-  const { data = [] } = index || {};
-  return data.filter(filter);
+  return data;
+}
+
+/**
+ * Queries the site's index and only includes the first record to match a given filter. This
+ * method is optimized for queries that only expect a single match.
+ * @param {function} filter Filter through which each record will be sent. The function will
+ *  receive a single argument: the current record's raw data. The function should return true
+ *  to include the record in the final result, or false to exclude it from the result.
+ * @returns {Promise<QueryIndexRecord>} Resolves with the single matching record. Will be
+ *  undefined if a matching record was not found.
+ */
+export async function queryIndexSingle(filter) {
+  let data;
+  try {
+    data = await buildFetch(filter, 1)
+      .first();
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.log('Unable to query index', e);
+  }
+  return data;
 }
 
 /**
@@ -445,11 +471,7 @@ export async function getArticlesByAuthor(authorName) {
  *  record. Will be falsy if a matching record was not found.
  */
 export async function getRecordByPath(path) {
-  const matching = await getRecordsByPath([path]);
-  if (!matching.length) {
-    return undefined;
-  }
-  return matching[0];
+  return queryIndexSingle((record) => record.path === path);
 }
 
 /**
@@ -458,13 +480,9 @@ export async function getRecordByPath(path) {
  * @returns {Promise<QueryIndexRecord>} Resolves author information.
  */
 export async function getAuthorByName(authorName) {
-  const records = await queryIndex(
+  return queryIndexSingle(
     (record) => record.path.startsWith('/authors/') && record.author === authorName,
   );
-  if (!records.length) {
-    return undefined;
-  }
-  return records[0];
 }
 
 /**

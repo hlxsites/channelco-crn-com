@@ -51,6 +51,9 @@ export async function loadLazy(main) {
     return;
   }
 
+  // serialize the article data to avoid needing to query it again
+  main.dataset.json = JSON.stringify(article);
+
   const categoryPath = getCategoryPath(path);
   const categoryName = getCategoryName(article);
 
@@ -86,7 +89,23 @@ export async function loadLazy(main) {
       authorLink.classList.add('link-arrow');
     }
   }
+}
 
-  const related = await getRelatedArticles(article);
+/**
+ * Processes the DOM as necessary in order to auto block items required
+ * for all articles.
+ * @param {HTMLElement} main The page's main content.
+ */
+// eslint-disable-next-line import/prefer-default-export
+export async function loadDelayed(main) {
+  if (!main.dataset.json) {
+    return;
+  }
+  const contentSection = main.querySelector('.content-section');
+  if (!contentSection) {
+    return;
+  }
+
+  const related = await getRelatedArticles(JSON.parse(main.dataset.json));
   await buildRelatedContent(contentSection, related);
 }
