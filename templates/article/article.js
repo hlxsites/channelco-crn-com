@@ -18,8 +18,6 @@ import {
  */
 // eslint-disable-next-line import/prefer-default-export
 export function loadEager(main) {
-  const path = window.location.pathname;
-
   const heading = main.querySelector('h1');
   if (!heading) {
     return;
