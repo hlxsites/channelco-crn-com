@@ -928,3 +928,21 @@ export function loadTemplateArticleCards(main, templateName, articles) {
     }
   });
 }
+
+/**
+ * Determines whether a given value is in a list of comma-separated values.
+ * @param {string} list Comma-separated list to check.
+ * @param {string} value Value to look for.
+ * @returns {boolean} True if the given value is in the comma-separated
+ *  list, false otherwise.
+ */
+export function commaSeparatedListContains(list, value) {
+  if (!list || !value) {
+    return false;
+  }
+  const listStr = String(list);
+
+  return listStr.split(',')
+    .map((item) => item.trim())
+    .includes(value);
+}
