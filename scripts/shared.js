@@ -33,41 +33,42 @@ export function buildBreadcrumb() {
   return div;
 }
 
-function buildList(name, elements) {
+function buildList(elements) {
   const ul = document.createElement('ul');
-  const h1 = document.createElement('h1');
-  h1.innerText = name;
-  ul.appendChild(h1);
-
-  if (elements && elements.length > 0) {
-    elements.split(',').forEach((element) => {
-      const li = document.createElement('li');
-      li.innerText = element.trim();
-      ul.appendChild(li);
-    });
-  } else {
-    return h1;
-  }
-
+  elements.split(',').forEach((element) => {
+    const li = document.createElement('li');
+    li.innerText = element.trim();
+    ul.appendChild(li);
+  });
   return ul;
 }
 
-export function buildNewsSlider(main, title) {
-  const name = title;
-  const elements = getMetadata('keywords');
-
-  const listOrH1 = buildList(name, elements);
-
-  const div = document.createElement('div');
-  const newsSliderBlock = buildBlock('news-slider', { elems: [listOrH1] });
-  newsSliderBlock.classList.add('tabbed');
-
-  div.append(newsSliderBlock);
+/**
+ * Appends an HTML element to the top section of the site.
+ * @param {HTMLElement} main The page's main element.
+ * @param {HTMLElement} element Element to append to the top.
+ */
+export function addToTopSection(main, element) {
   const topSection = main.querySelector('.top-section');
   if (!topSection) {
     return;
   }
-  topSection.append(div);
+  topSection.append(element);
+}
+
+export function buildNewsSlider(main) {
+  const elements = getMetadata('keywords');
+  if (!elements || !elements.length) {
+    return;
+  }
+
+  const list = buildList(elements);
+  const div = document.createElement('div');
+  const newsSliderBlock = buildBlock('news-slider', { elems: [list] });
+  newsSliderBlock.classList.add('tabbed');
+
+  div.append(newsSliderBlock);
+  addToTopSection(main, newsSliderBlock);
   decorateBlock(newsSliderBlock);
 }
 
