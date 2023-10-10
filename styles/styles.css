@@ -307,6 +307,18 @@ main .back-top-top-section-header::before {
   content: '▲';
 }
 
+main .placeholder {
+  position: relative;
+}
+
+main .placeholder::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background-color: var(--overlay-background-color);
+}
+
 @media (min-width: 576px) {
   main .section > div {
     max-width: 540px;

@@ -1,14 +1,11 @@
-.search-results {
-  border-top: 1px solid #8c8c8c;
-  padding-top: 2rem;
-}
-
 .search-results > h2 {
   border-bottom: 1px solid #8c8c8c;
   padding-bottom: 1rem;
 }
 
 .search-results form {
+  border-top: 1px solid #8c8c8c;
+  padding-top: 2rem;
   display: flex;
   gap: .5rem;
   align-items: center;
