@@ -328,6 +328,15 @@ footer {
   }
 }
 
+@media (min-width: 768px) {
+  .footer-main ul > li {
+    padding: 0 25px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Number of lines you want to display */
+    -webkit-box-orient: vertical;
+  }
+}
+
 @media (min-width: 992px) {
   .footer {
     flex-direction: row;
@@ -345,12 +354,12 @@ footer {
 
   .footer-main ul > li {
     padding: 0 25px;
-    width: 15%;
   }
 }
 
 @media (min-width: 1200px) {
   .footer-main ul > li {
     width: inherit;
+    white-space: nowrap;
   }
 }

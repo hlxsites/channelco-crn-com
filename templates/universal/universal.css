@@ -65,20 +65,6 @@ main .breadcrumb-wrapper {
   text-align: center;
 }
 
-.banner-container > .ad-wrapper:last-of-type {
-  position: -webkit-sticky;
-  position: sticky;
-  top: 0;
-  text-align: center;
-}
-
-.banner-container > .banner-wrapper:last-of-type {
-  position: -webkit-sticky;
-  position: sticky;
-  top: 0;
-  text-align: center;
-}
-
 main .back-to-top {
   margin: 0 var(--padding-spacer-x);
 }
@@ -151,6 +137,7 @@ main .content-section .section:first-child {
 
   /* shows the right ad section once it moves into place */
   main.grid-layout .right-ad-section {
+    position: relative;
     display: block;
   }
 

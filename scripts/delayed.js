@@ -106,6 +106,52 @@ function loadBottomAd() {
   }
 }
 
+function makeSticky() {
+  const adWrappers = document.querySelectorAll('.ad-wrapper');
+  const lastAd = adWrappers[adWrappers.length - 1];
+
+  const bannerWrappers = document.querySelectorAll('.banner-wrapper');
+  const lastBanner = bannerWrappers[bannerWrappers.length - 1];
+
+  // Calculate the initial position of the elements
+  const lastAdOffsetTop = lastAd.offsetTop;
+
+  function handleScroll() {
+    const { scrollY, screenWidth } = window;
+
+    const mobileScreenWidthThreshold = 768;
+
+    // Check if the user has scrolled past the last ad,
+    // the screen width is greater than the threshold,
+    // and the scroll position is within the bounds of maxScrollPosition
+    if (
+      scrollY >= lastAdOffsetTop
+      && screenWidth > mobileScreenWidthThreshold
+    ) {
+      // Make the last ad and banner sticky
+      lastAd.style.position = 'fixed';
+      lastAd.style.top = '0';
+      lastAd.style.width = '330px';
+
+      lastBanner.style.position = 'fixed';
+      lastBanner.style.top = '300px';
+      lastBanner.style.width = '330px';
+    } else {
+      // Reset the style when scrolling up, on mobile, or past the maxScrollPosition
+      lastAd.style.position = 'static';
+      lastAd.style.top = 'auto';
+      lastAd.style.width = 'auto';
+
+      lastBanner.style.position = 'static';
+      lastBanner.style.top = 'auto';
+      lastBanner.style.width = 'auto';
+    }
+  }
+
+  // Attach the scroll event listener
+  window.addEventListener('scroll', handleScroll);
+}
+
 function loadDelayedAds(main) {
   try {
     addMartechStack();
@@ -132,6 +178,7 @@ async function loadShareThis() {
 }
 
 await loadRightAdFragment();
+makeSticky();
 loadDelayedAds(document.querySelector('main'));
 loadShareThis();
 loadScript('/scripts/google-translate-init.js', { defer: true });
