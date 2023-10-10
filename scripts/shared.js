@@ -14,6 +14,16 @@ const DEFAULT_CATEGORY_PATH = '/news';
 const DEFAULT_CATEGORY_NAME = 'News';
 const EMAIL_REGEX = /\S+[a-z0-9]@[a-z0-9.]+/img;
 
+function createBreadcrumbItem(href, label) {
+  const li = document.createElement('li');
+  const a = document.createElement('a');
+  a.classList.add('breadcrumb-item');
+  a.href = href;
+  a.innerHTML = label;
+  li.append(a);
+  return li;
+}
+
 /**
  * Builds breadcrumb menu and returns it.
  * @returns {HTMLElement} Newly created bread crumb.
@@ -26,11 +36,31 @@ export function buildBreadcrumb() {
     return undefined;
   }
 
-  const div = document.createElement('div');
-  const breadcrumb = buildBlock('breadcrumb', { elems: [] });
-  div.append(breadcrumb);
-  decorateBlock(breadcrumb);
-  return div;
+  // If path ends with '/', pop the last item out. Then pop the current page
+  const pathArr = path.split('/');
+  if (pathArr[pathArr.length - 1] === '') pathArr.pop();
+  const lastPath = pathArr[pathArr.length - 1];
+  pathArr.pop();
+
+  // Formulate the list for breadcrumb
+  const list = document.createElement('ul');
+  list.classList.add('breadcrumb-list');
+  let segments = '/';
+  pathArr.forEach((path) => {
+    if (path !== '') segments += `${path}/`;
+    list.append(createBreadcrumbItem(segments, path === '' ? 'HOME' : ` ▸ ${path.replaceAll('-', ' ')}`));
+  });
+
+  // Last item in breadcrumb should be current page title. If not found, default to path
+  const li = document.createElement('li');
+  li.append(' ▸ ');
+  li.append(title ? title.innerText : lastPath.replaceAll('-', ' '));
+  list.append(li);
+
+  const breadcrumb = document.createElement('div');
+  breadcrumb.classList.add('breadcrumb');
+  breadcrumb.append(list);
+  return breadcrumb;
 }
 
 function buildList(elements) {
