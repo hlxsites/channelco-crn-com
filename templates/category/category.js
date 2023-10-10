@@ -11,6 +11,8 @@ import {
   buildNewsSlider,
 } from '../../scripts/shared.js';
 
+import ffetch from '../../scripts/ffetch.js';
+
 /**
  * Modifies the DOM with additional elements required to display a category page.
  * @param {HTMLElement} main The page's main element.
@@ -24,6 +26,7 @@ export async function loadEager(main) {
   if (!category) {
     return;
   }
+  console.log(category);
   buildNewsSlider(main, category.title);
 }
 
@@ -75,11 +78,15 @@ function buildCategoryNavigation(main){
 
 async function loadArticle(main) {
   console.log('inside loadArticle'+window.location.pathname);
-  const category = await getRecordByPath(window.location.pathname);
+  const category = await ffetch('/query-index.json').filter((article) => {
+    return  article.path === window.location.pathname;
+  }).all();
+  
   if (!category) {
     console.log('inside if');
     return;
   }
+  console.log(category);
   let lastElement;
   const contentSection = main.querySelector('.content-section');
   if (!contentSection) {
@@ -89,8 +96,8 @@ async function loadArticle(main) {
     lastElement = contentSection.children.item(0);
   }
 
-  const articles = await getArticlesByCategory(category.title);
-  totalArtciles = articles.length;
+  const articles = await getArticlesByCategory(category.category);
+  totalArtciles = articles.length;console.log(totalArtciles);
   console.log(category);
   articles.sort(comparePublishDate);
   if(startIndex === 5) {
