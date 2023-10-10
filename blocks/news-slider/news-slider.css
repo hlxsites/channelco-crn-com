@@ -2,11 +2,6 @@ main .section.news-slider-container {
   margin-top: 0;
 }
 
-.news-slider-wrapper {
-  padding-left: var(--padding-spacer-x, 0.75rem);
-  padding-right: var(--padding-spacer-x, 0.75rem);
-}
-
 #inthenews {
   width: 100%;
   border-bottom: 1px solid #8c8c8c;
