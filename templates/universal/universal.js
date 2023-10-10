@@ -114,6 +114,27 @@ export function loadEager(main) {
   loadingDiv.className = 'loading-animation';
   rightAdSection.appendChild(loadingDiv);
 
+  const breadcrumb = buildBreadcrumb();
+  const newsWrapper = main.querySelector('.news-slider-wrapper');
+
+  topSection.appendChild(topAdSection);
+  if (breadcrumb) {
+    topSection.appendChild(breadcrumb);
+  }
+  if (newsWrapper) {
+    newsWrapper.parentElement.classList.remove('news-slider-container');
+    topSection.appendChild(newsWrapper);
+    newsWrapper.parentElement.classList.add('news-slider-container');
+  }
+  main.prepend(topSection);
+  main.append(rightAdSection);
+}
+
+/**
+ * Decorates the DOM as needed for the template during the
+ * delayed phase.
+ */
+export function loadDelayed() {
   const bottomAdSection = document.createElement('div');
   bottomAdSection.className = 'bottom-ad-section';
   bottomAdSection.id = 'bottom-ad-fragment-container';
@@ -129,21 +150,5 @@ export function loadEager(main) {
   });
 
   bottomAdSection.appendChild(closeIcon);
-
-  const breadcrumb = buildBreadcrumb();
-  const newsWrapper = main.querySelector('.news-slider-wrapper');
-
-  topSection.appendChild(topAdSection);
-  if (breadcrumb) {
-    topSection.appendChild(breadcrumb);
-  }
-  if (newsWrapper) {
-    newsWrapper.parentElement.classList.remove('news-slider-container');
-    topSection.appendChild(newsWrapper);
-    newsWrapper.parentElement.classList.add('news-slider-container');
-  }
-  main.prepend(topSection);
-  main.append(rightAdSection);
-
   document.body.appendChild(bottomAdSection);
 }

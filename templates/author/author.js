@@ -25,7 +25,7 @@ function addIcon(beforeElement, iconName) {
  * @param {HTMLElement} main Main element of the page.
  */
 // eslint-disable-next-line import/prefer-default-export
-export async function loadEager(main) {
+export function loadEager(main) {
   const defaultContent = main.querySelector('.default-content-wrapper');
   if (!defaultContent) {
     return;

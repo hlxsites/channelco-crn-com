@@ -17,17 +17,7 @@ import {
  * @param {HTMLElement} main The page's main content.
  */
 // eslint-disable-next-line import/prefer-default-export
-export async function loadEager(main) {
-  const path = window.location.pathname;
-
-  const article = await getRecordByPath(path);
-  if (!article) {
-    return;
-  }
-  const categoryPath = getCategoryPath(path);
-  const categoryName = getCategoryName(article);
-  const author = await getAuthorByName(article.author);
-
+export function loadEager(main) {
   const heading = main.querySelector('h1');
   if (!heading) {
     return;
@@ -40,20 +30,56 @@ export async function loadEager(main) {
   buildSocialShare(picture);
 
   const categoryLink = document.createElement('a');
-  categoryLink.classList.add('link-arrow', 'article-category-link');
-  categoryLink.innerText = categoryName;
-  categoryLink.href = categoryPath;
-  categoryLink.title = categoryName;
-  categoryLink['aria-label'] = categoryName;
+  categoryLink.classList.add('link-arrow', 'article-category-link', 'placeholder');
+  categoryLink.innerText = 'Category';
   heading.parentElement.insertBefore(categoryLink, heading);
 
-  const authorContainer = buildArticleAuthor(article);
+  const authorContainer = buildArticleAuthor();
   heading.parentElement.insertBefore(authorContainer, heading.nextSibling);
+}
 
-  await buildLearnMore(heading.parentElement, article.keywords);
+/**
+ * Processes the DOM as necessary in order to auto block items required
+ * for all articles.
+ * @param {HTMLElement} main The page's main content.
+ */
+// eslint-disable-next-line import/prefer-default-export
+export async function loadLazy(main) {
+  const path = window.location.pathname;
+  const article = await getRecordByPath(path);
+  if (!article) {
+    return;
+  }
+
+  const categoryPath = getCategoryPath(path);
+  const categoryName = getCategoryName(article);
+
+  const categoryPlaceholder = main.querySelector('.article .article-category-link');
+  if (categoryPlaceholder) {
+    const categoryLink = document.createElement('a');
+    categoryLink.classList.add('link-arrow', 'article-category-link');
+    categoryLink.innerText = categoryName;
+    categoryLink.href = categoryPath;
+    categoryLink.title = categoryName;
+    categoryLink.ariaLabel = categoryName;
+    categoryPlaceholder.replaceWith(categoryLink);
+  }
+
+  const authorPlaceholder = main.querySelector('.article .article-author-container');
+  if (authorPlaceholder) {
+    authorPlaceholder.replaceWith(buildArticleAuthor(article));
+  }
+
+  const contentSection = main.querySelector('.content-section');
+  if (!contentSection) {
+    return;
+  }
+
+  const author = await getAuthorByName(article.author);
+  await buildLearnMore(contentSection, article.keywords);
   if (author) {
-    await buildAuthorBlades(heading.parentElement, [author]);
-    const authorLink = heading.parentElement.querySelector(
+    await buildAuthorBlades(contentSection, [author]);
+    const authorLink = contentSection.querySelector(
       '.blade.author .blade-text a',
     );
     if (authorLink) {
@@ -62,5 +88,5 @@ export async function loadEager(main) {
   }
 
   const related = await getRelatedArticles(article);
-  await buildRelatedContent(heading.parentElement, related);
+  await buildRelatedContent(contentSection, related);
 }
