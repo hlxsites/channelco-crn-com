@@ -928,3 +928,43 @@ export function loadTemplateArticleCards(main, templateName, articles) {
     }
   });
 }
+
+/**
+ * Builds an ad block with the given ID and type.
+ * @param {string} unitId ID of the ad to include in the block.
+ * @param {string} type The type of ad to create.
+ * @returns {HTMLElement} Newly built ad block.
+ */
+export function buildAdBlock(unitId, type) {
+  // Determine the text and class based on the type
+  let adText;
+  let adClass;
+  let height;
+  if (type === 'Advertisement') {
+    adText = 'Advertisement';
+    adClass = 'right-ad';
+    height = 'fixed-height';
+  } else if (type === 'Sponsored post') {
+    adText = 'Sponsored post';
+    adClass = 'right-sponsored';
+  } else {
+    // eslint-disable-next-line no-console
+    console.error('Unknown type in the block');
+    return;
+  }
+
+  // Build the ad using the extracted unit-id and determined text and class
+  const rightAdHTML = `
+    <!-- AD IMU  STARTS  -->
+
+    <div class="${adClass} ${height}">
+      <span class="ad-title">${adText}</span> <br />
+      <div id="${unitId}" class="tmsads"></div>
+    </div>
+
+    <br clear="all">
+  `;
+
+  const range = document.createRange();
+  return range.createContextualFragment(rightAdHTML);
+}
