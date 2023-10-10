@@ -85,10 +85,6 @@ export async function loadEager(main) {
   const ad = buildBlock('ad', [[{ elems: [adIdLabel, adId] }, { elems: [adTypeLabel, adType] }]]);
   defaultContent.append(ad);
   decorateBlock(ad);
-
-  const navigation = buildBlock('category-navigation', { elems: [] });
-  defaultContent.append(navigation);
-  decorateBlock(navigation);
 }
 
 /**
@@ -96,9 +92,18 @@ export async function loadEager(main) {
  * @param {HTMLElement} main Main element of the page.
  */
 export async function loadLazy(main) {
+  const defaultContent = main.querySelector('.default-content-wrapper');
+  if (!defaultContent) {
+    return;
+  }
   const authorName = getMetadata('author');
   const articles = await getArticlesByAuthor(authorName);
   articles.sort(comparePublishDate);
 
   loadTemplateArticleCards(main, 'author', articles);
+
+  const navigation = buildBlock('category-navigation', { elems: [] });
+  defaultContent.append(navigation);
+  decorateBlock(navigation);
+  await loadBlock(navigation);
 }
