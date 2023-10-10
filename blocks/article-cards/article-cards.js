@@ -1,7 +1,4 @@
 import {
-  decorateBlock,
-} from '../../scripts/lib-franklin.js';
-import {
   getCategoryName,
   getCategoryPath,
   createOptimizedPicture,
@@ -156,7 +153,10 @@ function getPath(paths, index) {
 function buildAd(id, type) {
   const ad = document.createElement('div');
   ad.classList.add('article-cards-ad');
-  ad.append(buildAdBlock(id, type));
+  const adBlock = buildAdBlock(id, type);
+  if (adBlock) {
+    ad.append(adBlock);
+  }
   return ad;
 }
 
@@ -214,7 +214,7 @@ export default function decorate(block) {
   blockTarget.append(addlArticleContainer);
 
   if (includeAds && cardCount < 6) {
-    addlArticleContainer.append(buildAd('unit-1661973671931', 'Sponsored post'));
+    blockTarget.append(buildAd('unit-1661973671931', 'Sponsored post'));
   }
 
   // listens for attribute modifications on child elements, and will replace a placeholder card

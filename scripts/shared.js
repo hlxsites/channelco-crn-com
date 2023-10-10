@@ -933,31 +933,36 @@ export function loadTemplateArticleCards(main, templateName, articles) {
  * Builds an ad block with the given ID and type.
  * @param {string} unitId ID of the ad to include in the block.
  * @param {string} type The type of ad to create.
- * @returns {HTMLElement} Newly built ad block.
+ * @param {boolean} [fixedHeight] If true, the ad will have a fixed height
+ *  associated with it.
+ * @returns {HTMLElement} Newly built ad block. Will be falsy if the ad type
+ *  is unknown.
  */
-export function buildAdBlock(unitId, type) {
+export function buildAdBlock(unitId, type, fixedHeight = false) {
   // Determine the text and class based on the type
   let adText;
   let adClass;
-  let height;
+  let height = '';
   if (type === 'Advertisement') {
     adText = 'Advertisement';
     adClass = 'right-ad';
-    height = 'fixed-height';
+    if (fixedHeight) {
+      height = ' fixed-height';
+    }
   } else if (type === 'Sponsored post') {
     adText = 'Sponsored post';
     adClass = 'right-sponsored';
   } else {
     // eslint-disable-next-line no-console
     console.error('Unknown type in the block');
-    return;
+    return undefined;
   }
 
   // Build the ad using the extracted unit-id and determined text and class
   const rightAdHTML = `
     <!-- AD IMU  STARTS  -->
 
-    <div class="${adClass} ${height}">
+    <div class="${adClass}${height}">
       <span class="ad-title">${adText}</span> <br />
       <div id="${unitId}" class="tmsads"></div>
     </div>
@@ -985,5 +990,4 @@ export function commaSeparatedListContains(list, value) {
   return listStr.split(',')
     .map((item) => item.trim())
     .includes(value);
->>>>>>> main
 }

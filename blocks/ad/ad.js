@@ -27,5 +27,8 @@ export default function decorate(block) {
   const divContainers = block.querySelectorAll('div > div');
   divContainers.forEach((div) => div.remove());
 
-  block.append(buildAdBlock(unitId, type));
+  const adBlock = buildAdBlock(unitId, type);
+  if (adBlock) {
+    block.append(adBlock);
+  }
 }
