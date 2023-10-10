@@ -117,12 +117,12 @@ function makeSticky() {
   const lastAdOffsetTop = lastAd.offsetTop;
 
   function handleScroll() {
-    const { scrollY, screenWidth } = window;
+    const { scrollY } = window;
+    const screenWidth = window.innerWidth;
 
     const mobileScreenWidthThreshold = 768;
 
-    // Check if the user has scrolled past the last ad,
-    // the screen width is greater than the threshold,
+    // Check if the user has scrolled past the last ad, the screen width is greater than the threshold,
     // and the scroll position is within the bounds of maxScrollPosition
     if (
       scrollY >= lastAdOffsetTop
