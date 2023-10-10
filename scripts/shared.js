@@ -46,9 +46,9 @@ export function buildBreadcrumb() {
   const list = document.createElement('ul');
   list.classList.add('breadcrumb-list');
   let segments = '/';
-  pathArr.forEach((path) => {
-    if (path !== '') segments += `${path}/`;
-    list.append(createBreadcrumbItem(segments, path === '' ? 'HOME' : ` ▸ ${path.replaceAll('-', ' ')}`));
+  pathArr.forEach((pathPart) => {
+    if (pathPart !== '') segments += `${pathPart}/`;
+    list.append(createBreadcrumbItem(segments, pathPart === '' ? 'HOME' : ` ▸ ${pathPart.replaceAll('-', ' ')}`));
   });
 
   // Last item in breadcrumb should be current page title. If not found, default to path
