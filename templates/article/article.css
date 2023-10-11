@@ -71,3 +71,11 @@
 .article main .related-content {
   margin-top: 1rem;
 }
+
+.article main .article-author.placeholder {
+  width: 150px;
+}
+
+.article main .article-date.placeholder {
+  width: 200px;
+}

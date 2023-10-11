@@ -8,6 +8,7 @@ import {
   buildLearnMore,
   buildRelatedContent,
   buildSocialShare,
+  getRelatedArticles,
 } from '../../scripts/shared.js';
 
 /**
@@ -15,16 +16,8 @@ import {
  * for all articles.
  * @param {HTMLElement} main The page's main content.
  */
-export default async function loadTemplate(main) {
-  const path = window.location.pathname;
-  const article = await getRecordByPath(path);
-  if (!article) {
-    return;
-  }
-  const categoryPath = getCategoryPath(path);
-  const categoryName = getCategoryName(article);
-  const author = await getAuthorByName(article.author);
-
+// eslint-disable-next-line import/prefer-default-export
+export function loadEager(main) {
   const heading = main.querySelector('h1');
   if (!heading) {
     return;
@@ -37,27 +30,63 @@ export default async function loadTemplate(main) {
   buildSocialShare(picture);
 
   const categoryLink = document.createElement('a');
-  categoryLink.classList.add('link-arrow', 'article-category-link');
-  categoryLink.innerText = categoryName;
-  categoryLink.href = categoryPath;
-  categoryLink.title = categoryName;
-  categoryLink['aria-label'] = categoryName;
+  categoryLink.classList.add('link-arrow', 'article-category-link', 'placeholder');
+  categoryLink.innerText = 'Category';
   heading.parentElement.insertBefore(categoryLink, heading);
 
-  const authorContainer = buildArticleAuthor(article);
+  const authorContainer = buildArticleAuthor();
   heading.parentElement.insertBefore(authorContainer, heading.nextSibling);
+}
 
-  await buildLearnMore(heading.parentElement, article.keywords);
-  if (author) {
-    await buildAuthorBlades(heading.parentElement, [author]);
+/**
+ * Processes the DOM as necessary in order to auto block items required
+ * for all articles.
+ * @param {HTMLElement} main The page's main content.
+ */
+// eslint-disable-next-line import/prefer-default-export
+export async function loadLazy(main) {
+  const path = window.location.pathname;
+  const article = await getRecordByPath(path);
+  if (!article) {
+    return;
   }
-  // TODO: need to determine how to get related content. For now it will just
-  // link to a static list.
-  await buildRelatedContent(heading.parentElement, [
-    'https://main--channelco-crn-com--hlxsites.hlx.page/news/managed-services/painful-decision-slalom-consulting-layoffs-hit-900-workers',
-    'https://main--channelco-crn-com--hlxsites.hlx.page/news/internet-of-things/5-industrial-iot-solutions-that-are-solving-big-problems',
-    'https://main--channelco-crn-com--hlxsites.hlx.page/news/computing/apple-mac-s-transition-from-intel-has-lured-influx-of-new-customers',
-    'https://main--channelco-crn-com--hlxsites.hlx.page/news/computing/asus-starts-selling-nuc-mini-pcs-after-intel-exits-business',
-    'https://main--channelco-crn-com--hlxsites.hlx.page/news/computing/dell-s-moonshot-5-key-features-of-concept-luna',
-  ]);
+
+  const categoryPath = getCategoryPath(path);
+  const categoryName = getCategoryName(article);
+
+  const categoryPlaceholder = main.querySelector('.article .article-category-link');
+  if (categoryPlaceholder) {
+    const categoryLink = document.createElement('a');
+    categoryLink.classList.add('link-arrow', 'article-category-link');
+    categoryLink.innerText = categoryName;
+    categoryLink.href = categoryPath;
+    categoryLink.title = categoryName;
+    categoryLink.ariaLabel = categoryName;
+    categoryPlaceholder.replaceWith(categoryLink);
+  }
+
+  const authorPlaceholder = main.querySelector('.article .article-author-container');
+  if (authorPlaceholder) {
+    authorPlaceholder.replaceWith(buildArticleAuthor(article));
+  }
+
+  const contentSection = main.querySelector('.content-section');
+  if (!contentSection) {
+    return;
+  }
+
+  const author = await getAuthorByName(article.author);
+  await buildLearnMore(contentSection, article.keywords);
+  if (author) {
+    await buildAuthorBlades(contentSection, [author]);
+    const authorLink = contentSection.querySelector(
+      '.blade.author .blade-text a',
+    );
+    if (authorLink) {
+      authorLink.classList.add('link-arrow');
+    }
+  }
+
+  const related = await getRelatedArticles(article);
+  await buildRelatedContent(contentSection, related);
 }

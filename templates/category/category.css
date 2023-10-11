@@ -1,1 +1,20 @@
-/* nothing here */
+.category main h1 {
+  color: var(--link-color);
+}
+
+.category main h1.placeholder {
+  width: 250px;
+}
+
+.category main .content-section .section > h2 {
+  color: var(--link-color);
+  text-transform: uppercase;
+}
+
+.category main .article-card-title a {
+  color: var(--text-color);
+}
+
+.category main .article-cards:not(.lead-article) .article-card {
+  border-bottom: 2px dotted var(--color-mid-grey);
+}
