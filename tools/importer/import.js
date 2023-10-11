@@ -130,7 +130,7 @@ const createFetchMetadata = (main, document) => {
 
   const CompanyWebpages = document.querySelector('[name="CompanyWebpages"]');
   if (CompanyNames) {
-    meta.companynames = CompanyWebpages.content;
+    meta.companywebpages = CompanyWebpages.content;
   }
 
   const keywords = document.querySelector('[name="keywords"]');
