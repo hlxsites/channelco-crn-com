@@ -15,25 +15,19 @@ function dataMapLookup(dataMap, value) {
 }
 
 // Function to get unique values from an array of keys for each object
-function getUniqueValuesByKeys(arr, keys, dataMap) {
-  const uniqueValuesByKeys = {};
+function getUniqueValuesByKeys(data, key) {
+  const uniqueValues = [];
 
-  keys.forEach((key) => {
-    uniqueValuesByKeys[key] = [`-- Select ${dataMapLookup(dataMap, key)} --`];
+  data.forEach((obj) => {
+    const value = obj[key];
+
+    // Check if the value is not in the uniqueValues array for this key
+    if (!uniqueValues.includes(value)) {
+      uniqueValues.push(value);
+    }
   });
 
-  arr.forEach((obj) => {
-    keys.forEach((key) => {
-      const value = obj[key];
-
-      // Check if the value is not in the uniqueValues array for this key
-      if (!uniqueValuesByKeys[key].includes(value)) {
-        uniqueValuesByKeys[key].push(value);
-      }
-    });
-  });
-
-  return uniqueValuesByKeys;
+  return uniqueValues;
 }
 
 function populateTable(data, tableFields, dataMap, detailsUrl, dataSource, year, tbody) {
@@ -71,6 +65,67 @@ async function loadMore(tableFields, dataMap, detailsUrl, dataSource, year, tbod
   }
 }
 
+function createDropdownOption(value, dataMap) {
+  const option = document.createElement('option');
+  option.innerText = dataMapLookup(dataMap, value);
+  option.setAttribute('value', value);
+  return option;
+}
+
+async function loadDropdownValues(key, filters, dataMap, spreadsheet, year, dropdown) {
+  const isPopulated = dropdown.getAttribute('data-populated') === 'true';
+  if (isPopulated) return;
+
+  dropdown.setAttribute('data-populated', true);
+  if (filters[key].type === 'alpha') {
+    alphaArr.forEach((item) => {
+      dropdown.append(createDropdownOption(item, dataMap));
+    });
+    return;
+  }
+
+  const data = await ffetch(spreadsheet).sheet(year).all();
+  const uniqueValues = getUniqueValuesByKeys(data, key);
+  uniqueValues.forEach((value) => {
+    dropdown.append(createDropdownOption(value, dataMap));
+  });
+}
+
+// eslint-disable-next-line max-len
+async function onDropdownChange(block, dropdown, spreadsheet, year, filters, key, detailsUrl, dataSource, tableFields, dataMap) {
+  const tbody = block.querySelector('tbody');
+  tbody.innerHTML = '';
+  const selectedValue = dropdown.value.includes('-- Select ') ? '' : dropdown.value;
+  if (selectedValue === '') {
+    const data = await ffetch(spreadsheet).sheet(year).all();
+    populateTable(data, tableFields, dataMap, detailsUrl, dataSource, year, tbody);
+    return;
+  }
+
+  if (filters[key].type === 'alpha') {
+    const data = await ffetch(spreadsheet)
+      .sheet(year)
+      .map((item) => item)
+      .filter((item) => {
+        if (selectedValue === '#') return !Number.isNaN(parseInt(item[key].charAt(0), 2));
+        return item[key].charAt(0).toUpperCase() === selectedValue;
+      })
+      .all();
+    populateTable(data, tableFields, dataMap, detailsUrl, dataSource, year, tbody);
+  } else {
+    const data = await ffetch(spreadsheet)
+      .sheet(year)
+      .map((item) => item)
+      .filter((item) => item[key] === selectedValue)
+      .all();
+    populateTable(data, tableFields, dataMap, detailsUrl, dataSource, year, tbody);
+  }
+
+  // Remove load more...
+  const loadMoreDiv = block.querySelector('.load-more');
+  if (loadMoreDiv) loadMoreDiv.remove();
+}
+
 export default async function decorate(block) {
   const config = readBlockConfig(block);
   const dataSource = config['data-source'];
@@ -93,39 +148,51 @@ export default async function decorate(block) {
   // Process and create filter fields
   const filterDiv = document.createElement('div');
   filterDiv.classList.add('filters');
-  const alphaFields = {};
-  const valueFields = [];
+  const filters = {};
   filterFields.forEach((field) => {
     if (field.includes('(alpha')) {
       const fieldName = field.replace('(alpha)', '').trim();
-      alphaArr.unshift(`-- Select ${dataMapLookup(dataMap, fieldName)} --`);
-      alphaFields[fieldName] = alphaArr;
+      filters[fieldName] = {
+        values: [`-- Select ${dataMapLookup(dataMap, fieldName)} --`],
+        type: 'alpha',
+      };
     } else if (field.includes('(value)')) {
-      valueFields.push(field.replace('(value)', '').trim());
+      const fieldName = field.replace('(value)', '').trim();
+      filters[fieldName] = {
+        values: [`-- Select ${dataMapLookup(dataMap, fieldName)} --`],
+        type: 'value',
+      };
     } else {
-      valueFields.push(field.trim());
+      filters[field] = {
+        values: [`-- Select ${dataMapLookup(dataMap, field)} --`],
+        type: 'value',
+      };
     }
   });
-  const filterDropdownValues = {
-    ...alphaFields,
-    ...getUniqueValuesByKeys(data, valueFields, dataMap),
-  };
-  Object.keys(filterDropdownValues).forEach((key) => {
+
+  const dropdownsDiv = document.createElement('div');
+  dropdownsDiv.classList.add('filters');
+  Object.keys(filters).forEach((key) => {
     const dropdownDiv = document.createElement('div');
     const filterPrompt = document.createElement('b');
     filterPrompt.innerText = `Find by ${dataMapLookup(dataMap, key)}:`;
     dropdownDiv.classList.add('dropdown');
     const dropdown = document.createElement('select');
-    filterDropdownValues[key].forEach((item) => {
+    dropdown.setAttribute('data-populated', false);
+    filters[key].values.forEach((item) => {
       const option = document.createElement('option');
       option.innerText = dataMapLookup(dataMap, item);
       option.setAttribute('value', item);
       dropdown.append(option);
     });
+    dropdown.addEventListener('click', () => loadDropdownValues(key, filters, dataMap, spreadsheet, year, dropdown));
+    dropdown.addEventListener('change', () => onDropdownChange(block, dropdown, spreadsheet, year, filters, key, detailsUrl, dataSource, tableFields, dataMap));
+
     dropdownDiv.append(filterPrompt);
     dropdownDiv.append(dropdown);
-    block.append(dropdownDiv);
+    dropdownsDiv.append(dropdownDiv);
   });
+  block.append(dropdownsDiv);
 
   // Create table
   const tableDiv = document.createElement('div');
