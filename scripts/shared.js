@@ -350,10 +350,26 @@ export function getCategoryName(record) {
  * @property {string} authordescription Bio information for the record's author.
  * @property {string} publisheddate Full, human-readable date when the record was published.
  * @property {string} keywords Comma-separated list of keywords associated with the index record.
- * @property {string} company-names Comma-separated list of companies to which the index record
+ * @property {string} companynames Comma-separated list of companies to which the index record
  *  applies.
- * @property {string} company-webpages Comma-separated list of websites for the index's companies.
+ * @property {string} companywebpages Comma-separated list of websites for the index's companies.
  * @property {string} lastModified Unix timestamp of the last time the index record was modified.
+ */
+
+/**
+ * @typedef PageMetadata
+ * @property {string} [path] Full path of the page.
+ * @property {string} [author] Name of the author associated with the page.
+ * @property {string} [category] Name of the category associated with the page.
+ * @property {string} [companynames] Comma-separated list of companies to which
+ *  the page applies.
+ * @property {string} [companywebpages] Comma-separated list of websites for the
+ *  page's companies.
+ * @property {string} [description] Summary description of the page.
+ * @property {string} [keywords] Comma-separated list of keywords associated with the page.
+ * @property {string} [publisheddate] Full, human-readable date when the page was published.
+ * @property {string} [title] Title of the page.
+ * @property {string} [image] Image for the page.
  */
 
 /**
@@ -401,9 +417,79 @@ export async function queryIndex(filter) {
 }
 
 /**
+ * Retrieves the title of the current page.
+ * @returns {string} Page title.
+ */
+export function getTitle() {
+  return getMetadata('og:title');
+}
+
+/**
+ * Retrieves the list of company names of the current page.
+ * @returns {string} Comma-separated list of names.
+ */
+export function getCompanyNames() {
+  return getMetadata('companynames');
+}
+
+/**
+ * Retrieves the list of keywords of the current page.
+ * @returns {string} Comma-separated list of words.
+ */
+export function getKeywords() {
+  return getMetadata('keywords');
+}
+
+/**
+ * forward looking *.metadata.json experiment
+ * fetches metadata.json of page
+ * @param {path} path to *.metadata.json
+ * @returns {PageMetadata} containing sanitized meta data
+ */
+export async function getMetadataJson(path) {
+  let resp;
+  try {
+    resp = await fetch(path);
+    if (resp && resp.ok) {
+      const text = await resp.text();
+      const headStr = text.split('<head>')[1].split('</head>')[0];
+      const head = document.createElement('head');
+      head.innerHTML = headStr;
+      const metaTags = head.querySelectorAll(':scope > meta');
+      const meta = {};
+      metaTags.forEach((metaTag) => {
+        const name = metaTag.getAttribute('name') || metaTag.getAttribute('property');
+        const value = metaTag.getAttribute('content');
+        if (meta[name]) {
+          meta[name] += `, ${value}`;
+        } else {
+          meta[name] = value;
+        }
+      });
+
+      if (meta['og:image']) {
+        meta.image = meta['og:image'];
+      }
+      if (meta['og:url']) {
+        meta.path = new URL(meta['og:url']).pathname;
+      }
+      if (meta['og:title']) {
+        meta.title = meta['og:title'];
+      }
+
+      return meta;
+    }
+  } catch {
+    // fail
+  }
+
+  return null;
+}
+
+/**
  * Retrieves all records whose path matches one of a given list of path values.
  * @param {Array<string>} paths List of all record paths to retrieve from the site's index.
- * @returns {Promise<Array<QueryIndexRecord>>} Resolves with an array of information for all
+ * @returns {Promise<Array<PageMetadata>>} Resolves with an array of information for all
  *  matching records.
  */
 export async function getRecordsByPath(paths) {
@@ -411,7 +497,11 @@ export async function getRecordsByPath(paths) {
   paths.forEach((path) => {
     pathLookup[path] = true;
   });
-  return queryIndex((record) => !!pathLookup[record.path]);
+  const promises = Object.keys(pathLookup).map((path) => {
+    const pathUrl = `${window.location.protocol}//${window.location.host}${path}`;
+    return getMetadataJson(pathUrl);
+  });
+  return Promise.all(promises);
 }
 
 /**
@@ -441,7 +531,7 @@ export async function getArticlesByAuthor(authorName) {
 /**
  * Retrieves the record whose path matches a given value.
  * @param {string} path Path to retrieve from the site's index.
- * @returns {Promise<QueryIndexRecord>} Resolves with the information for the matching
+ * @returns {Promise<PageMetadata>} Resolves with the information for the matching
  *  record. Will be falsy if a matching record was not found.
  */
 export async function getRecordByPath(path) {
@@ -940,9 +1030,10 @@ export function commaSeparatedListContains(list, value) {
   if (!list || !value) {
     return false;
   }
+  const valueLower = String(value).toLowerCase();
   const listStr = String(list);
 
   return listStr.split(',')
-    .map((item) => item.trim())
-    .includes(value);
+    .map((item) => item.trim().toLowerCase())
+    .includes(valueLower);
 }

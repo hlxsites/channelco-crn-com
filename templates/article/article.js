@@ -1,5 +1,5 @@
+import { getMetadata } from '../../scripts/lib-franklin.js';
 import {
-  getRecordByPath,
   getCategoryName,
   getCategoryPath,
   getAuthorByName,
@@ -30,7 +30,7 @@ export function loadEager(main) {
   buildSocialShare(picture);
 
   const categoryLink = document.createElement('a');
-  categoryLink.classList.add('link-arrow', 'article-category-link', 'placeholder');
+  categoryLink.classList.add('link-arrow', 'article-category-link');
   categoryLink.innerText = 'Category';
   heading.parentElement.insertBefore(categoryLink, heading);
 
@@ -46,10 +46,13 @@ export function loadEager(main) {
 // eslint-disable-next-line import/prefer-default-export
 export async function loadLazy(main) {
   const path = window.location.pathname;
-  const article = await getRecordByPath(path);
-  if (!article) {
-    return;
-  }
+  const article = {
+    path,
+    category: getMetadata('category'),
+    author: getMetadata('author'),
+    publisheddate: getMetadata('publisheddate'),
+    keywords: getMetadata('keywords'),
+  };
 
   const categoryPath = getCategoryPath(path);
   const categoryName = getCategoryName(article);
