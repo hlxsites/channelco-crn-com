@@ -9,10 +9,13 @@ import {
   loadBlocks,
   getMetadata,
 } from './lib-franklin.js';
+import ffetch from './ffetch.js';
 
 const DEFAULT_CATEGORY_PATH = '/news';
 const DEFAULT_CATEGORY_NAME = 'News';
 const EMAIL_REGEX = /\S+[a-z0-9]@[a-z0-9.]+/img;
+const CHUNK_SIZE = 500;
+const CHUNK_LIMIT = 3;
 
 function createBreadcrumbItem(href, label) {
   const li = document.createElement('li');
@@ -386,34 +389,23 @@ export function isArticle(record) {
   );
 }
 
-let cachedIndex;
 /**
  * Queries the site's index and only includes those records that match a given filter.
  * @param {function} filter Filter through which each record will be sent. The function will
  *  receive a single argument: the current record's raw data. The function should return true
  *  to include the record in the final result, or false to exclude it from the result.
- * @returns {Promise<Array<QueryIndexRecord>>} Resolves with an array of information for all
- *  matching records.
+ * @param {number} [limit] The maximum number of records to retrieve. Default: 10.
+ * @returns {import('./ffetch.js').default} Resolves an ffetch object configured with parameters
+ *  ready for querying.
  */
-export async function queryIndex(filter) {
-  let index = cachedIndex;
-  if (!index) {
-    // will need to be updated to use ffetch for performance.
-    const res = await fetch('/query-index.json');
-    if (res && res.ok) {
-      try {
-        index = await res.json();
-        // storing the query index in memory as a speed performance optimization.
-        // may need to revisit this if the query index gets very large.
-        cachedIndex = index;
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.log('Unable to parse query index json', e);
-      }
-    }
-  }
-  const { data = [] } = index || {};
-  return data.filter(filter);
+export function queryIndex(filter, limit = 10) {
+  return ffetch('/query-index.json')
+    .chunks(CHUNK_SIZE)
+    // "safety net" to ensure we aren't inadvertently traversing the entire index. individual
+    // calls can override this, or we can adjust the limit as needed
+    .chunkLimit(CHUNK_LIMIT)
+    .filter(filter)
+    .limit(limit);
 }
 
 /**
@@ -506,15 +498,74 @@ export async function getRecordsByPath(paths) {
 }
 
 /**
+ * Converts a given value to lower case, then strictly compares it with another value.
+ * @param {string} value Value to convert to lower case.
+ * @param {string} matchValue Value to match against (as-is).
+ * @returns {boolean} True if the values match, false otherwise.
+ */
+function lowerCaseCompare(value, matchValue) {
+  return String(value).toLowerCase() === matchValue;
+}
+
+/**
+ * Converts a given list of comma-separated values to lower case, then determines whether a
+ * given value is in the list.
+ * @param {string} list Comma-separated list to convert to lower case and check.
+ * @param {string} value Value to look for (as-is).
+ * @returns {boolean} True if the given value is in the comma-separated
+ *  list, false otherwise.
+ */
+function commaSeparatedListContains(list, value) {
+  if (!list || !value) {
+    return false;
+  }
+  const listStr = String(list);
+
+  return listStr.split(',')
+    .map((item) => item.trim().toLowerCase())
+    .includes(value);
+}
+
+/**
+ * Queries the site's index and returns articles whose specified metadata value
+ * matches a given filter value.
+ * @param {string} metadataName Name of the article metadata to match.
+ * @param {string} value Value to match with.
+ * @param {number} [limit=10] Maximum number of articles to include.
+ * @param {function} [compareFn] Used to compare the two values. The first parameter will be
+ *  the record's metadata value, and the second will be a lower-case version of the match
+ *  value. Default function will convert the record's metadata value to lower case and strictly
+ *  compare it with the match value.
+ * @returns {Promise<QueryIndexRecord>} Article's record information.
+ */
+async function queryMatchingArticles(
+  metadataName,
+  value,
+  limit = 10,
+  compareFn = lowerCaseCompare,
+) {
+  const matchValue = String(value).toLowerCase();
+  const entries = queryIndex(
+    (record) => compareFn(record[metadataName], matchValue),
+    limit,
+  ).sheet('article');
+
+  const articles = [];
+  // eslint-disable-next-line no-restricted-syntax
+  for await (const entry of entries) {
+    articles.push(entry);
+  }
+  return articles;
+}
+
+/**
  * Retrieves all articles in a given category.
  * @param {string} categoryName Category whose articles should be retrieved.
  * @returns {Promise<Array<QueryIndexRecord>>} Resolves with an array of matching
  *  articles.
  */
 export async function getArticlesByCategory(categoryName) {
-  return queryIndex(
-    (record) => record.category === categoryName && isArticle(record),
-  );
+  return queryMatchingArticles('category', categoryName, 13);
 }
 
 /**
@@ -524,9 +575,27 @@ export async function getArticlesByCategory(categoryName) {
  *  articles.
  */
 export async function getArticlesByAuthor(authorName) {
-  return queryIndex(
-    (record) => record.author === authorName && isArticle(record),
-  );
+  return queryMatchingArticles('author', authorName, 15);
+}
+
+/**
+ * Retrieves all articles related to a given company.
+ * @param {string} companyName Company whose articles should be retrieved.
+ * @returns {Promise<Array<QueryIndexRecord>>} Resolves with an array of matching
+ *  articles.
+ */
+export async function getArticlesByCompany(companyName) {
+  return queryMatchingArticles('companynames', companyName, 14, commaSeparatedListContains);
+}
+
+/**
+ * Retrieves all articles related to a given keyword.
+ * @param {string} keyword Keyword whose articles should be retrieved.
+ * @returns {Promise<Array<QueryIndexRecord>>} Resolves with an array of matching
+ *  articles.
+ */
+export async function getArticlesByKeyword(keyword) {
+  return queryMatchingArticles('keywords', keyword, 10, commaSeparatedListContains);
 }
 
 /**
@@ -549,13 +618,11 @@ export async function getRecordByPath(path) {
  * @returns {Promise<QueryIndexRecord>} Resolves author information.
  */
 export async function getAuthorByName(authorName) {
-  const records = await queryIndex(
-    (record) => record.path.startsWith('/authors/') && record.author === authorName,
-  );
-  if (!records.length) {
-    return undefined;
-  }
-  return records[0];
+  const authorValue = String(authorName).toLowerCase();
+  return ffetch('/query-index.json')
+    .sheet('authors')
+    .filter((record) => (String(record.author).toLowerCase()) === authorValue)
+    .first();
 }
 
 /**
@@ -860,21 +927,22 @@ function calculateScore(keywordLookup, record) {
  */
 async function buildRelevanceScores(keywordLookup) {
   const relevanceScores = [];
-  await queryIndex((record) => {
-    if (!record.keywords || !isArticle(record)) {
-      return false;
-    }
+  // only read a single chunk, limiting the relevant articles to that dataset
+  const entries = queryIndex(() => true, CHUNK_SIZE)
+    .sheet('article');
+
+  // eslint-disable-next-line no-restricted-syntax
+  for await (const entry of entries) {
     // calculate relevance by determining how many of the given keywords each
     // article has
-    const relevance = calculateScore(keywordLookup, record);
+    const relevance = calculateScore(keywordLookup, entry);
     if (relevance > 0) {
       relevanceScores.push({
-        record,
+        record: entry,
         relevance,
       });
     }
-    return false;
-  });
+  }
   return relevanceScores;
 }
 
@@ -965,11 +1033,6 @@ function sortByMostRelevant(relevanceScores) {
  * @returns {Promise<Array<QueryIndexRecord>>} Resolves with the most related articles.
  */
 export async function getRelatedArticles(article, relatedCount = 5) {
-  // this method will almost certainly need to be optimized as the number of articles
-  // grows. As is, it will:
-  // 1. Potentially read a very large number of articles into memory.
-  // 2. Query the full index.
-  // 3. Sort a very large number of articles.
   const lookup = buildKeywordLookup(article.keywords);
   const related = await buildRelevanceScores(lookup);
   sortByMostRelevant(related);
@@ -1018,23 +1081,4 @@ export function loadTemplateArticleCards(main, templateName, articles) {
       card.remove();
     }
   });
-}
-
-/**
- * Determines whether a given value is in a list of comma-separated values.
- * @param {string} list Comma-separated list to check.
- * @param {string} value Value to look for.
- * @returns {boolean} True if the given value is in the comma-separated
- *  list, false otherwise.
- */
-export function commaSeparatedListContains(list, value) {
-  if (!list || !value) {
-    return false;
-  }
-  const valueLower = String(value).toLowerCase();
-  const listStr = String(list);
-
-  return listStr.split(',')
-    .map((item) => item.trim().toLowerCase())
-    .includes(valueLower);
 }

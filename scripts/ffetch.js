@@ -11,8 +11,8 @@
  */
 
 async function* request(url, context) {
-    const { chunks, sheet, fetch } = context;
-    for (let offset = 0, total = Infinity; offset < total; offset += chunks) {
+    const { chunks, chunkLimit = Infinity, sheet, fetch } = context;
+    for (let offset = 0, total = Infinity; offset < total && offset < chunks * chunkLimit; offset += chunks) {
       const params = new URLSearchParams(`offset=${offset}&limit=${chunks}`);
       if (sheet) params.append('sheet', sheet);
       const resp = await fetch(`${url}?${params.toString()}`);
@@ -40,6 +40,11 @@ async function* request(url, context) {
   
   function chunks(upstream, context, chunks) {
     context.chunks = chunks;
+    return upstream;
+  }
+
+  function chunkLimit(upstream, context, chunkLimit) {
+    context.chunkLimit = chunkLimit;
     return upstream;
   }
   
@@ -147,6 +152,7 @@ async function* request(url, context) {
     // functions that either return the upstream generator or no generator at all
     const functions = {
       chunks: chunks.bind(null, generator, context),
+      chunkLimit: chunkLimit.bind(null, generator, context),
       all: all.bind(null, generator, context),
       first: first.bind(null, generator, context),
       withFetch: withFetch.bind(null, generator, context),

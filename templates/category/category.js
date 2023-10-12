@@ -5,7 +5,6 @@ import {
 } from '../../scripts/lib-franklin.js';
 import {
   getArticlesByCategory,
-  comparePublishDate,
   buildArticleCardsBlock,
   buildNewsSlider,
   loadTemplateArticleCards,
@@ -97,7 +96,6 @@ export async function loadLazy(main) {
   }
 
   const articles = await getArticlesByCategory(getTitle());
-  articles.sort(comparePublishDate);
 
   loadTemplateArticleCards(main, 'category', articles);
 

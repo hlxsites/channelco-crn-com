@@ -8,7 +8,6 @@ import {
 import {
   createOptimizedPicture,
   getArticlesByAuthor,
-  comparePublishDate,
   buildArticleCardsBlock,
   loadTemplateArticleCards,
 } from '../../scripts/shared.js';
@@ -98,7 +97,6 @@ export async function loadLazy(main) {
   }
   const authorName = getMetadata('author');
   const articles = await getArticlesByAuthor(authorName);
-  articles.sort(comparePublishDate);
 
   loadTemplateArticleCards(main, 'author', articles);
 

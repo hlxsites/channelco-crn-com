@@ -1,9 +1,6 @@
 import {
   getTitle,
-  comparePublishDate,
-  queryIndex,
-  isArticle,
-  commaSeparatedListContains,
+  getArticlesByCompany,
   buildArticleCardsBlock,
   loadTemplateArticleCards,
 } from '../../scripts/shared.js';
@@ -44,9 +41,7 @@ export function loadEager(main) {
 export async function loadLazy(main) {
   const companyName = getTitle();
 
-  const articles = await queryIndex((record) => isArticle(record)
-    && commaSeparatedListContains(record.companynames, companyName));
-  articles.sort(comparePublishDate);
+  const articles = await getArticlesByCompany(companyName);
 
   loadTemplateArticleCards(main, 'company', articles);
 }

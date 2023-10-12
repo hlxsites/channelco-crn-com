@@ -5,10 +5,7 @@ import {
 } from '../../scripts/lib-franklin.js';
 import {
   buildArticleCardsBlock,
-  commaSeparatedListContains,
-  queryIndex,
-  isArticle,
-  comparePublishDate,
+  getArticlesByKeyword,
   loadTemplateArticleCards,
   getKeywords,
 } from '../../scripts/shared.js';
@@ -38,9 +35,7 @@ export function loadEager(main) {
 export async function loadLazy(main) {
   const tagName = getKeywords();
 
-  const records = await queryIndex((record) => isArticle(record)
-    && commaSeparatedListContains(record.keywords, tagName));
-  records.sort(comparePublishDate);
+  const records = await getArticlesByKeyword(tagName);
 
   loadTemplateArticleCards(main, 'tag', records);
 
