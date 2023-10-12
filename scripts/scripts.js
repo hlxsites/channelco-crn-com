@@ -14,7 +14,7 @@ import { decorateMain } from './shared.js';
 
 const LCP_BLOCKS = []; // add your LCP blocks to the list
 
-const TEMPLATE_LIST = ['category', 'article', 'author', 'search-results', 'tag', 'company'];
+const TEMPLATE_LIST = ['category', 'article', 'filter', 'author', 'search-results', 'tag', 'company'];
 
 /**
  * load fonts.css and set a session storage flag

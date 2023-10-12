@@ -1,8 +1,6 @@
 import { readBlockConfig } from '../../scripts/lib-franklin.js';
 import ffetch from '../../scripts/ffetch.js';
 
-const alphaArr = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '#'];
-
 function buildCell(rowIndex) {
   const cell = rowIndex ? document.createElement('td') : document.createElement('th');
   if (!rowIndex) cell.setAttribute('scope', 'col');
@@ -12,22 +10,6 @@ function buildCell(rowIndex) {
 function dataMapLookup(dataMap, value) {
   const foundValue = dataMap.find((item) => item.key === value);
   return foundValue ? foundValue.value : value;
-}
-
-// Function to get unique values from an array of keys for each object
-function getUniqueValuesByKeys(data, key) {
-  const uniqueValues = [];
-
-  data.forEach((obj) => {
-    const value = obj[key];
-
-    // Check if the value is not in the uniqueValues array for this key
-    if (!uniqueValues.includes(value)) {
-      uniqueValues.push(value);
-    }
-  });
-
-  return uniqueValues;
 }
 
 function populateTable(data, tableFields, dataMap, detailsUrl, dataSource, year, tbody) {
@@ -63,32 +45,6 @@ async function loadMore(tableFields, dataMap, detailsUrl, dataSource, year, tbod
   if (loadMoreDiv) {
     loadMoreDiv.remove();
   }
-}
-
-function createDropdownOption(value, dataMap) {
-  const option = document.createElement('option');
-  option.innerText = dataMapLookup(dataMap, value);
-  option.setAttribute('value', value);
-  return option;
-}
-
-async function loadDropdownValues(key, filters, dataMap, spreadsheet, year, dropdown) {
-  const isPopulated = dropdown.getAttribute('data-populated') === 'true';
-  if (isPopulated) return;
-
-  dropdown.setAttribute('data-populated', true);
-  if (filters[key].type === 'alpha') {
-    alphaArr.forEach((item) => {
-      dropdown.append(createDropdownOption(item, dataMap));
-    });
-    return;
-  }
-
-  const data = await ffetch(spreadsheet).sheet(year).all();
-  const uniqueValues = getUniqueValuesByKeys(data, key);
-  uniqueValues.forEach((value) => {
-    dropdown.append(createDropdownOption(value, dataMap));
-  });
 }
 
 // eslint-disable-next-line max-len
@@ -153,18 +109,18 @@ export default async function decorate(block) {
     if (field.includes('(alpha')) {
       const fieldName = field.replace('(alpha)', '').trim();
       filters[fieldName] = {
-        values: [`-- Select ${dataMapLookup(dataMap, fieldName)} --`],
+        value: `-- Select ${dataMapLookup(dataMap, fieldName)} --`,
         type: 'alpha',
       };
     } else if (field.includes('(value)')) {
       const fieldName = field.replace('(value)', '').trim();
       filters[fieldName] = {
-        values: [`-- Select ${dataMapLookup(dataMap, fieldName)} --`],
+        value: `-- Select ${dataMapLookup(dataMap, fieldName)} --`,
         type: 'value',
       };
     } else {
       filters[field] = {
-        values: [`-- Select ${dataMapLookup(dataMap, field)} --`],
+        value: `-- Select ${dataMapLookup(dataMap, field)} --`,
         type: 'value',
       };
     }
@@ -179,13 +135,14 @@ export default async function decorate(block) {
     dropdownDiv.classList.add('dropdown');
     const dropdown = document.createElement('select');
     dropdown.setAttribute('data-populated', false);
-    filters[key].values.forEach((item) => {
-      const option = document.createElement('option');
-      option.innerText = dataMapLookup(dataMap, item);
-      option.setAttribute('value', item);
-      dropdown.append(option);
-    });
-    dropdown.addEventListener('click', () => loadDropdownValues(key, filters, dataMap, spreadsheet, year, dropdown));
+    dropdown.setAttribute('data-key', key);
+    dropdown.setAttribute('data-type', filters[key].type);
+    dropdown.setAttribute('data-source', dataSource);
+    dropdown.setAttribute('data-year', year);
+    const option = document.createElement('option');
+    option.innerText = dataMapLookup(dataMap, filters[key].value);
+    option.setAttribute('value', filters[key].value);
+    dropdown.append(option);
     dropdown.addEventListener('change', () => onDropdownChange(block, dropdown, spreadsheet, year, filters, key, detailsUrl, dataSource, tableFields, dataMap));
 
     dropdownDiv.append(filterPrompt);
