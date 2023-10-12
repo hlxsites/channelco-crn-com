@@ -106,6 +106,16 @@ function loadBottomAd() {
   }
 }
 
+let throttleTimer;
+function throttle(func, delay) {
+  if (throttleTimer) return;
+
+  throttleTimer = setTimeout(() => {
+    func();
+    throttleTimer = null;
+  }, delay);
+}
+
 function makeSticky() {
   const adWrappers = document.querySelectorAll('.ad-wrapper');
   const lastAd = adWrappers[adWrappers.length - 1];
@@ -114,44 +124,45 @@ function makeSticky() {
   const lastBanner = bannerWrappers[bannerWrappers.length - 1];
 
   // Calculate the initial position of the elements
-  // adding 300 to make up for ad expansion
-  const lastAdOffsetTop = lastAd.offsetTop + 300;
+  const lastAdOffsetTop = lastAd.offsetTop + 295;
+  
+  let isSticky = false;
 
   function handleScroll() {
-    const { scrollY } = window;
-    const screenWidth = window.innerWidth;
+    console.log('called');
+    requestAnimationFrame(() => {
+      const { scrollY } = window;
+      const screenWidth = window.innerWidth;
+      const mobileScreenWidthThreshold = 768;
 
-    const mobileScreenWidthThreshold = 768;
+      const shouldStick = scrollY >= lastAdOffsetTop && screenWidth > mobileScreenWidthThreshold;
 
-    // Check if the user has scrolled past the last ad,
-    // the screen width is greater than the threshold,
-    // and the scroll position is within the bounds of maxScrollPosition
-    if (
-      scrollY >= lastAdOffsetTop
-      && screenWidth > mobileScreenWidthThreshold
-    ) {
-      // Make the last ad and banner sticky
-      lastAd.style.position = 'fixed';
-      lastAd.style.top = '0';
-      lastAd.style.width = '330px';
+      if (shouldStick !== isSticky) {
+        isSticky = shouldStick;
 
-      lastBanner.style.position = 'fixed';
-      lastBanner.style.top = '300px';
-      lastBanner.style.width = '330px';
-    } else {
-      // Reset the style when scrolling up, on mobile, or past the maxScrollPosition
-      lastAd.style.position = 'static';
-      lastAd.style.top = 'auto';
-      lastAd.style.width = 'auto';
+        if (isSticky) {
+          lastAd.style.position = 'fixed';
+          lastAd.style.top = '0';
+          lastAd.style.width = '330px';
 
-      lastBanner.style.position = 'static';
-      lastBanner.style.top = 'auto';
-      lastBanner.style.width = 'auto';
-    }
+          lastBanner.style.position = 'fixed';
+          lastBanner.style.top = '300px';
+          lastBanner.style.width = '330px';
+        } else {
+          lastAd.style.position = 'static';
+          lastAd.style.top = 'auto';
+          lastAd.style.width = 'auto';
+
+          lastBanner.style.position = 'static';
+          lastBanner.style.top = 'auto';
+          lastBanner.style.width = 'auto';
+        }
+      }
+    });
   }
 
-  // Attach the scroll event listener
-  window.addEventListener('scroll', handleScroll);
+  // Attach the throttled scroll event listener
+  window.addEventListener('scroll', () => throttle(handleScroll, 200));
 }
 
 function loadDelayedAds(main) {
