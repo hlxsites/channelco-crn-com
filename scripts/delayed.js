@@ -125,7 +125,7 @@ function makeSticky() {
 
   // Calculate the initial position of the elements
   const lastAdOffsetTop = lastAd.offsetTop + 295;
-  
+
   let isSticky = false;
 
   function handleScroll() {
