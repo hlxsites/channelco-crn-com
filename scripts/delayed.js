@@ -129,7 +129,6 @@ function makeSticky() {
   let isSticky = false;
 
   function handleScroll() {
-    console.log('called');
     requestAnimationFrame(() => {
       const { scrollY } = window;
       const screenWidth = window.innerWidth;
