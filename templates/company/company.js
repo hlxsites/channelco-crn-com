@@ -1,5 +1,5 @@
 import {
-  getRecordByPath,
+  getTitle,
   comparePublishDate,
   queryIndex,
   isArticle,
@@ -18,6 +18,7 @@ export function loadEager(main) {
     return;
   }
 
+  const companyName = getTitle();
   buildArticleCardsBlock(8, 'company', (cards) => { firstSection.prepend(cards); });
 
   const h2 = document.createElement('h2');
@@ -31,8 +32,8 @@ export function loadEager(main) {
   });
 
   const h1 = document.createElement('h1');
-  h1.innerText = 'Company';
-  h1.classList.add('company-heading', 'placeholder');
+  h1.innerText = companyName;
+  h1.classList.add('company-heading');
   firstSection.prepend(h1);
 }
 
@@ -41,18 +42,8 @@ export function loadEager(main) {
  * @param {HTMLElement} main The page's main element.
  */
 export async function loadLazy(main) {
-  const company = await getRecordByPath(window.location.pathname);
-  if (!company) {
-    return;
-  }
+  const companyName = getTitle();
 
-  const companyName = company.companynames;
-  const heading = main.querySelector('.company-heading');
-  if (heading) {
-    const newHeading = document.createElement('h1');
-    newHeading.innerText = companyName;
-    heading.replaceWith(newHeading);
-  }
   const articles = await queryIndex((record) => isArticle(record)
     && commaSeparatedListContains(record.companynames, companyName));
   articles.sort(comparePublishDate);
