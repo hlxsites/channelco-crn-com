@@ -501,7 +501,8 @@ export async function getRecordsByPath(paths) {
     const pathUrl = `${window.location.protocol}//${window.location.host}${path}`;
     return getMetadataJson(pathUrl);
   });
-  return Promise.all(promises);
+  const results = await Promise.all(promises);
+  return results.filter((value) => !!value);
 }
 
 /**
