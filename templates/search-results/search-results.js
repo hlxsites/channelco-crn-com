@@ -5,7 +5,6 @@ import {
 } from '../../scripts/lib-franklin.js';
 import {
   queryIndex,
-  isArticle,
   buildArticleCardsBlock,
   loadTemplateArticleCards,
 } from '../../scripts/shared.js';
@@ -105,19 +104,28 @@ export async function loadLazy(main) {
     return;
   }
 
-  let results = [];
+  const results = [];
   if (searchTerm) {
-    results = await queryIndex((record) => isArticle(record)
-      && (String(record.title).toLowerCase().includes(searchTerm)
-      || String(record.description).toLowerCase().includes(searchTerm)));
+    const searchCompare = searchTerm.toLowerCase();
+    const entries = queryIndex(
+      (record) => (String(record.title).toLowerCase().includes(searchCompare)
+      || String(record.description).toLowerCase().includes(searchCompare)),
+      500,
+    )
+      .sheet('article');
+
+    // eslint-disable-next-line no-restricted-syntax
+    for await (const entry of entries) {
+      results.push(entry);
+    }
   }
 
-  resultCountLabel.innerText = `${results.length} results for `;
+  resultCountLabel.innerText = `${results.length === 500 ? '500+' : results.length} results for `;
   const termLabel = createSearchTermElement(searchTerm);
   termLabel.classList.add('quoted');
   resultCountLabel.append(termLabel);
 
-  loadTemplateArticleCards(main, 'search-results', results);
+  loadTemplateArticleCards(main, 'search-results', results.slice(0, 50));
 
   const nav = buildBlock('category-navigation', { elems: [] });
   section.append(nav);
