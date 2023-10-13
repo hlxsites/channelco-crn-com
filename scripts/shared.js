@@ -918,14 +918,18 @@ export async function buildRelatedContent(target, articles) {
  * Dynamically creates a social share block, then appends the new block after
  * a given element.
  * @param {HTMLElement} insertAfter Element after which the block will be inserted.
- * @returns {Promise} Resolves when the operation is complete.
  */
-export async function buildSocialShare(insertAfter) {
+export function buildSocialShare(insertAfter) {
   const insertBefore = insertAfter.nextSibling;
+  if (!insertBefore) {
+    return;
+  }
+  if (!insertAfter.parentElement) {
+    return;
+  }
   const socialShare = buildBlock('social-share', { elems: [] });
   insertAfter.parentElement.insertBefore(socialShare, insertBefore);
   decorateBlock(socialShare);
-  return loadBlock(socialShare);
 }
 
 function buildKeywordLookup(keywords) {

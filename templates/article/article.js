@@ -38,7 +38,7 @@ export function loadEager(main) {
     return;
   }
 
-  // buildSocialShare(picture);
+  buildSocialShare(picture);
 
   const article = getArticleByMetadata();
 
