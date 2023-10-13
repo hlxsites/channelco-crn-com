@@ -77,6 +77,22 @@ async function loadArticleCards(main) {
  */
 // eslint-disable-next-line import/prefer-default-export
 export async function loadLazy(main) {
+  // move all sections into a single container so that they can be
+  // placed in the correct location in the page's grid
+  const contentSection = document.createElement('div');
+  contentSection.className = 'content-section';
+
+  const rightSection = main.querySelector('.right-section');
+  if (!rightSection) {
+    return;
+  }
+
+  [...main.querySelectorAll('main > .section:not(.auto-section)')].forEach((section) => {
+    contentSection.appendChild(section);
+  });
+  main.insertBefore(contentSection, rightSection);
+  main.classList.add('grid-layout');
+
   const toTopSection = createToTopSection();
   main.appendChild(toTopSection);
 
@@ -119,39 +135,16 @@ export function loadEager(main) {
 /**
  * Decorates the DOM as needed for the template during the
  * delayed phase.
- * @param {HTMLElement} main The document's main element.
  */
-export function loadDelayed(main) {
-  // move all sections into a single container so that they can be
-  // placed in the correct location in the page's grid
-  const contentSection = document.createElement('div');
-  contentSection.className = 'content-section';
-
-  const rightSection = main.querySelector('.right-section');
-  if (!rightSection) {
+export function loadDelayed() {
+  const bottomSection = document.querySelector('.bottom-section');
+  if (!bottomSection) {
     return;
   }
-
-  [...main.querySelectorAll('main > .section:not(.auto-section)')].forEach((section) => {
-    contentSection.appendChild(section);
-  });
-  main.insertBefore(contentSection, rightSection);
-  main.classList.add('grid-layout');
 
   const bottomAdSection = document.createElement('div');
   bottomAdSection.className = 'bottom-ad-section';
   bottomAdSection.id = 'bottom-ad-fragment-container';
 
-  // Create the close icon
-  const closeIcon = document.createElement('img');
-  closeIcon.className = 'close-icon';
-  closeIcon.src = '/styles/icons/close-ribbon.png';
-  closeIcon.alt = 'Close'; // Accessibility
-
-  closeIcon.addEventListener('click', () => {
-    bottomAdSection.style.display = 'none';
-  });
-
-  bottomAdSection.appendChild(closeIcon);
-  document.body.appendChild(bottomAdSection);
+  bottomSection.appendChild(bottomAdSection);
 }

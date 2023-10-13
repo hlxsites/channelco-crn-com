@@ -89,7 +89,7 @@ main .top-section.auto-section .breadcrumb-list a {
   cursor: pointer;
 }
 
-.bottom-ad-section {
+main .bottom-section.auto-section {
   position: fixed;
   bottom: 0;
   left: 0;
@@ -130,6 +130,10 @@ main .section:not(.auto-section):first-child {
   margin-top: 0;
 }
 
+main .right-ad-section {
+  height: 100%;
+}
+
 @keyframes loading {
   0% {
     background-position: 200% 0;
@@ -150,7 +154,7 @@ main .section:not(.auto-section):first-child {
 }
 
 @media (min-width: 768px) {
-  .bottom-ad-section {
+  main .bottom-section.auto-section {
     width: 100%;
     min-height: 75px;
     margin-left: -50%;
@@ -211,7 +215,7 @@ main .section:not(.auto-section):first-child {
 }
 
 @media (min-width: 1140px) {
-  .bottom-ad-section {
+  main .bottom-section.auto-section {
     max-width: 1140px;
     margin-left: -570px;
   }

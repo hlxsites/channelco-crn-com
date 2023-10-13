@@ -141,8 +141,24 @@ function buildAutoSections(main) {
   const rightSection = document.createElement('div');
   rightSection.classList.add('right-section', 'auto-section');
 
+  const bottomSection = document.createElement('div');
+  bottomSection.classList.add('bottom-section', 'auto-section');
+
+  // Create the close icon
+  const closeIcon = document.createElement('img');
+  closeIcon.className = 'close-icon';
+  closeIcon.src = '/styles/icons/close-ribbon.png';
+  closeIcon.alt = 'Close'; // Accessibility
+
+  closeIcon.addEventListener('click', () => {
+    bottomSection.style.display = 'none';
+  });
+
+  bottomSection.appendChild(closeIcon);
+
   main.prepend(topSection);
   main.append(rightSection);
+  main.append(bottomSection);
 }
 
 /**
