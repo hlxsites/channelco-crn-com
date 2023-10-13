@@ -124,9 +124,6 @@ export function loadEager(main) {
   }
 
   addToRightSection(main, rightAdSection);
-
-  main.prepend(topSection);
-  main.append(rightAdSection);
 }
 
 /**
