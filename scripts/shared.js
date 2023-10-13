@@ -89,6 +89,53 @@ export function addToTopSection(main, element) {
   topSection.append(element);
 }
 
+/**
+ * Appends an HTML element to the right section of the site.
+ * @param {HTMLElement} main The page's main element.
+ * @param {HTMLElement} element Element to append to the top.
+ */
+export function addToRightSection(main, element) {
+  const rightSection = main.querySelector('.right-section');
+  if (!rightSection) {
+    return;
+  }
+  rightSection.append(element);
+}
+
+/**
+ * Retrieves all the default sections, which will contain content created
+ * by a document author.
+ * @param {HTMLElement} main The page's main element.
+ * @returns {Array<HTMLElement>} The page's default sections.
+ */
+export function getDefaultSections(main) {
+  return [...main.querySelectorAll('.section:not(.auto-section)')];
+}
+
+/**
+ * Retrieves the first default section on the page, if there is
+ * one.
+ * @param {HTMLElement} main The page's main element.
+ * @returns {HTMLElement|undefined} The first default section, or undefined if none.
+ */
+export function getFirstDefaultSection(main) {
+  return main.querySelector('.section:not(.auto-section)');
+}
+
+/**
+ * Retrieves the last default section on the page, if there is
+ * one.
+ * @param {HTMLElement} main The page's main element.
+ * @returns {HTMLElement|undefined} The last default section, or undefined if none.
+ */
+export function getLastDefaultSection(main) {
+  const sections = getDefaultSections(main);
+  if (sections.length) {
+    return sections[sections.length - 1];
+  }
+  return undefined;
+}
+
 export function buildNewsSlider(main) {
   const elements = getMetadata('keywords');
   if (!elements || !elements.length) {

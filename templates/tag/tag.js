@@ -8,6 +8,7 @@ import {
   getArticlesByKeyword,
   loadTemplateArticleCards,
   getKeywords,
+  getLastDefaultSection,
 } from '../../scripts/shared.js';
 
 /**
@@ -39,13 +40,13 @@ export async function loadLazy(main) {
 
   loadTemplateArticleCards(main, 'tag', records);
 
-  const contentSection = main.querySelector('.content-section');
-  if (!contentSection) {
+  const lastSection = getLastDefaultSection(main);
+  if (!lastSection) {
     return;
   }
 
   const nav = buildBlock('category-navigation', { elems: [] });
-  contentSection.append(nav);
+  lastSection.append(nav);
   decorateBlock(nav);
   await loadBlock(nav);
 }
