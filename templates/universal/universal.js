@@ -117,19 +117,16 @@ export function loadEager(main) {
   rightAdSection.appendChild(loadingDiv);
 
   const breadcrumb = buildBreadcrumb();
-  const newsWrapper = main.querySelector('.news-slider-wrapper');
 
   addToTopSection(main, topAdSection);
   if (breadcrumb) {
     addToTopSection(main, breadcrumb);
   }
-  if (newsWrapper) {
-    newsWrapper.parentElement.classList.remove('news-slider-container');
-    addToTopSection(main, newsWrapper);
-    newsWrapper.parentElement.classList.add('news-slider-container');
-  }
 
   addToRightSection(main, rightAdSection);
+
+  main.prepend(topSection);
+  main.append(rightAdSection);
 }
 
 /**
