@@ -11,7 +11,6 @@ function dataMapLookup(dataMap, value) {
   const foundValue = dataMap.find((item) => item.key === value);
   return foundValue ? foundValue.value : value;
 }
-}
 
 function populateTable(data, tableFields, dataMap, detailsUrl, dataSource, year, tbody) {
   data.forEach((item, i) => {
