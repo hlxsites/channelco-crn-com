@@ -381,7 +381,7 @@ export function updateSectionsStatus(main) {
     if (status !== 'loaded') {
       const loadingBlock = section.querySelector('.block[data-block-status="initialized"], .block[data-block-status="loading"]');
       if (loadingBlock) {
-        console.log(`updateSectionStatus loading section ${section.id}`, new Error().stack);
+        console.log(`updateSectionStatus loading section ${section.id} because of loadingBlock ${loadingBlock.className}`, new Error().stack);
         section.dataset.sectionStatus = 'loading';
         break;
       } else {
