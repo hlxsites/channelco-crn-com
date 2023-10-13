@@ -349,7 +349,6 @@ export function decorateSections(main) {
     wrappers.forEach((wrapper) => section.append(wrapper));
     section.classList.add('section');
     section.dataset.sectionStatus = 'initialized';
-    console.log(`decorateSections hiding ${section.id}`, new Error().stack);
     section.style.display = 'none';
 
     /* process section metadata */
@@ -380,15 +379,11 @@ export function updateSectionsStatus(main) {
     const status = section.dataset.sectionStatus;
     if (status !== 'loaded') {
       const loadingBlock = section.querySelector('.block[data-block-status="initialized"], .block[data-block-status="loading"]');
-      const loadingBocks = section.querySelectorAll('.block[data-block-status="initialized"], .block[data-block-status="loading"]');
       if (loadingBlock) {
-        console.log(`updateSectionStatus loading section ${section.id} because of loadingBlock ${loadingBlock.className}`, section.innerHTML, new Error().stack);
-        [...loadingBocks].forEach((loadingBlock) => console.log('still loading block', loadingBlock.className))
         section.dataset.sectionStatus = 'loading';
         break;
       } else {
         section.dataset.sectionStatus = 'loaded';
-        console.log(`updateSectionStatus showing section ${section.id}`, new Error().stack);
         section.style.display = null;
       }
     }

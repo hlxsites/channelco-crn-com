@@ -143,10 +143,6 @@ function buildAutoSections(main) {
 
   main.prepend(topSection);
   main.append(rightSection);
-
-  [...main.querySelectorAll(':scope > div')].forEach((section, index) => {
-    section.id = `section-${index}`;
-  });
 }
 
 /**
