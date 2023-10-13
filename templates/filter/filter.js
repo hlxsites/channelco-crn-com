@@ -38,8 +38,11 @@ export async function loadDelayed(main) {
   const dataSheet = `/data-source/${dataSource}/${dataSource}-data.json`;
   const dataMapSheet = `/data-source/${dataSource}/data-mapping.json`;
 
-  const data = await ffetch(dataSheet).sheet(year).all();
-  const dataMap = await ffetch(dataMapSheet).sheet(year).all();
+  const promises = [];
+  promises.push(ffetch(dataSheet).sheet(year).all());
+  promises.push(ffetch(dataMapSheet).sheet(year).all());
+
+  const [data, dataMap] = await Promise.all(promises);
 
   dropdowns.forEach((dropdown) => {
     const key = dropdown.getAttribute('data-key');

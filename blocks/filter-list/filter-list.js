@@ -11,6 +11,7 @@ function dataMapLookup(dataMap, value) {
   const foundValue = dataMap.find((item) => item.key === value);
   return foundValue ? foundValue.value : value;
 }
+}
 
 function populateTable(data, tableFields, dataMap, detailsUrl, dataSource, year, tbody) {
   data.forEach((item, i) => {
@@ -91,8 +92,11 @@ export default async function decorate(block) {
   const filterFields = config['filter-fields'].split(',');
   const tableFields = config['table-fields'].split(',');
 
-  const data = await ffetch(spreadsheet).sheet(year).limit(20).all();
-  const dataMap = await ffetch(dataMapSheet).sheet(year).all();
+  const promises = [];
+  promises.push(ffetch(spreadsheet).sheet(year).limit(20).all());
+  promises.push(ffetch(dataMapSheet).sheet(year).all());
+
+  const [data, dataMap] = await Promise.all(promises);
 
   const currentUrlArray = window.location.href.split('/');
   currentUrlArray[currentUrlArray.length - 1] = `${currentUrlArray[currentUrlArray.length - 1]}-${year}details`;
