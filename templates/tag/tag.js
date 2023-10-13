@@ -9,6 +9,7 @@ import {
   loadTemplateArticleCards,
   getKeywords,
   getLastDefaultSection,
+  getFirstDefaultSection,
 } from '../../scripts/shared.js';
 
 /**
@@ -16,7 +17,7 @@ import {
  * @param {HTMLElement} main The page's main element.
  */
 export function loadEager(main) {
-  const firstSection = main.querySelector('.section');
+  const firstSection = getFirstDefaultSection(main);
   if (!firstSection) {
     return;
   }
