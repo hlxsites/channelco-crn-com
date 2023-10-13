@@ -20,7 +20,7 @@ export default async function decorate(block) {
   const dataMapSheet = `/data-source/${dataSource}/data-mapping.json`;
 
   const promises = [];
-  promises.push(ffetch(spreadsheet).sheet(year).limit(10).all());
+  promises.push(ffetch(spreadsheet).sheet(year).limit(30).all());
   promises.push(ffetch(dataMapSheet).sheet(year).all());
 
   const [data, dataMap] = await Promise.all(promises);
