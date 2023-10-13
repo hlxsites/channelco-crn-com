@@ -1,15 +1,11 @@
 import { readBlockConfig } from '../../scripts/lib-franklin.js';
+import { dataMapLookup } from '../../scripts/shared.js';
 import ffetch from '../../scripts/ffetch.js';
 
 function buildCell(rowIndex) {
   const cell = rowIndex ? document.createElement('td') : document.createElement('th');
   if (!rowIndex) cell.setAttribute('scope', 'col');
   return cell;
-}
-
-function dataMapLookup(dataMap, value) {
-  const foundValue = dataMap.find((item) => item.key === value);
-  return foundValue ? foundValue.value : value;
 }
 
 function populateTable(data, tableFields, dataMap, detailsUrl, dataSource, year, tbody) {
@@ -98,7 +94,7 @@ export default async function decorate(block) {
   const [data, dataMap] = await Promise.all(promises);
 
   const currentUrlArray = window.location.href.split('/');
-  currentUrlArray[currentUrlArray.length - 1] = `${currentUrlArray[currentUrlArray.length - 1]}-${year}details`;
+  currentUrlArray[currentUrlArray.length - 1] = `${currentUrlArray[currentUrlArray.length - 1]}-${year}-details`;
   const detailsUrl = currentUrlArray.join('/');
 
   // Clear block contents

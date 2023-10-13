@@ -33,6 +33,8 @@ function getUniqueValuesByKeys(data, key) {
 // eslint-disable-next-line import/prefer-default-export
 export async function loadDelayed(main) {
   const dropdowns = main.querySelectorAll('select[data-populated="false"]');
+  if (dropdowns.length === 0) return;
+
   const dataSource = dropdowns[0].getAttribute('data-source');
   const year = dropdowns[0].getAttribute('data-year');
   const dataSheet = `/data-source/${dataSource}/${dataSource}-data.json`;

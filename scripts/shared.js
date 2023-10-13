@@ -946,3 +946,14 @@ export function commaSeparatedListContains(list, value) {
     .map((item) => item.trim())
     .includes(value);
 }
+
+/**
+ * Determines whether a given value is in a list of comma-separated values.
+ * @param {string} dataMap Data map from data-source
+ * @param {string} value Value to look for
+ * @returns {string} Mapped string if found, value if not
+ */
+export function dataMapLookup(dataMap, value) {
+  const foundValue = dataMap.find((item) => item.key === value);
+  return foundValue ? foundValue.value : value;
+}

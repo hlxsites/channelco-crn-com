@@ -27,7 +27,8 @@ export default async function decorate(block) {
 
   const headerDiv = document.createElement('div');
   headerDiv.classList.add('details-header');
-  heading.forEach((header) => {
+  const headingList = Array.isArray(heading) ? heading : [heading];
+  headingList.forEach((header) => {
     const values = header.split(',');
     const row = document.createElement('div');
     row.classList.add('heading-row');
@@ -44,7 +45,6 @@ export default async function decorate(block) {
 
   const detailsDiv = document.createElement('div');
   detailsDiv.classList.add('details');
-
   const detailsList = Array.isArray(details) ? details : [details];
   detailsList.forEach(((detailItem) => {
     let parsedDetailItem;
