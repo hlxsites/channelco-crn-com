@@ -1,7 +1,4 @@
-import {
-  buildBreadcrumb,
-  getRecordsByPath,
-} from '../../scripts/shared.js';
+import { buildBreadcrumb, getRecordsByPath } from '../../scripts/shared.js';
 
 function scrollToTop(event) {
   event.preventDefault();
@@ -45,14 +42,15 @@ function createToTopSection() {
 async function loadArticleCards(main) {
   // find all article cards with a data-path attribute and build a lookup for each unique path
   const articleLookup = {};
-  [...main.querySelectorAll('.article-card.skeleton[data-path]')]
-    .forEach((articleCard) => {
+  [...main.querySelectorAll('.article-card.skeleton[data-path]')].forEach(
+    (articleCard) => {
       const path = articleCard?.dataset?.path;
       if (!articleLookup[path]) {
         articleLookup[path] = [];
       }
       articleLookup[path].push(articleCard);
-    });
+    },
+  );
 
   // set json data on any article cards from articles that were found
   const records = await getRecordsByPath(Object.keys(articleLookup));
@@ -117,16 +115,10 @@ export function loadEager(main) {
   rightAdSection.appendChild(loadingDiv);
 
   const breadcrumb = buildBreadcrumb();
-  const newsWrapper = main.querySelector('.news-slider-wrapper');
 
   topSection.appendChild(topAdSection);
   if (breadcrumb) {
     topSection.appendChild(breadcrumb);
-  }
-  if (newsWrapper) {
-    newsWrapper.parentElement.classList.remove('news-slider-container');
-    topSection.appendChild(newsWrapper);
-    newsWrapper.parentElement.classList.add('news-slider-container');
   }
   main.prepend(topSection);
   main.append(rightAdSection);

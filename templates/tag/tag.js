@@ -4,13 +4,10 @@ import {
   loadBlock,
 } from '../../scripts/lib-franklin.js';
 import {
-  getRecordByPath,
   buildArticleCardsBlock,
-  commaSeparatedListContains,
-  queryIndex,
-  isArticle,
-  comparePublishDate,
+  getArticlesByKeyword,
   loadTemplateArticleCards,
+  getKeywords,
 } from '../../scripts/shared.js';
 
 /**
@@ -26,8 +23,8 @@ export function loadEager(main) {
   buildArticleCardsBlock(10, 'tag', (cards) => { firstSection.prepend(cards); });
 
   const title = document.createElement('h1');
-  title.innerText = 'Keyword';
-  title.classList.add('tag-title', 'placeholder');
+  title.innerText = getKeywords();
+  title.classList.add('tag-title');
   firstSection.prepend(title);
 }
 
@@ -36,22 +33,9 @@ export function loadEager(main) {
  * @param {HTMLElement} main The page's main element.
  */
 export async function loadLazy(main) {
-  const tag = await getRecordByPath(window.location.pathname);
-  if (!tag) {
-    return;
-  }
+  const tagName = getKeywords();
 
-  const tagName = tag.keywords;
-  const heading = main.querySelector('.tag-title');
-  if (heading) {
-    const tagHeading = document.createElement('h1');
-    tagHeading.innerText = tagName;
-    heading.replaceWith(tagHeading);
-  }
-
-  const records = await queryIndex((record) => isArticle(record)
-    && commaSeparatedListContains(record.keywords, tagName));
-  records.sort(comparePublishDate);
+  const records = await getArticlesByKeyword(tagName);
 
   loadTemplateArticleCards(main, 'tag', records);
 

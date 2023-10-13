@@ -5,12 +5,11 @@ import {
 } from '../../scripts/lib-franklin.js';
 import {
   getArticlesByCategory,
-  getRecordByPath,
-  comparePublishDate,
   buildArticleCardsBlock,
   buildNewsSlider,
   loadTemplateArticleCards,
   addToTopSection,
+  getTitle,
 } from '../../scripts/shared.js';
 
 /**
@@ -59,7 +58,8 @@ function createHeading(text, ...classes) {
  */
 // eslint-disable-next-line import/prefer-default-export
 export function loadEager(main) {
-  addToTopSection(main, createHeading('Category', 'placeholder'));
+  const title = getTitle();
+  addToTopSection(main, createHeading(title));
   buildNewsSlider(main);
 
   let lastElement;
@@ -76,7 +76,7 @@ export function loadEager(main) {
     firstSection.insertBefore(leadCards, lastElement);
   });
 
-  const newsHeading = createNewsHeading('Category News', 'placeholder');
+  const newsHeading = createNewsHeading(`${title} News`);
   firstSection.insertBefore(newsHeading, lastElement);
 
   buildArticleCardsBlock(8, 'category', (cards) => {
@@ -90,27 +90,12 @@ export function loadEager(main) {
  */
 // eslint-disable-next-line import/prefer-default-export
 export async function loadLazy(main) {
-  const category = await getRecordByPath(window.location.pathname);
-  if (!category) {
-    return;
-  }
   const contentSection = main.querySelector('.content-section');
   if (!contentSection) {
     return;
   }
 
-  const heading = main.querySelector('.category h1');
-  if (heading) {
-    heading.replaceWith(createHeading(category.title));
-  }
-
-  const newsHeading = main.querySelector('.category .news-heading');
-  if (newsHeading) {
-    newsHeading.replaceWith(createNewsHeading(`${category.title} News`));
-  }
-
-  const articles = await getArticlesByCategory(category.title);
-  articles.sort(comparePublishDate);
+  const articles = await getArticlesByCategory(getTitle());
 
   loadTemplateArticleCards(main, 'category', articles);
 
