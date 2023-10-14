@@ -43,6 +43,16 @@ async function loadMore(tableFields, dataMap, detailsUrl, dataSource, year, tbod
   }
 }
 
+// Resets all dropdowns aside from current
+function resetDropdowns(block, currDropdown) {
+  const dropdowns = block.querySelectorAll('select');
+  dropdowns.forEach((dropdown) => {
+    if (dropdown !== currDropdown) {
+      dropdown.selectedIndex = 0;
+    }
+  });
+}
+
 // eslint-disable-next-line max-len
 async function onDropdownChange(block, dropdown, spreadsheet, year, filters, key, detailsUrl, dataSource, tableFields, dataMap) {
   const tbody = block.querySelector('tbody');
@@ -63,6 +73,7 @@ async function onDropdownChange(block, dropdown, spreadsheet, year, filters, key
       })
       .all();
     tbody.innerHTML = '';
+    resetDropdowns(block, dropdown);
     populateTable(data, tableFields, dataMap, detailsUrl, dataSource, year, tbody);
   } else {
     const data = await ffetch(spreadsheet)
@@ -70,6 +81,7 @@ async function onDropdownChange(block, dropdown, spreadsheet, year, filters, key
       .filter((item) => item[key] === selectedValue)
       .all();
     tbody.innerHTML = '';
+    resetDropdowns(block, dropdown);
     populateTable(data, tableFields, dataMap, detailsUrl, dataSource, year, tbody);
   }
 

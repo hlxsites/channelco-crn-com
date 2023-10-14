@@ -24,6 +24,16 @@ function populateCardDisplay(data, imageUrl, information, detailsUrl, displayDiv
   });
 }
 
+// Resets all dropdowns aside from current
+function resetDropdowns(block, currDropdown) {
+  const dropdowns = block.querySelectorAll('select');
+  dropdowns.forEach((dropdown) => {
+    if (dropdown !== currDropdown) {
+      dropdown.selectedIndex = 0;
+    }
+  });
+}
+
 async function onDropdownChange(block, dropdown, filters, key, imageUrl, information, detailsUrl) {
   const year = dropdown.getAttribute('data-year');
   const dataSource = dropdown.getAttribute('data-source');
@@ -47,6 +57,7 @@ async function onDropdownChange(block, dropdown, filters, key, imageUrl, informa
       })
       .all();
     container.innerHTML = '';
+    resetDropdowns(block, dropdown);
     populateCardDisplay(data, imageUrl, information, detailsUrl, container);
   } else {
     const data = await ffetch(dataSheet)
@@ -54,7 +65,18 @@ async function onDropdownChange(block, dropdown, filters, key, imageUrl, informa
       .filter((item) => item[key] === selectedValue)
       .all();
     container.innerHTML = '';
+    resetDropdowns(block, dropdown);
     populateCardDisplay(data, imageUrl, information, detailsUrl, container);
+  }
+}
+
+// eslint-disable-next-line max-len
+async function loadMore(dataSheet, year, offset, imageUrl, information, detailsUrl, displayDiv, loadMoreDiv) {
+  const data = await ffetch(dataSheet).sheet(year).slice(offset).all();
+  populateCardDisplay(data, imageUrl, information, detailsUrl, displayDiv);
+
+  if (loadMoreDiv) {
+    loadMoreDiv.remove();
   }
 }
 
@@ -68,11 +90,11 @@ export default async function decorate(block) {
   const filterFields = config['filter-fields'].split(',');
   const imageUrl = config['image-url'];
   const { information } = config;
-  const spreadsheet = `/data-source/${dataSource}/${dataSource}-data.json`;
-  const dataMapSheet = `/data-source/${dataSource}/data-mapping.json`;
+  const [dataSheet, dataMapSheet] = getFilterInfoLocation(dataSource);
+  const offset = 30;
 
   const promises = [];
-  promises.push(ffetch(spreadsheet).sheet(year).limit(30).all());
+  promises.push(ffetch(dataSheet).sheet(year).limit(offset).all());
   promises.push(ffetch(dataMapSheet).sheet(year).all());
 
   const [data, dataMap] = await Promise.all(promises);
@@ -133,6 +155,15 @@ export default async function decorate(block) {
   const displayDiv = document.createElement('div');
   displayDiv.classList.add('card-display');
   populateCardDisplay(data, imageUrl, information, detailsUrl, displayDiv);
+
+  // Add load more... button
+  const loadMoreDiv = document.createElement('div');
+  loadMoreDiv.classList.add('load-more');
+  const loadMoreButton = document.createElement('button');
+  loadMoreButton.innerText = 'Load more...';
+  loadMoreButton.addEventListener('click', () => { loadMore(dataSheet, year, offset, imageUrl, information, detailsUrl, displayDiv, loadMoreDiv); });
+  loadMoreDiv.append(loadMoreButton);
+  displayDiv.append(loadMoreDiv);
+
   block.append(displayDiv);
 }
-

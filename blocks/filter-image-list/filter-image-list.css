@@ -45,3 +45,15 @@
   text-decoration: underline;
   cursor: pointer;
 }
+
+.filter-image-list .load-more {
+  width: 100%;
+  text-align: center;
+  padding-top: 20px;
+}
+
+.filter-image-list .load-more button {
+  color: var(--clr-red);
+  border-style: none;
+  background-color: var(--clr-white);
+}
