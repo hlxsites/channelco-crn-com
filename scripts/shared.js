@@ -957,3 +957,14 @@ export function dataMapLookup(dataMap, value) {
   const foundValue = dataMap.find((item) => item.key === value);
   return foundValue ? foundValue.value : value;
 }
+
+/**
+ * Determines whether a given value is in a list of comma-separated values.
+ * @param {string} dataSource report code for data source (eg. ppg, ceo)
+ * @returns {Array<string>} Returns data and data map location
+ */
+export function getFilterInfoLocation(dataSource) {
+  const dataSheet = `/data-source/${dataSource}/${dataSource}-data.json`;
+  const dataMapSheet = `/data-source/${dataSource}/data-mapping.json`;
+  return [dataSheet, dataMapSheet];
+}

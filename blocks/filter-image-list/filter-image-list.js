@@ -1,9 +1,61 @@
 import { readBlockConfig } from '../../scripts/lib-franklin.js';
 import ffetch from '../../scripts/ffetch.js';
-import { dataMapLookup } from '../../scripts/shared.js';
+import { dataMapLookup, getFilterInfoLocation } from '../../scripts/shared.js';
 
-function onDropdownChange() {
-  console.log("changed");
+function populateCardDisplay(data, imageUrl, information, detailsUrl, displayDiv) {
+  data.forEach((item, i) => {
+    const card = document.createElement('div');
+    const isEvenCard = i % 2 === 0;
+    card.classList.add('card');
+    card.classList.add(isEvenCard ? 'card1' : 'card2');
+
+    const imageDiv = document.createElement('div');
+    imageDiv.classList.add('image');
+    const img = document.createElement('img');
+    img.src = item[imageUrl];
+    card.append(img);
+
+    const infoLink = document.createElement('a');
+    infoLink.innerText = item[information];
+    infoLink.href = `${detailsUrl}?c=${item.Pkey}`;
+    card.append(infoLink);
+
+    displayDiv.append(card);
+  });
+}
+
+async function onDropdownChange(block, dropdown, filters, key, imageUrl, information, detailsUrl) {
+  const year = dropdown.getAttribute('data-year');
+  const dataSource = dropdown.getAttribute('data-source');
+  const dataSheet = getFilterInfoLocation(dataSource)[0];
+  const container = block.querySelector('.card-display');
+
+  const selectedValue = dropdown.value.includes('-- Select ') ? undefined : dropdown.value;
+  if (!selectedValue) {
+    const data = await ffetch(dataSheet).sheet(year).all();
+    container.innerHTML = '';
+    populateCardDisplay(data, imageUrl, information, detailsUrl, container);
+    return;
+  }
+
+  if (filters[key].type === 'alpha') {
+    const data = await ffetch(dataSheet)
+      .sheet(year)
+      .filter((item) => {
+        if (selectedValue === '#') return !Number.isNaN(parseInt(item[key].charAt(0), 2));
+        return item[key].charAt(0).toUpperCase() === selectedValue;
+      })
+      .all();
+    container.innerHTML = '';
+    populateCardDisplay(data, imageUrl, information, detailsUrl, container);
+  } else {
+    const data = await ffetch(dataSheet)
+      .sheet(year)
+      .filter((item) => item[key] === selectedValue)
+      .all();
+    container.innerHTML = '';
+    populateCardDisplay(data, imageUrl, information, detailsUrl, container);
+  }
 }
 
 export default async function decorate(block) {
@@ -69,7 +121,7 @@ export default async function decorate(block) {
     option.innerText = dataMapLookup(dataMap, filters[key].value);
     option.setAttribute('value', filters[key].value);
     dropdown.append(option);
-    dropdown.addEventListener('change', () => onDropdownChange(block, dropdown, spreadsheet, year, filters, key, detailsUrl, dataSource, tableFields, dataMap));
+    dropdown.addEventListener('change', () => onDropdownChange(block, dropdown, filters, key, imageUrl, information, detailsUrl));
 
     dropdownDiv.append(filterPrompt);
     dropdownDiv.append(dropdown);
@@ -79,24 +131,8 @@ export default async function decorate(block) {
 
   // Create card table
   const displayDiv = document.createElement('div');
-  data.forEach((item, i) => {
-    const card = document.createElement('div');
-    const isEvenCard = i % 2 === 0;
-    card.classList.add('card');
-    card.classList.add(isEvenCard ? 'card1' : 'card2');
-
-    const imageDiv = document.createElement('div');
-    imageDiv.classList.add('image');
-    const img = document.createElement('img');
-    img.src = item[imageUrl];
-    card.append(img);
-
-    const infoLink = document.createElement('a');
-    infoLink.innerText = item[information];
-    infoLink.href = detailsUrl;
-    card.append(infoLink);
-
-    displayDiv.append(card);
-  });
+  displayDiv.classList.add('card-display');
+  populateCardDisplay(data, imageUrl, information, detailsUrl, displayDiv);
   block.append(displayDiv);
 }
+

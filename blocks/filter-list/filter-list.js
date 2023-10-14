@@ -46,10 +46,10 @@ async function loadMore(tableFields, dataMap, detailsUrl, dataSource, year, tbod
 // eslint-disable-next-line max-len
 async function onDropdownChange(block, dropdown, spreadsheet, year, filters, key, detailsUrl, dataSource, tableFields, dataMap) {
   const tbody = block.querySelector('tbody');
-  tbody.innerHTML = '';
-  const selectedValue = dropdown.value.includes('-- Select ') ? '' : dropdown.value;
-  if (selectedValue === '') {
+  const selectedValue = dropdown.value.includes('-- Select ') ? undefined : dropdown.value;
+  if (!selectedValue) {
     const data = await ffetch(spreadsheet).sheet(year).all();
+    tbody.innerHTML = '';
     populateTable(data, tableFields, dataMap, detailsUrl, dataSource, year, tbody);
     return;
   }
@@ -57,19 +57,19 @@ async function onDropdownChange(block, dropdown, spreadsheet, year, filters, key
   if (filters[key].type === 'alpha') {
     const data = await ffetch(spreadsheet)
       .sheet(year)
-      .map((item) => item)
       .filter((item) => {
         if (selectedValue === '#') return !Number.isNaN(parseInt(item[key].charAt(0), 2));
         return item[key].charAt(0).toUpperCase() === selectedValue;
       })
       .all();
+    tbody.innerHTML = '';
     populateTable(data, tableFields, dataMap, detailsUrl, dataSource, year, tbody);
   } else {
     const data = await ffetch(spreadsheet)
       .sheet(year)
-      .map((item) => item)
       .filter((item) => item[key] === selectedValue)
       .all();
+    tbody.innerHTML = '';
     populateTable(data, tableFields, dataMap, detailsUrl, dataSource, year, tbody);
   }
 

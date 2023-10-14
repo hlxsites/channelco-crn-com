@@ -1,4 +1,5 @@
 import ffetch from '../../scripts/ffetch.js';
+import { getFilterInfoLocation } from '../../scripts/shared.js';
 
 const alphaArr = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '#'];
 
@@ -37,8 +38,7 @@ export async function loadDelayed(main) {
 
   const dataSource = dropdowns[0].getAttribute('data-source');
   const year = dropdowns[0].getAttribute('data-year');
-  const dataSheet = `/data-source/${dataSource}/${dataSource}-data.json`;
-  const dataMapSheet = `/data-source/${dataSource}/data-mapping.json`;
+  const [dataSheet, dataMapSheet] = getFilterInfoLocation(dataSource);
 
   const promises = [];
   promises.push(ffetch(dataSheet).sheet(year).all());
