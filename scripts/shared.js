@@ -959,7 +959,7 @@ export function dataMapLookup(dataMap, value) {
 }
 
 /**
- * Determines whether a given value is in a list of comma-separated values.
+ * Converts filter source code to location of data and mapping
  * @param {string} dataSource report code for data source (eg. ppg, ceo)
  * @returns {Array<string>} Returns data and data map location
  */
@@ -967,4 +967,17 @@ export function getFilterInfoLocation(dataSource) {
   const dataSheet = `/data-source/${dataSource}/${dataSource}-data.json`;
   const dataMapSheet = `/data-source/${dataSource}/data-mapping.json`;
   return [dataSheet, dataMapSheet];
+}
+
+/**
+ * Checks if a string is a URL
+ * @param {string} str String to check
+ * @returns {Array<string>} Returns true if URL
+ */
+export function isURL(str) {
+  // Regular expression pattern to match URLs
+  const urlPattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w- ./?%&=]*)?$/;
+  
+  // Use the test() method to check if the string matches the pattern
+  return urlPattern.test(str);
 }

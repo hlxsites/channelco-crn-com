@@ -44,3 +44,15 @@
   font-size: .95rem;
   margin-bottom: 0.5rem;
 }
+
+.filter-details .details img {
+  width: auto;
+  max-width: 50%;
+  float: right;
+  margin-top: 7px;
+  border: 4px double #5e5e5e;
+}
+
+.filter-details .details .heading-img img {
+  border: none;
+}

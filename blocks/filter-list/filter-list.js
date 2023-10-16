@@ -20,7 +20,7 @@ function populateTable(data, tableFields, dataMap, detailsUrl, dataSource, year,
       const cell = buildCell(1);
       if (isDetailsLink) {
         const a = document.createElement('a');
-        a.href = `${detailsUrl}?key=${item.Pkey}&dataSource=${dataSource}&year=${year}`;
+        a.href = `${detailsUrl}?c=${item.Pkey}`;
         a.innerText = value;
         cell.append(a);
       } else {
@@ -106,7 +106,7 @@ export default async function decorate(block) {
   const [data, dataMap] = await Promise.all(promises);
 
   const currentUrlArray = window.location.href.split('/');
-  currentUrlArray[currentUrlArray.length - 1] = `${currentUrlArray[currentUrlArray.length - 1]}-${year}-details`;
+  currentUrlArray[currentUrlArray.length - 1] = `${currentUrlArray[currentUrlArray.length - 1]}-details`;
   const detailsUrl = currentUrlArray.join('/');
 
   // Clear block contents
