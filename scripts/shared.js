@@ -975,9 +975,6 @@ export function getFilterInfoLocation(dataSource) {
  * @returns {Array<string>} Returns true if URL
  */
 export function isURL(str) {
-  // Regular expression pattern to match URLs
   const urlPattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w- ./?%&=]*)?$/;
-  
-  // Use the test() method to check if the string matches the pattern
   return urlPattern.test(str);
 }

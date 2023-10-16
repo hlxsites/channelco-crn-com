@@ -54,7 +54,6 @@ export default async function decorate(block) {
       // eslint-disable-next-line max-len
       const foundHeader = dataMap.find((item) => item.key === data[value.trim()]);
       h.innerText = foundHeader ? foundHeader.value : data[value.trim()];
-      console.log(data);
       row.append(h);
     });
     detailsDiv.append(row);
