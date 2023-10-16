@@ -1,6 +1,8 @@
 export default function decorate(block) {
   // Extract the unit-id from the block
-  const unitIdElement = block.querySelector('div:nth-child(1) > div:nth-child(2)');
+  const unitIdElement = block.querySelector(
+    'div:nth-child(1) > div:nth-child(2)',
+  );
   if (!unitIdElement) {
     // eslint-disable-next-line no-console
     console.error('Unit ID not found in the block');
@@ -9,7 +11,9 @@ export default function decorate(block) {
   const unitId = unitIdElement.textContent;
 
   // Extract the type from the block
-  const typeElement = block.querySelector('div:nth-child(2) > div:nth-child(2)');
+  const typeElement = block.querySelector(
+    'div:nth-child(2) > div:nth-child(2)',
+  );
   if (!typeElement) {
     // eslint-disable-next-line no-console
     console.error('Type not found in the block');
@@ -18,11 +22,13 @@ export default function decorate(block) {
   const type = typeElement.textContent;
 
   // Determine the text and class based on the type
-  let adText; let
-    adClass;
+  let adText;
+  let adClass;
+  let height;
   if (type === 'Advertisement') {
     adText = 'Advertisement';
     adClass = 'right-ad';
+    height = 'fixed-height';
   } else if (type === 'Sponsored post') {
     adText = 'Sponsored post';
     adClass = 'right-sponsored';
@@ -40,7 +46,7 @@ export default function decorate(block) {
   const rightAdHTML = `
     <!-- AD IMU  STARTS  -->
 
-    <div class="${adClass}">
+    <div class="${adClass} ${height}">
       <span class="ad-title">${adText}</span> <br />
       <div id="${unitId}" class="tmsads"></div>
     </div>

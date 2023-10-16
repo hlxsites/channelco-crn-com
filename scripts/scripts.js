@@ -12,9 +12,9 @@ import {
 
 import { decorateMain } from './shared.js';
 
-const LCP_BLOCKS = []; // add your LCP blocks to the list
+const LCP_BLOCKS = ['article-cards', 'news-slider']; // add your LCP blocks to the list
 
-const TEMPLATE_LIST = ['category', 'article'];
+const TEMPLATE_LIST = ['category', 'article', 'author', 'search-results', 'tag', 'company'];
 
 /**
  * load fonts.css and set a session storage flag
@@ -22,10 +22,92 @@ const TEMPLATE_LIST = ['category', 'article'];
 async function loadFonts() {
   await loadCSS(`${window.hlx.codeBasePath}/styles/fonts.css`);
   try {
-    if (!window.location.hostname.includes('localhost')) sessionStorage.setItem('fonts-loaded', 'true');
+    if (!window.location.hostname.includes('localhost')) {
+      sessionStorage.setItem('fonts-loaded', 'true');
+    }
   } catch (e) {
     // do nothing
   }
+}
+
+/**
+ * @typedef Template
+ * @property {function} [loadLazy] If provided, will be called in the lazy phase. Expects a
+ *  single argument: the document's <main> HTMLElement.
+ * @property {function} [loadEager] If provided, will be called in the eager phase. Expects a single
+ *  argument: the document's <main> HTMLElement.
+ * @property {function} [loadDelayed] If provided, will be called in the delayed phase. Expects a
+ *  single argument: the document's <main> HTMLElement.
+ */
+
+/**
+ * @type {Template}
+ */
+let universalTemplate;
+/**
+ * @type {Template}
+ */
+let template;
+
+/**
+ * Invokes a template's eager method, if specified.
+ * @param {Template} [toLoad] Template whose eager method should be invoked.
+ * @param {HTMLElement} main The document's main element.
+ */
+async function loadEagerTemplate(toLoad, main) {
+  if (toLoad && toLoad.loadEager) {
+    await toLoad.loadEager(main);
+  }
+}
+
+/**
+ * Invokes a template's lazy method, if specified.
+ * @param {Template} [toLoad] Template whose lazy method should be invoked.
+ * @param {HTMLElement} main The document's main element.
+ */
+async function loadLazyTemplate(toLoad, main) {
+  if (toLoad) {
+    if (toLoad.loadLazy) {
+      await toLoad.loadLazy(main);
+    }
+  }
+}
+
+/**
+ * Invokes a template's delayed method, if specified.
+ * @param {Template} [toLoad] Template whose delayed method should be invoked.
+ * @param {HTMLElement} main The document's main element.
+ */
+async function loadDelayedTemplate(toLoad, main) {
+  if (toLoad && toLoad.loadDelayed) {
+    await toLoad.loadDelayed(main);
+  }
+}
+
+/**
+ * Loads a template by concurrently requesting its CSS and javascript files, and invoking its
+ * eager loading phase.
+ * @param {string} templateName The name of the template to load.
+ * @param {HTMLElement} main The document's main element.
+ * @returns {Promise<Template>} Resolves with the imported module after the template's files are
+ *  loaded and its eager phase is complete.
+ */
+async function loadTemplate(templateName, main) {
+  const cssLoaded = loadCSS(
+    `${window.hlx.codeBasePath}/templates/${templateName}/${templateName}.css`,
+  );
+  let module;
+  const decorateComplete = new Promise((resolve) => {
+    (async () => {
+      module = await import(
+        `../templates/${templateName}/${templateName}.js`
+      );
+      await loadEagerTemplate(module, main);
+      resolve();
+    })();
+  });
+  await Promise.all([cssLoaded, decorateComplete]);
+  return module;
 }
 
 /**
@@ -35,21 +117,12 @@ async function loadFonts() {
 async function decorateTemplates(main) {
   try {
     // Load the universal template for every page
-    const universalTemplate = 'universal';
-    const universalMod = await import(`../templates/${universalTemplate}/${universalTemplate}.js`);
-    loadCSS(`${window.hlx.codeBasePath}/templates/${universalTemplate}/${universalTemplate}.css`);
-    if (universalMod.default) {
-      await universalMod.default(main);
-    }
+    universalTemplate = await loadTemplate('universal', main);
 
-    const template = toClassName(getMetadata('template'));
+    const templateName = toClassName(getMetadata('template'));
     const templates = TEMPLATE_LIST;
-    if (templates.includes(template)) {
-      const mod = await import(`../templates/${template}/${template}.js`);
-      loadCSS(`${window.hlx.codeBasePath}/templates/${template}/${template}.css`);
-      if (mod.default) {
-        await mod.default(main);
-      }
+    if (templates.includes(templateName)) {
+      template = await loadTemplate(templateName, main);
     }
   } catch (error) {
     // eslint-disable-next-line no-console
@@ -57,65 +130,19 @@ async function decorateTemplates(main) {
   }
 }
 
-function scrollToTop(event) {
-  event.preventDefault();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
+/**
+ * Adds universal sections to the document, including the top and right sections.
+ * @param {HTMLElement} main The document's main element.
+ */
+function buildAutoSections(main) {
+  const topSection = document.createElement('div');
+  topSection.classList.add('top-section', 'auto-section');
 
-function createToTopSection() {
-  const toTopContainer = document.createElement('div');
-  toTopContainer.className = 'back-to-top';
+  const rightSection = document.createElement('div');
+  rightSection.classList.add('right-section', 'auto-section');
 
-  const toTopCol = document.createElement('div');
-  toTopCol.className = 'to-top-text';
-
-  const toTopContent = document.createElement('div');
-  const toTopLink = document.createElement('a');
-  toTopLink.href = '#top';
-  toTopLink.target = '_self';
-  toTopLink.ariaLabel = 'To Top';
-
-  const toTopHeader = document.createElement('h3');
-  toTopHeader.className = 'back-top-top-section-header';
-
-  const toTopIcon = document.createElement('img');
-  toTopIcon.className = 'triangle-fill';
-  toTopIcon.src = '/styles/icons/triangle-fill.svg';
-  toTopHeader.appendChild(toTopIcon);
-  toTopHeader.appendChild(document.createTextNode(' TO TOP'));
-
-  toTopLink.appendChild(toTopHeader);
-  toTopContent.appendChild(toTopLink);
-  toTopCol.appendChild(toTopContent);
-  toTopContainer.appendChild(toTopCol);
-
-  // Event listener to scroll to top smoothly
-  toTopLink.addEventListener('click', scrollToTop);
-
-  return toTopContainer;
-}
-
-async function createContentAndAdsSections(doc) {
-  const mainContainer = document.createElement('div');
-  mainContainer.className = 'main-content-container';
-
-  const contentSection = document.createElement('div');
-  contentSection.className = 'content-section';
-
-  const topAdSection = document.createElement('div');
-  topAdSection.className = 'top-ad-section';
-  topAdSection.id = 'top-ad-fragment-container';
-
-  const contentAndAdsContainer = document.createElement('div');
-  contentAndAdsContainer.className = 'content-and-ads-container';
-
-  const rightAdSection = document.createElement('div');
-  rightAdSection.className = 'right-ad-section';
-  rightAdSection.id = 'right-ad-fragment-container';
-
-  const bottomAdSection = document.createElement('div');
-  bottomAdSection.className = 'bottom-ad-section';
-  bottomAdSection.id = 'bottom-ad-fragment-container';
+  const bottomSection = document.createElement('div');
+  bottomSection.classList.add('bottom-section', 'auto-section');
 
   // Create the close icon
   const closeIcon = document.createElement('img');
@@ -123,39 +150,15 @@ async function createContentAndAdsSections(doc) {
   closeIcon.src = '/styles/icons/close-ribbon.png';
   closeIcon.alt = 'Close'; // Accessibility
 
-  // Add event listener to close the bottom ad section when the close icon is clicked
   closeIcon.addEventListener('click', () => {
-    bottomAdSection.style.display = 'none';
+    bottomSection.style.display = 'none';
   });
 
-  bottomAdSection.appendChild(closeIcon);
-  contentAndAdsContainer.appendChild(contentSection);
-  contentAndAdsContainer.appendChild(rightAdSection);
+  bottomSection.appendChild(closeIcon);
 
-  const main = doc.querySelector('main');
-
-  if (main) {
-    const breadcrumb = main.querySelector('.breadcrumb-container');
-    if (breadcrumb) {
-      main.insertBefore(topAdSection, breadcrumb); // Place the ad section before breadcrumb
-    } else {
-      main.prepend(topAdSection);
-    }
-
-    // Move remaining sections in main to contentSection using array iteration
-    Array.from(main.children).filter((child) => child !== topAdSection && child !== breadcrumb)
-      .forEach((section) => contentSection.appendChild(section));
-
-    mainContainer.appendChild(contentAndAdsContainer);
-
-    // Append the "TO TOP" section to the mainContainer (Outside of the flex container)
-    const toTopSection = createToTopSection();
-    mainContainer.appendChild(toTopSection);
-
-    main.appendChild(mainContainer);
-  }
-
-  doc.body.appendChild(bottomAdSection);
+  main.prepend(topSection);
+  main.append(rightSection);
+  main.append(bottomSection);
 }
 
 /**
@@ -167,9 +170,10 @@ async function loadEager(doc) {
   decorateTemplateAndTheme();
   const main = doc.querySelector('main');
   if (main) {
+    buildAutoSections(main);
     decorateMain(main);
-    document.body.classList.add('appear');
     await decorateTemplates(main);
+    document.body.classList.add('appear');
     await waitForLCP(LCP_BLOCKS);
   }
 
@@ -190,6 +194,8 @@ async function loadEager(doc) {
 async function loadLazy(doc) {
   const main = doc.querySelector('main');
   await loadBlocks(main);
+  await loadLazyTemplate(universalTemplate, main);
+  await loadLazyTemplate(template, main);
 
   const { hash } = window.location;
   const element = hash ? doc.getElementById(hash.substring(1)) : false;
@@ -212,14 +218,18 @@ async function loadLazy(doc) {
  */
 function loadDelayed() {
   // eslint-disable-next-line import/no-cycle
-  window.setTimeout(() => import('./delayed.js'), 3000);
+  window.setTimeout(async () => {
+    const main = document.querySelector('main');
+    await loadDelayedTemplate(universalTemplate, main);
+    await loadDelayedTemplate(template, main);
+    import('./delayed.js');
+  }, 3000);
   // load anything that can be postponed to the latest here
 }
 
 async function loadPage() {
   await loadEager(document);
   await loadLazy(document);
-  await createContentAndAdsSections(document);
   loadDelayed();
 }
 
