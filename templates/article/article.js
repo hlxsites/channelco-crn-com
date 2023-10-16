@@ -1,8 +1,5 @@
 import {
   getMetadata,
-  buildBlock,
-  decorateBlock,
-  loadBlock,
 } from '../../scripts/lib-franklin.js';
 import {
   getCategoryName,
@@ -15,6 +12,7 @@ import {
   buildSocialShare,
   getRelatedArticles,
   getLastDefaultSection,
+  renderContent,
 } from '../../scripts/shared.js';
 
 function getArticleByMetadata() {
@@ -75,15 +73,10 @@ export async function loadLazy(main) {
     return;
   }
   if (getMetadata('slideshow') === 'true') {
-    const paginationTop = buildBlock('pagination', { elems: [] });
-    const paginationBottom = buildBlock('pagination', { elems: [] });
+    const pagination = await renderContent();
     const pFirstOfType = main.querySelector('p:first-of-type');
-    pFirstOfType.parentElement.insertBefore(paginationTop, pFirstOfType.nextSibling);
-    lastSection.append(paginationBottom);
-    decorateBlock(paginationBottom);
-    decorateBlock(paginationTop);
-    await loadBlock(paginationTop);
-    await loadBlock(paginationBottom);
+    pFirstOfType.parentElement.insertBefore(pagination[0], pFirstOfType.nextSibling);
+    lastSection.append(pagination[1]);
   }
   const author = await getAuthorByName(article.author);
   await buildLearnMore(lastSection, article.keywords);

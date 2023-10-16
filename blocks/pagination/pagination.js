@@ -1,7 +1,7 @@
 import { decorateIcons } from '../../scripts/lib-franklin.js';
 import ffetch from '../../scripts/ffetch.js';
 
-const CHUNK_SIZE = 20000;
+const CHUNK_SIZE = 10000;
 
 async function renderContent(block) {
   const page = window.location.pathname;
@@ -15,13 +15,12 @@ async function renderContent(block) {
     ? page : page.slice(0, (page.length - (URLTailEnd.length + 1)));
   const articles = ffetch('/query-index.json')
     .chunks(CHUNK_SIZE)
-    .sheet(sheet);
+    .sheet(sheet)
+    .filter((p) => p.title === title);
   const filteredList = [];
   /* eslint-disable no-restricted-syntax */
   for await (const article of articles) {
-    if (article.title === title) {
-      filteredList.push(article);
-    }
+    filteredList.push(article);
   }
   const pathArray = [];
   pathArray.push(firstArticle);
