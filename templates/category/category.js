@@ -10,6 +10,8 @@ import {
   loadTemplateArticleCards,
   addToTopSection,
   getTitle,
+  getFirstDefaultSection,
+  getLastDefaultSection,
 } from '../../scripts/shared.js';
 
 /**
@@ -63,7 +65,7 @@ export function loadEager(main) {
   buildNewsSlider(main);
 
   let lastElement;
-  const firstSection = main.querySelector('.section');
+  const firstSection = getFirstDefaultSection(main);
   if (!firstSection) {
     return;
   }
@@ -90,8 +92,8 @@ export function loadEager(main) {
  */
 // eslint-disable-next-line import/prefer-default-export
 export async function loadLazy(main) {
-  const contentSection = main.querySelector('.content-section');
-  if (!contentSection) {
+  const lastSection = getLastDefaultSection(main);
+  if (!lastSection) {
     return;
   }
 
@@ -100,7 +102,7 @@ export async function loadLazy(main) {
   loadTemplateArticleCards(main, 'category', articles);
 
   const categoryNavigation = buildBlock('category-navigation', { elems: [] });
-  contentSection.append(categoryNavigation);
+  lastSection.append(categoryNavigation);
   decorateBlock(categoryNavigation);
   await loadBlock(categoryNavigation);
 }
