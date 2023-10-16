@@ -7,6 +7,7 @@ import {
   queryIndex,
   buildArticleCardsBlock,
   loadTemplateArticleCards,
+  getFirstDefaultSection,
 } from '../../scripts/shared.js';
 
 const MAX_LIMIT = 50;
@@ -49,7 +50,7 @@ export function loadEager(main) {
     limit = MAX_LIMIT;
   }
 
-  const section = main.querySelector('.section');
+  const section = getFirstDefaultSection(main);
   if (!section) {
     return;
   }
@@ -95,7 +96,7 @@ export function loadEager(main) {
 // eslint-disable-next-line import/prefer-default-export
 export async function loadLazy(main) {
   const searchTerm = getSearchTerm();
-  const section = main.querySelector('.section');
+  const section = getFirstDefaultSection(main);
   if (!section) {
     return;
   }

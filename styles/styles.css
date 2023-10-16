@@ -274,6 +274,15 @@ main .section {
   max-width: 1140px;
 }
 
+main .section.auto-section {
+  margin: 0;
+  padding: 0;
+}
+
+main .section.auto-section.top-section {
+  margin: 0 var(--padding-spacer-x) 0.75rem
+}
+
 main .divider {
   display: block;
   width: auto;

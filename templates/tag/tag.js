@@ -8,6 +8,8 @@ import {
   getArticlesByKeyword,
   loadTemplateArticleCards,
   getKeywords,
+  getLastDefaultSection,
+  getFirstDefaultSection,
 } from '../../scripts/shared.js';
 
 /**
@@ -15,7 +17,7 @@ import {
  * @param {HTMLElement} main The page's main element.
  */
 export function loadEager(main) {
-  const firstSection = main.querySelector('.section');
+  const firstSection = getFirstDefaultSection(main);
   if (!firstSection) {
     return;
   }
@@ -39,13 +41,13 @@ export async function loadLazy(main) {
 
   loadTemplateArticleCards(main, 'tag', records);
 
-  const contentSection = main.querySelector('.content-section');
-  if (!contentSection) {
+  const lastSection = getLastDefaultSection(main);
+  if (!lastSection) {
     return;
   }
 
   const nav = buildBlock('category-navigation', { elems: [] });
-  contentSection.append(nav);
+  lastSection.append(nav);
   decorateBlock(nav);
   await loadBlock(nav);
 }
