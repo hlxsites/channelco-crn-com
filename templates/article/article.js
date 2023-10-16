@@ -1,4 +1,9 @@
-import { getMetadata } from '../../scripts/lib-franklin.js';
+import {
+  getMetadata,
+  buildBlock,
+  decorateBlock,
+  loadBlock,
+} from '../../scripts/lib-franklin.js';
 import {
   getCategoryName,
   getCategoryPath,
@@ -28,7 +33,7 @@ function getArticleByMetadata() {
  * @param {HTMLElement} main The page's main content.
  */
 // eslint-disable-next-line import/prefer-default-export
-export function loadEager(main) {
+export async function loadEager(main) {
   const heading = main.querySelector('h1');
   if (!heading) {
     return;
@@ -52,7 +57,6 @@ export function loadEager(main) {
   categoryLink.title = categoryName;
   categoryLink.ariaLabel = categoryName;
   heading.parentElement.insertBefore(categoryLink, heading);
-
   const authorContainer = buildArticleAuthor(article);
   heading.parentElement.insertBefore(authorContainer, heading.nextSibling);
 }
@@ -70,7 +74,17 @@ export async function loadLazy(main) {
   if (!lastSection) {
     return;
   }
-
+  if (getMetadata('slideshow') === 'true') {
+    const paginationTop = buildBlock('pagination', { elems: [] });
+    const paginationBottom = buildBlock('pagination', { elems: [] });
+    const pFirstOfType = main.querySelector('p:first-of-type');
+    pFirstOfType.parentElement.insertBefore(paginationTop, pFirstOfType.nextSibling);
+    lastSection.append(paginationBottom);
+    decorateBlock(paginationBottom);
+    decorateBlock(paginationTop);
+    await loadBlock(paginationTop);
+    await loadBlock(paginationBottom);
+  }
   const author = await getAuthorByName(article.author);
   await buildLearnMore(lastSection, article.keywords);
   if (author) {

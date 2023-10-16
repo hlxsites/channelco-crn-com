@@ -1,19 +1,31 @@
 import { decorateIcons } from '../../scripts/lib-franklin.js';
 import ffetch from '../../scripts/ffetch.js';
 
+const CHUNK_SIZE = 20000;
+
 async function renderContent(block) {
   const page = window.location.pathname;
+  const title = document.querySelector('title').innerText;
   let splitURL = page.split('/');
+  const sheet = page.includes('news') ? 'article' : 'slideshow';
   const URLTailEnd = splitURL[splitURL.length - 1];
-  const pageIndex = Number.isNaN(URLTailEnd) ? 1 : Number(URLTailEnd);
-  const searchParam = Number.isNaN(URLTailEnd)
+  /* eslint-disable no-restricted-globals */
+  const pageIndex = isNaN(URLTailEnd) ? 1 : Number(URLTailEnd);
+  const firstArticle = isNaN(URLTailEnd)
     ? page : page.slice(0, (page.length - (URLTailEnd.length + 1)));
-  const articles = await ffetch('/query-index.json')
-    .filter((p) => p.path.includes(searchParam))
-    .all();
+  const articles = ffetch('/query-index.json')
+    .chunks(CHUNK_SIZE)
+    .sheet(sheet);
+  const filteredList = [];
+  /* eslint-disable no-restricted-syntax */
+  for await (const article of articles) {
+    if (article.title === title) {
+      filteredList.push(article);
+    }
+  }
   const pathArray = [];
-  pathArray.push(searchParam);
-  articles.forEach((element) => {
+  pathArray.push(firstArticle);
+  filteredList.forEach((element) => {
     splitURL = element.path.split('/');
     const URLTailEnd2 = Number(splitURL[splitURL.length - 1]);
     pathArray[URLTailEnd2] = element.path;
@@ -41,11 +53,19 @@ async function renderContent(block) {
   for (let i = startIndex; i <= endIndex; i += 1) {
     const li = document.createElement('li');
     li.classList.add('page-item');
-    if (i === pageIndex) {
+    if (i === pageIndex && i === 1) {
+      li.innerHTML = `<a class = "page-link" href="#">${i}</a>`;
+      li.classList.add('active-first');
+      li.setAttribute('aria-current', 'page');
+    } else if (i === pageIndex && i === endIndex) {
+      li.innerHTML = `<a class = "page-link next" href="#">${i}</a>`;
+      li.classList.add('active-last');
+      li.setAttribute('aria-current', 'page');
+    } else if (i === pageIndex) {
       li.innerHTML = `<a class = "page-link" href="#">${i}</a>`;
       li.classList.add('active');
       li.setAttribute('aria-current', 'page');
-    } else {
+    } else if (undefined !== pathArray[i]) {
       li.innerHTML = `<a class = "page-link" href="${pathArray[i]}">${i}</a>`;
     }
     ul.append(li);
