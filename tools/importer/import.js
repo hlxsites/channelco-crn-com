@@ -11,6 +11,9 @@
  */
 /* global WebImporter */
 /* eslint-disable no-console, class-methods-use-this */
+let slidehsowPageURL;
+let template;
+let isPagination;
 const captializeFirstLetter = (str) => {
   const arr = str.split(" ");
   for (let i = 0; i < arr.length; i++) {
@@ -71,6 +74,7 @@ const createMetadata = (main, document) => {
   const pagination = document.querySelector(".pagination");
   if (pagination) {
     meta.SlideShow = "true";
+    isPagination = true;
   } else {
     meta.SlideShow = "false";
   }
@@ -108,7 +112,14 @@ const createFetchMetadata = (main, document) => {
 
   const templateType = document.querySelector('[name="templateType"]');
   if (templateType) {
-    meta.Template = templateType.content;
+    if(templateType.content === "staff") {
+      meta.Template = "author";
+      meta.title = document.querySelector("title").textContent;
+      const author = document.querySelector("title").textContent.split('|')[0];
+      meta.author = author;
+    } else {
+      meta.Template = templateType.content;
+    }
   }
   const desc = document.querySelector('[property="og:description"]');
   if (desc) {
@@ -122,19 +133,24 @@ const createFetchMetadata = (main, document) => {
     }
     meta.Template = "Category";
   }
-
+  const pubishDate = document.querySelector(
+    '[property="article:published_time"]'
+  );
+  if (pubishDate) {
+    meta.PublishedDate = pubishDate.content;
+  }
   const CompanyNames = document.querySelector('[name="CompanyNames"]');
-  if (CompanyNames) {
+  if (CompanyNames.content) {
     meta.companynames = CompanyNames.content;
   }
 
   const CompanyWebpages = document.querySelector('[name="CompanyWebpages"]');
-  if (CompanyNames) {
-    meta.companywebpages = CompanyWebpages.content;
+  if (CompanyWebpages.content) {
+    meta.companywebpages  = CompanyWebpages.content;
   }
 
   const keywords = document.querySelector('[name="keywords"]');
-  if (keywords) {
+  if (keywords.content) {
     meta.Keywords = keywords.content;
   }
 
@@ -197,7 +213,7 @@ const createAdBlock = (adBlock, main, document) => {
     if (!article) {
       article = document.getElementById("news-article");
     }
-    const p = article.querySelector("p:nth-of-type(5)");
+    const p = article.querySelector("p:nth-of-type(4)");
     if (p) {
       p.after(table);
     } else {
@@ -215,7 +231,7 @@ const removeLearnMore = (main, document) => {
   });
 };
 
-const insertBrightCoveBlock = (main, document) => {
+const insertBrightCoveBlock = (main, document, templateType) => {
   main.querySelectorAll('.video-player').forEach((videoPlayer) => {
     const videoJS = videoPlayer.getElementsByTagName('video-js')[0];
     const playListID = videoJS.getAttribute('data-playlist-id');
@@ -235,6 +251,27 @@ const insertBrightCoveBlock = (main, document) => {
     main.append(table);
 
   });
+  if(templateType === "flatpage"){
+  const video = main.getElementsByTagName('video');
+  for(const videoPlayer of video) {   
+    const playListID = videoPlayer.getAttribute('data-playlist-id');
+    const videoId = videoPlayer.getAttribute('data-video-id');
+    const player = videoPlayer.getAttribute('data-player');    
+    const cells = [["Brightcove"]];
+    if(player) {
+      cells.push(["player" , player]);
+    }
+    if (playListID) {
+      cells.push(["playlist", playListID]);
+    }
+    if (videoId) {
+      cells.push(["video" , videoId]);
+    }    
+    const table = WebImporter.DOMUtils.createTable(cells, document);
+    videoPlayer.parentElement.replaceWith(table);
+
+  }
+}
 };
 
 export default {
@@ -256,9 +293,10 @@ export default {
   }) => {
     // define the main element: the one that will be transformed to Markdown
     const main = document.body;
-
+   
     // use helper method to remove header, footer, etc.
     const templateType = document.querySelector('[name="templateType"]');
+    template = templateType;
     if (templateType.content === "article" || templateType.content === "slideshow") {
       createAuthorBio(main, document);
       const adBlock = document.getElementById("imu1forarticles");
@@ -267,6 +305,22 @@ export default {
       }
       createMetadata(main, document);
       removeLearnMore(main, document);
+      let pathname = new URL(url).pathname; 
+      if(!pathname.includes('.html') && pathname.indexOf('htm') < pathname.length-3){
+        pathname = pathname.replace('.htm', '');
+      }
+     const splitURL = pathname.split('/');
+      const pageName = splitURL[splitURL.length-1].split('.');
+      if(isNaN(pageName[0]) && isPagination && !pageName[0].includes('index')){        
+        slidehsowPageURL = new URL(url).pathname.replace('.htm', "").replace(/\/$/, "");        
+        slidehsowPageURL += "/index";
+      } else if(pageName[1] && pageName[1].includes('html')) {          ``
+          slidehsowPageURL = new URL(url).pathname.replace('.html', '').replace(/\/$/, '');
+      } else {
+        slidehsowPageURL = new URL(url).pathname.replace('.htm', '').replace(/\/$/, "");
+      }
+        
+      
     } else if (templateType.content === "company") {      
       createFetchMetadata(main, document);
       WebImporter.DOMUtils.remove(main, [".container.parent"]);
@@ -274,6 +328,12 @@ export default {
       insertBrightCoveBlock(main, document);
       createFetchMetadata(main, document);
       WebImporter.DOMUtils.remove(main, [".container.parent"]);
+    } else if (templateType.content === "staff") {
+      createFetchMetadata(main,document);
+      WebImporter.DOMUtils.remove(main, [".list-news"]);
+    } else if (templateType.content === "flatpage"){
+      insertBrightCoveBlock(main, document, templateType.content);
+      createFetchMetadata(main, document);
     }
     WebImporter.DOMUtils.remove(main, [
       "nav",
@@ -312,8 +372,17 @@ export default {
     url,
     html,
     params,
-  }) =>
-    WebImporter.FileUtils.sanitizePath(
+  }) => {
+    
+    if(!isPagination) {
+    return WebImporter.FileUtils.sanitizePath(
       new URL(url).pathname.replace(/\.htm$/, "").replace(/\/$/, "")
-    ),
+    );
+    } else {     
+      return WebImporter.FileUtils.sanitizePath(
+        slidehsowPageURL
+      );
+    }
+  },
+  
 };
