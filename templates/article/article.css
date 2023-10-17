@@ -84,7 +84,7 @@
   display: flex;
   padding-left: 0;
   list-style: none;
-  min-height: 54px;
+  
 }
 
 .pagination ul,
@@ -174,4 +174,5 @@ a.page-link:hover, a#a-prev.page-link.previous:hover, a#a-next.page-link.next.ac
 .news-list-pagination {
   width: 100%;
   text-align: justify;
+  flex: 0 0 auto;  
 }

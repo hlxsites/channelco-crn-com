@@ -1141,9 +1141,8 @@ export function loadTemplateArticleCards(main, templateName, articles) {
 export async function renderContent() {
   const CHUNK = 10000;
   const page = window.location.pathname;
-  const title = document.querySelector('title').innerText;
   let splitURL = page.split('/');
-  const sheet = page.includes('news') ? 'article' : 'slideshow';
+  const sheet = 'path';
   const URLTailEnd = splitURL[splitURL.length - 1];
   /* eslint-disable no-restricted-globals */
   const pageIndex = isNaN(URLTailEnd) ? 1 : Number(URLTailEnd);
@@ -1152,7 +1151,7 @@ export async function renderContent() {
   const articles = ffetch('/query-index.json')
     .chunks(CHUNK)
     .sheet(sheet)
-    .filter((p) => p.title === title);
+    .filter((p) => p.Path.includes(firstArticle));
   const filteredList = [];
   /* eslint-disable no-restricted-syntax */
   for await (const article of articles) {
@@ -1161,9 +1160,9 @@ export async function renderContent() {
   const pathArray = [];
   pathArray.push(firstArticle);
   filteredList.forEach((element) => {
-    splitURL = element.path.split('/');
+    splitURL = element.Path.split('/');
     const URLTailEnd2 = Number(splitURL[splitURL.length - 1]);
-    pathArray[URLTailEnd2] = element.path;
+    pathArray[URLTailEnd2] = element.Path;
   });
   const startIndex = (pageIndex < 3) ? 1 : pageIndex - 2;
   const endIndex = ((pageIndex + 2) >= (pathArray.length - 1))

@@ -75,8 +75,14 @@ export async function loadLazy(main) {
   if (getMetadata('slideshow') === 'true') {
     const pagination = await renderContent();
     const pFirstOfType = main.querySelector('p:first-of-type');
-    pFirstOfType.parentElement.insertBefore(pagination[0], pFirstOfType.nextSibling);
-    lastSection.append(pagination[1]);
+    const paginationTopDiv = document.createElement('div');
+    paginationTopDiv.classList.add('pagination');
+    paginationTopDiv.append(pagination[0]);
+    pFirstOfType.parentElement.insertBefore(paginationTopDiv, pFirstOfType.nextSibling);
+    const paginationBottomDiv = document.createElement('div');
+    paginationBottomDiv.classList.add('pagination');
+    paginationBottomDiv.append(pagination[1]);
+    lastSection.append(paginationBottomDiv);
   }
   const author = await getAuthorByName(article.author);
   await buildLearnMore(lastSection, article.keywords);
