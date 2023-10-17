@@ -9,10 +9,23 @@ import {
   loadBlocks,
   getMetadata,
 } from './lib-franklin.js';
+import ffetch from './ffetch.js';
 
 const DEFAULT_CATEGORY_PATH = '/news';
 const DEFAULT_CATEGORY_NAME = 'News';
 const EMAIL_REGEX = /\S+[a-z0-9]@[a-z0-9.]+/img;
+const CHUNK_SIZE = 500;
+const CHUNK_LIMIT = 3;
+
+function createBreadcrumbItem(href, label) {
+  const li = document.createElement('li');
+  const a = document.createElement('a');
+  a.classList.add('breadcrumb-item');
+  a.href = href;
+  a.innerHTML = label;
+  li.append(a);
+  return li;
+}
 
 /**
  * Builds breadcrumb menu and returns it.
@@ -26,50 +39,117 @@ export function buildBreadcrumb() {
     return undefined;
   }
 
-  const div = document.createElement('div');
-  const breadcrumb = buildBlock('breadcrumb', { elems: [] });
-  div.append(breadcrumb);
-  decorateBlock(breadcrumb);
-  return div;
+  // If path ends with '/', pop the last item out. Then pop the current page
+  const pathArr = path.split('/');
+  if (pathArr[pathArr.length - 1] === '') pathArr.pop();
+  const lastPath = pathArr[pathArr.length - 1];
+  pathArr.pop();
+
+  // Formulate the list for breadcrumb
+  const list = document.createElement('ul');
+  list.classList.add('breadcrumb-list');
+  let segments = '/';
+  pathArr.forEach((pathPart) => {
+    if (pathPart !== '') segments += `${pathPart}/`;
+    list.append(createBreadcrumbItem(segments, pathPart === '' ? 'HOME' : ` ▸ ${pathPart.replaceAll('-', ' ')}`));
+  });
+
+  // Last item in breadcrumb should be current page title. If not found, default to path
+  const li = document.createElement('li');
+  li.append(' ▸ ');
+  li.append(title ? title.innerText : lastPath.replaceAll('-', ' '));
+  list.append(li);
+
+  const breadcrumb = document.createElement('div');
+  breadcrumb.classList.add('breadcrumb');
+  breadcrumb.append(list);
+  return breadcrumb;
 }
 
-function buildList(name, elements) {
+function buildList(elements) {
   const ul = document.createElement('ul');
-  const h1 = document.createElement('h1');
-  h1.innerText = name;
-  ul.appendChild(h1);
-
-  if (elements && elements.length > 0) {
-    elements.split(',').forEach((element) => {
-      const li = document.createElement('li');
-      li.innerText = element.trim();
-      ul.appendChild(li);
-    });
-  } else {
-    return h1;
-  }
-
+  elements.split(',').forEach((element) => {
+    const li = document.createElement('li');
+    li.innerText = element.trim();
+    ul.appendChild(li);
+  });
   return ul;
 }
 
-export async function buildNewsSlider(main, title) {
-  const name = title;
-  const elements = getMetadata('keywords');
-
-  const listOrH1 = buildList(name, elements);
-
-  const div = document.createElement('div');
-  const newsSliderBlock = buildBlock('news-slider', { elems: [listOrH1] });
-  newsSliderBlock.classList.add('tabbed');
-
-  div.append(newsSliderBlock);
+/**
+ * Appends an HTML element to the top section of the site.
+ * @param {HTMLElement} main The page's main element.
+ * @param {HTMLElement} element Element to append to the top.
+ */
+export function addToTopSection(main, element) {
   const topSection = main.querySelector('.top-section');
   if (!topSection) {
     return;
   }
-  topSection.append(div);
+  topSection.append(element);
+}
+
+/**
+ * Appends an HTML element to the right section of the site.
+ * @param {HTMLElement} main The page's main element.
+ * @param {HTMLElement} element Element to append to the top.
+ */
+export function addToRightSection(main, element) {
+  const rightSection = main.querySelector('.right-section');
+  if (!rightSection) {
+    return;
+  }
+  rightSection.append(element);
+}
+
+/**
+ * Retrieves all the default sections, which will contain content created
+ * by a document author.
+ * @param {HTMLElement} main The page's main element.
+ * @returns {Array<HTMLElement>} The page's default sections.
+ */
+export function getDefaultSections(main) {
+  return [...main.querySelectorAll('.section:not(.auto-section)')];
+}
+
+/**
+ * Retrieves the first default section on the page, if there is
+ * one.
+ * @param {HTMLElement} main The page's main element.
+ * @returns {HTMLElement|undefined} The first default section, or undefined if none.
+ */
+export function getFirstDefaultSection(main) {
+  return main.querySelector('.section:not(.auto-section)');
+}
+
+/**
+ * Retrieves the last default section on the page, if there is
+ * one.
+ * @param {HTMLElement} main The page's main element.
+ * @returns {HTMLElement|undefined} The last default section, or undefined if none.
+ */
+export function getLastDefaultSection(main) {
+  const sections = getDefaultSections(main);
+  if (sections.length) {
+    return sections[sections.length - 1];
+  }
+  return undefined;
+}
+
+export function buildNewsSlider(main) {
+  const elements = getMetadata('keywords');
+  if (!elements || !elements.length) {
+    return;
+  }
+
+  const list = buildList(elements);
+  const div = document.createElement('div');
+  const newsSliderBlock = buildBlock('news-slider', { elems: [list] });
+  newsSliderBlock.classList.add('tabbed');
+
+  div.append(newsSliderBlock);
+  addToTopSection(main, newsSliderBlock);
   decorateBlock(newsSliderBlock);
-  await loadBlock(newsSliderBlock);
 }
 
 /**
@@ -290,7 +370,7 @@ export function getCategoryPath(path) {
     // fall back to default category if unexpected path format
     return DEFAULT_CATEGORY_PATH;
   }
-  return pathStr.substring(0, lastSlash);
+  return pathStr.substring(0, lastSlash + 1);
 }
 
 /**
@@ -320,10 +400,26 @@ export function getCategoryName(record) {
  * @property {string} authordescription Bio information for the record's author.
  * @property {string} publisheddate Full, human-readable date when the record was published.
  * @property {string} keywords Comma-separated list of keywords associated with the index record.
- * @property {string} company-names Comma-separated list of companies to which the index record
+ * @property {string} companynames Comma-separated list of companies to which the index record
  *  applies.
- * @property {string} company-webpages Comma-separated list of websites for the index's companies.
+ * @property {string} companywebpages Comma-separated list of websites for the index's companies.
  * @property {string} lastModified Unix timestamp of the last time the index record was modified.
+ */
+
+/**
+ * @typedef PageMetadata
+ * @property {string} [path] Full path of the page.
+ * @property {string} [author] Name of the author associated with the page.
+ * @property {string} [category] Name of the category associated with the page.
+ * @property {string} [companynames] Comma-separated list of companies to which
+ *  the page applies.
+ * @property {string} [companywebpages] Comma-separated list of websites for the
+ *  page's companies.
+ * @property {string} [description] Summary description of the page.
+ * @property {string} [keywords] Comma-separated list of keywords associated with the page.
+ * @property {string} [publisheddate] Full, human-readable date when the page was published.
+ * @property {string} [title] Title of the page.
+ * @property {string} [image] Image for the page.
  */
 
 /**
@@ -340,40 +436,99 @@ export function isArticle(record) {
   );
 }
 
-let cachedIndex;
 /**
  * Queries the site's index and only includes those records that match a given filter.
  * @param {function} filter Filter through which each record will be sent. The function will
  *  receive a single argument: the current record's raw data. The function should return true
  *  to include the record in the final result, or false to exclude it from the result.
- * @returns {Promise<Array<QueryIndexRecord>>} Resolves with an array of information for all
- *  matching records.
+ * @param {number} [limit] The maximum number of records to retrieve. Default: 10.
+ * @returns {import('./ffetch.js').default} Resolves an ffetch object configured with parameters
+ *  ready for querying.
  */
-export async function queryIndex(filter) {
-  let index = cachedIndex;
-  if (!index) {
-    // will need to be updated to use ffetch for performance.
-    const res = await fetch('/query-index.json');
-    if (res && res.ok) {
-      try {
-        index = await res.json();
-        // storing the query index in memory as a speed performance optimization.
-        // may need to revisit this if the query index gets very large.
-        cachedIndex = index;
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.log('Unable to parse query index json', e);
+export function queryIndex(filter, limit = 10) {
+  return ffetch('/query-index.json')
+    .chunks(CHUNK_SIZE)
+    // "safety net" to ensure we aren't inadvertently traversing the entire index. individual
+    // calls can override this, or we can adjust the limit as needed
+    .chunkLimit(CHUNK_LIMIT)
+    .filter(filter)
+    .limit(limit);
+}
+
+/**
+ * Retrieves the title of the current page.
+ * @returns {string} Page title.
+ */
+export function getTitle() {
+  return getMetadata('og:title');
+}
+
+/**
+ * Retrieves the list of company names of the current page.
+ * @returns {string} Comma-separated list of names.
+ */
+export function getCompanyNames() {
+  return getMetadata('companynames');
+}
+
+/**
+ * Retrieves the list of keywords of the current page.
+ * @returns {string} Comma-separated list of words.
+ */
+export function getKeywords() {
+  return getMetadata('keywords');
+}
+
+/**
+ * forward looking *.metadata.json experiment
+ * fetches metadata.json of page
+ * @param {path} path to *.metadata.json
+ * @returns {PageMetadata} containing sanitized meta data
+ */
+export async function getMetadataJson(path) {
+  let resp;
+  try {
+    resp = await fetch(path);
+    if (resp && resp.ok) {
+      const text = await resp.text();
+      const headStr = text.split('<head>')[1].split('</head>')[0];
+      const head = document.createElement('head');
+      head.innerHTML = headStr;
+      const metaTags = head.querySelectorAll(':scope > meta');
+      const meta = {};
+      metaTags.forEach((metaTag) => {
+        const name = metaTag.getAttribute('name') || metaTag.getAttribute('property');
+        const value = metaTag.getAttribute('content');
+        if (meta[name]) {
+          meta[name] += `, ${value}`;
+        } else {
+          meta[name] = value;
+        }
+      });
+
+      if (meta['og:image']) {
+        meta.image = meta['og:image'];
       }
+      if (meta['og:url']) {
+        meta.path = new URL(meta['og:url']).pathname;
+      }
+      if (meta['og:title']) {
+        meta.title = meta['og:title'];
+      }
+
+      return meta;
     }
+  } catch {
+    // fail
   }
-  const { data = [] } = index || {};
-  return data.filter(filter);
+
+  return null;
 }
 
 /**
  * Retrieves all records whose path matches one of a given list of path values.
  * @param {Array<string>} paths List of all record paths to retrieve from the site's index.
- * @returns {Promise<Array<QueryIndexRecord>>} Resolves with an array of information for all
+ * @returns {Promise<Array<PageMetadata>>} Resolves with an array of information for all
  *  matching records.
  */
 export async function getRecordsByPath(paths) {
@@ -381,7 +536,73 @@ export async function getRecordsByPath(paths) {
   paths.forEach((path) => {
     pathLookup[path] = true;
   });
-  return queryIndex((record) => !!pathLookup[record.path]);
+  const promises = Object.keys(pathLookup).map((path) => {
+    const pathUrl = `${window.location.protocol}//${window.location.host}${path}`;
+    return getMetadataJson(pathUrl);
+  });
+  const results = await Promise.all(promises);
+  return results.filter((value) => !!value);
+}
+
+/**
+ * Converts a given value to lower case, then strictly compares it with another value.
+ * @param {string} value Value to convert to lower case.
+ * @param {string} matchValue Value to match against (as-is).
+ * @returns {boolean} True if the values match, false otherwise.
+ */
+function lowerCaseCompare(value, matchValue) {
+  return String(value).toLowerCase() === matchValue;
+}
+
+/**
+ * Converts a given list of comma-separated values to lower case, then determines whether a
+ * given value is in the list.
+ * @param {string} list Comma-separated list to convert to lower case and check.
+ * @param {string} value Value to look for (as-is).
+ * @returns {boolean} True if the given value is in the comma-separated
+ *  list, false otherwise.
+ */
+function commaSeparatedListContains(list, value) {
+  if (!list || !value) {
+    return false;
+  }
+  const listStr = String(list);
+
+  return listStr.split(',')
+    .map((item) => item.trim().toLowerCase())
+    .includes(value);
+}
+
+/**
+ * Queries the site's index and returns articles whose specified metadata value
+ * matches a given filter value.
+ * @param {string} metadataName Name of the article metadata to match.
+ * @param {string} value Value to match with.
+ * @param {number} [limit=10] Maximum number of articles to include.
+ * @param {function} [compareFn] Used to compare the two values. The first parameter will be
+ *  the record's metadata value, and the second will be a lower-case version of the match
+ *  value. Default function will convert the record's metadata value to lower case and strictly
+ *  compare it with the match value.
+ * @returns {Promise<QueryIndexRecord>} Article's record information.
+ */
+async function queryMatchingArticles(
+  metadataName,
+  value,
+  limit = 10,
+  compareFn = lowerCaseCompare,
+) {
+  const matchValue = String(value).toLowerCase();
+  const entries = queryIndex(
+    (record) => compareFn(record[metadataName], matchValue),
+    limit,
+  ).sheet('article');
+
+  const articles = [];
+  // eslint-disable-next-line no-restricted-syntax
+  for await (const entry of entries) {
+    articles.push(entry);
+  }
+  return articles;
 }
 
 /**
@@ -391,9 +612,7 @@ export async function getRecordsByPath(paths) {
  *  articles.
  */
 export async function getArticlesByCategory(categoryName) {
-  return queryIndex(
-    (record) => record.category === categoryName && isArticle(record),
-  );
+  return queryMatchingArticles('category', categoryName, 13);
 }
 
 /**
@@ -403,15 +622,33 @@ export async function getArticlesByCategory(categoryName) {
  *  articles.
  */
 export async function getArticlesByAuthor(authorName) {
-  return queryIndex(
-    (record) => record.author === authorName && isArticle(record),
-  );
+  return queryMatchingArticles('author', authorName, 15);
+}
+
+/**
+ * Retrieves all articles related to a given company.
+ * @param {string} companyName Company whose articles should be retrieved.
+ * @returns {Promise<Array<QueryIndexRecord>>} Resolves with an array of matching
+ *  articles.
+ */
+export async function getArticlesByCompany(companyName) {
+  return queryMatchingArticles('companynames', companyName, 14, commaSeparatedListContains);
+}
+
+/**
+ * Retrieves all articles related to a given keyword.
+ * @param {string} keyword Keyword whose articles should be retrieved.
+ * @returns {Promise<Array<QueryIndexRecord>>} Resolves with an array of matching
+ *  articles.
+ */
+export async function getArticlesByKeyword(keyword) {
+  return queryMatchingArticles('keywords', keyword, 10, commaSeparatedListContains);
 }
 
 /**
  * Retrieves the record whose path matches a given value.
  * @param {string} path Path to retrieve from the site's index.
- * @returns {Promise<QueryIndexRecord>} Resolves with the information for the matching
+ * @returns {Promise<PageMetadata>} Resolves with the information for the matching
  *  record. Will be falsy if a matching record was not found.
  */
 export async function getRecordByPath(path) {
@@ -428,24 +665,22 @@ export async function getRecordByPath(path) {
  * @returns {Promise<QueryIndexRecord>} Resolves author information.
  */
 export async function getAuthorByName(authorName) {
-  const records = await queryIndex(
-    (record) => record.path.startsWith('/authors/') && record.author === authorName,
-  );
-  if (!records.length) {
-    return undefined;
-  }
-  return records[0];
+  const authorValue = String(authorName).toLowerCase();
+  return ffetch('/query-index.json')
+    .sheet('authors')
+    .filter((record) => (String(record.author).toLowerCase()) === authorValue)
+    .first();
 }
 
 /**
- * Processes the contents of a block and retrieves the records specified in the
+ * Processes the contents of a block and retrieves the paths specified in the
  * block. The method assumes that the block's content consists of a <ul> whose
  * list items are links to items in the site's query index.
  * @param {HTMLElement} block Block whose content will be used.
- * @returns {Promise<Array<QueryIndexRecord>>} Resolves with records that match all
- *  specified URLs in a block.
+ * @returns {Array<string>} Resolves with paths that are
+ *  specified in the block.
  */
-export function getRecordsFromBlock(block) {
+export function getPathsFromBlock(block) {
   const uls = block.querySelectorAll('ul');
   let paths = [];
 
@@ -471,15 +706,28 @@ export function getRecordsFromBlock(block) {
       .filter((path) => !!path);
     paths = paths.concat(paths, recordPaths);
   });
+  return paths;
+}
 
+/**
+ * Processes the contents of a block and retrieves the records specified in the
+ * block. The method assumes that the block's content consists of a <ul> whose
+ * list items are links to items in the site's query index.
+ * @param {HTMLElement} block Block whose content will be used.
+ * @returns {Promise<Array<QueryIndexRecord>>} Resolves with records that match all
+ *  specified URLs in a block.
+ */
+export function getRecordsFromBlock(block) {
   // retrieve article information for all specified article paths
-  return getRecordsByPath(paths);
+  const paths = getPathsFromBlock(block);
+  return getPathsFromBlock(paths);
 }
 
 /**
  * Creates an HTML element that contains an article author's name, a link to the
- * author's profile page, and the publish date of the article.
- * @param {QueryIndexRecord} article Article whose author information will be
+ * author's profile page, and the publish date of the article. If an article
+ * is not provided, the method will create placeholders.
+ * @param {QueryIndexRecord} [article] Article whose author information will be
  *  included.
  * @returns {HTMLElement} Element containing summary information about the author of
  *  an article.
@@ -487,19 +735,29 @@ export function getRecordsFromBlock(block) {
 export function buildArticleAuthor(article) {
   const author = document.createElement('h5');
   author.classList.add('article-author');
-  // attempting to predict the URL to the author. may need to change to query
-  // author information from index
-  const authorId = String(article.author)
-    .toLowerCase()
-    .replaceAll(/[^0-9a-z ]/g, '')
-    .replaceAll(/[^0-9a-z]/g, '-');
-  author.innerHTML = `
-    <a href="/authors/${authorId}" class="link-arrow" aria-label="By ${article.author}"><span class="uncolored-link">By</span> ${article.author}</a>
-  `;
 
   const date = document.createElement('h5');
   date.classList.add('article-date');
-  date.innerText = article.publisheddate;
+
+  if (article) {
+    // attempting to predict the URL to the author. may need to change to query
+    // author information from index
+    const authorId = String(article.author)
+      .toLowerCase()
+      .replaceAll(/[^0-9a-z ]/g, '')
+      .replaceAll(/[^0-9a-z]/g, '-');
+    author.innerHTML = `
+      <a href="/authors/${authorId}" class="link-arrow" aria-label="By ${article.author}"><span class="uncolored-link">By</span> ${article.author}</a>
+    `;
+
+    date.innerText = article.publisheddate;
+  } else {
+    author.classList.add('placeholder');
+    date.classList.add('placeholder');
+
+    author.innerText = 'Author Name';
+    date.innerText = 'Article published date';
+  }
 
   const container = document.createElement('div');
   container.classList.add('article-author-container');
@@ -660,14 +918,18 @@ export async function buildRelatedContent(target, articles) {
  * Dynamically creates a social share block, then appends the new block after
  * a given element.
  * @param {HTMLElement} insertAfter Element after which the block will be inserted.
- * @returns {Promise} Resolves when the operation is complete.
  */
-export async function buildSocialShare(insertAfter) {
+export function buildSocialShare(insertAfter) {
   const insertBefore = insertAfter.nextSibling;
+  if (!insertBefore) {
+    return;
+  }
+  if (!insertAfter.parentElement) {
+    return;
+  }
   const socialShare = buildBlock('social-share', { elems: [] });
   insertAfter.parentElement.insertBefore(socialShare, insertBefore);
   decorateBlock(socialShare);
-  return loadBlock(socialShare);
 }
 
 function buildKeywordLookup(keywords) {
@@ -716,21 +978,22 @@ function calculateScore(keywordLookup, record) {
  */
 async function buildRelevanceScores(keywordLookup) {
   const relevanceScores = [];
-  await queryIndex((record) => {
-    if (!record.keywords || !isArticle(record)) {
-      return false;
-    }
+  // only read a single chunk, limiting the relevant articles to that dataset
+  const entries = queryIndex(() => true, CHUNK_SIZE)
+    .sheet('article');
+
+  // eslint-disable-next-line no-restricted-syntax
+  for await (const entry of entries) {
     // calculate relevance by determining how many of the given keywords each
     // article has
-    const relevance = calculateScore(keywordLookup, record);
+    const relevance = calculateScore(keywordLookup, entry);
     if (relevance > 0) {
       relevanceScores.push({
-        record,
+        record: entry,
         relevance,
       });
     }
-    return false;
-  });
+  }
   return relevanceScores;
 }
 
@@ -821,11 +1084,6 @@ function sortByMostRelevant(relevanceScores) {
  * @returns {Promise<Array<QueryIndexRecord>>} Resolves with the most related articles.
  */
 export async function getRelatedArticles(article, relatedCount = 5) {
-  // this method will almost certainly need to be optimized as the number of articles
-  // grows. As is, it will:
-  // 1. Potentially read a very large number of articles into memory.
-  // 2. Query the full index.
-  // 3. Sort a very large number of articles.
   const lookup = buildKeywordLookup(article.keywords);
   const related = await buildRelevanceScores(lookup);
   sortByMostRelevant(related);
@@ -841,29 +1099,82 @@ export async function getRelatedArticles(article, relatedCount = 5) {
 }
 
 /**
- * Builds an article-cards block from a list of articles, and adds the
- * block to the DOM.
- * @param {Array<QueryIndexRecord>} articles Records from which article cards
- *  will be built.
+ * Builds an article-cards block with a given number of placeholders,
+ * adds the block to the DOM, and decorates it.
+ * @param {number} count The number of cards to add to the block.
  * @param {function} addBlockToDom Will be invoked when the block needs to be
  *  added to the DOM. Will receive a single argument: the block's HTMLElement.
- * @returns {Promise} Resolves when the block is complete.
+ * @returns {HTMLElement} The newly created block.
  */
-export async function buildArticleCardsBlock(articles, addBlockToDom) {
-  const ul = document.createElement('ul');
-  articles.forEach((article) => {
-    const li = document.createElement('li');
-    const articleUrl = `${window.location.protocol}//${window.location.host}${article.path}`;
-    li.innerHTML = `
-      <a href="${articleUrl}" title="${article.title}" aria-label="${article.title}">
-        ${articleUrl}
-      </a>
-    `;
-    ul.append(li);
-  });
-
-  const cards = buildBlock('article-cards', { elems: [ul] });
+export function buildArticleCardsBlock(count, templateName, addBlockToDom) {
+  const cards = buildBlock('article-cards', { elems: [] });
+  cards.dataset.cardCount = count;
+  cards.dataset.template = templateName;
   addBlockToDom(cards);
   decorateBlock(cards);
-  await loadBlock(cards);
+  return cards;
+}
+
+/**
+ * Loads a list of article records into a template's card placeholders.
+ * @param {HTMLElement} main The document's main element.
+ * @param {string} templateName Name of the template whose cards are being loaded.
+ * @param {Array<QueryIndexRecord>} articles Article records to load into the template's card
+ *  placeholders.
+ */
+export function loadTemplateArticleCards(main, templateName, articles) {
+  const placeholderCards = main.querySelectorAll(`.article-cards[data-template="${templateName}"] .article-card.skeleton`);
+  [...placeholderCards].forEach((card, index) => {
+    if (articles.length > index) {
+      card.dataset.json = JSON.stringify(articles[index]);
+    } else {
+      // placeholder not needed - not enough articles
+      card.remove();
+    }
+  });
+}
+
+/**
+ * Builds an ad block with the given ID and type.
+ * @param {string} unitId ID of the ad to include in the block.
+ * @param {string} type The type of ad to create.
+ * @param {boolean} [fixedHeight] If true, the ad will have a fixed height
+ *  associated with it.
+ * @returns {HTMLElement} Newly built ad block. Will be falsy if the ad type
+ *  is unknown.
+ */
+export function buildAdBlock(unitId, type, fixedHeight = false) {
+  // Determine the text and class based on the type
+  let adText;
+  let adClass;
+  let height = '';
+  if (type === 'Advertisement') {
+    adText = 'Advertisement';
+    adClass = 'right-ad';
+    if (fixedHeight) {
+      height = ' fixed-height';
+    }
+  } else if (type === 'Sponsored post') {
+    adText = 'Sponsored post';
+    adClass = 'right-sponsored';
+  } else {
+    // eslint-disable-next-line no-console
+    console.error('Unknown type in the block');
+    return undefined;
+  }
+
+  // Build the ad using the extracted unit-id and determined text and class
+  const rightAdHTML = `
+    <!-- AD IMU  STARTS  -->
+
+    <div class="${adClass}${height}">
+      <span class="ad-title">${adText}</span> <br />
+      <div id="${unitId}" class="tmsads"></div>
+    </div>
+
+    <br clear="all">
+  `;
+
+  const range = document.createRange();
+  return range.createContextualFragment(rightAdHTML);
 }

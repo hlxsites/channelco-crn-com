@@ -164,7 +164,7 @@ a:hover {
   text-decoration: none;
 }
 
-a.link-arrow::after {
+.link-arrow::after {
   content: '▶';
   display: inline-block;
   margin-left: .5rem;
@@ -274,6 +274,15 @@ main .section {
   max-width: 1140px;
 }
 
+main .section.auto-section {
+  margin: 0;
+  padding: 0;
+}
+
+main .section.auto-section.top-section {
+  margin: 0 var(--padding-spacer-x) 0.75rem
+}
+
 main .divider {
   display: block;
   width: auto;
@@ -305,6 +314,18 @@ main .back-top-top-section-header {
 
 main .back-top-top-section-header::before {
   content: '▲';
+}
+
+main .placeholder {
+  position: relative;
+}
+
+main .placeholder::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background-color: var(--overlay-background-color);
 }
 
 @media (min-width: 576px) {

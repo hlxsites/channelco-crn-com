@@ -8,8 +8,8 @@ import {
 import {
   createOptimizedPicture,
   getArticlesByAuthor,
-  comparePublishDate,
   buildArticleCardsBlock,
+  loadTemplateArticleCards,
 } from '../../scripts/shared.js';
 
 function addIcon(beforeElement, iconName) {
@@ -24,7 +24,7 @@ function addIcon(beforeElement, iconName) {
  * @param {HTMLElement} main Main element of the page.
  */
 // eslint-disable-next-line import/prefer-default-export
-export async function loadEager(main) {
+export function loadEager(main) {
   const defaultContent = main.querySelector('.default-content-wrapper');
   if (!defaultContent) {
     return;
@@ -55,7 +55,6 @@ export async function loadEager(main) {
   block.classList.add('author');
   defaultContent.append(block);
   decorateBlock(block);
-  await loadBlock(block);
   decorateIcons(block);
 
   const authorName = getMetadata('author');
@@ -68,11 +67,9 @@ export async function loadEager(main) {
   `;
   defaultContent.append(newsLink);
 
-  const articles = await getArticlesByAuthor(authorName);
-  articles.sort(comparePublishDate);
-
-  await buildArticleCardsBlock(
-    articles.slice(0, 15),
+  buildArticleCardsBlock(
+    15,
+    'author',
     (articleCards) => defaultContent.append(articleCards),
   );
 
@@ -87,7 +84,21 @@ export async function loadEager(main) {
   const ad = buildBlock('ad', [[{ elems: [adIdLabel, adId] }, { elems: [adTypeLabel, adType] }]]);
   defaultContent.append(ad);
   decorateBlock(ad);
-  await loadBlock(ad);
+}
+
+/**
+ * Manipulates the DOM as necessary to format the template.
+ * @param {HTMLElement} main Main element of the page.
+ */
+export async function loadLazy(main) {
+  const defaultContent = main.querySelector('.default-content-wrapper');
+  if (!defaultContent) {
+    return;
+  }
+  const authorName = getMetadata('author');
+  const articles = await getArticlesByAuthor(authorName);
+
+  loadTemplateArticleCards(main, 'author', articles);
 
   const navigation = buildBlock('category-navigation', { elems: [] });
   defaultContent.append(navigation);

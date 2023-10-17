@@ -42,6 +42,24 @@
   margin-top: 1rem;
 }
 
+.article-cards .article-card.skeleton > a {
+  display: inline-block;
+  width: 100%;
+  height: calc(100vw * .6);
+}
+
+.article-cards .article-cards-ad {
+  background-color: #e6e6e6;
+  text-align: center;
+  padding: 0 1rem;
+  margin-top: 1rem;
+}
+
+.article-cards .sub-article .article-cards-ad {
+  width: 100%;
+  margin-bottom: auto;
+}
+
 /* lead article variant */
 .article-cards.lead-article,
 .article-cards.lead-article .sub-article .article-card:nth-child(odd) {
@@ -71,6 +89,8 @@
 
 .article-cards.lead-article .featured-article .article-card-description {
   display: block;
+  border-bottom: 2px dotted #a7a7a7;
+  padding-bottom: 2rem;
 }
 
 @media (min-width: 576px) {
@@ -83,6 +103,11 @@
     max-height: 100px;
     max-width: 170px;
     aspect-ratio: 1 / 1;
+  }
+
+  .article-cards .article-card.skeleton > a {
+    width: 100px;
+    height: 100px;
   }
 
   /* lead article variant */
@@ -99,6 +124,11 @@
   .article-cards.lead-article .featured-article .article-card-description {
     margin-bottom: 2rem;
   }
+
+  .article-cards.lead-article .featured-article.skeleton > a {
+    width: 450px;
+    height: 280px;
+  }
 }
 
 @media (min-width: 1200px) {
@@ -107,19 +137,37 @@
     max-width: 230px;
   }
 
-  /* lead article variant */
-  .article-cards.lead-article > div > div {
-    flex-direction: row;
+  .article-cards .article-card.skeleton > a {
+    width: 165px;
+    height: 165px;
   }
 
-  .article-cards.lead-article .featured-article,
-  .article-cards.lead-article .sub-article {
-    flex: 1;
+  /* lead article variant */
+  .article-cards.lead-article > div > div {
+    display: grid;
+    gap: 1rem;
+    grid-template:
+      "featured sub-articles" auto
+      "featured sub-articles-ad" auto
+      "featured ." 1fr / 1fr 1fr;
+  }
+
+  .article-cards.lead-article .featured-article {
+    grid-area: featured;
+  }
+
+  .article-cards.lead-article .article-cards-ad {
+    min-height: 325px;
   }
 
   .article-cards.lead-article .sub-article {
     display: flex;
     flex-wrap: wrap;
+    grid-area: sub-articles;
+  }
+
+  .article-cards.lead-article > div > div > .article-cards-ad {
+    grid-area: sub-articles-ad;
   }
 
   .article-cards.lead-article .sub-article .article-card {
@@ -144,5 +192,10 @@
 
   .article-cards.lead-article .sub-article .article-card:nth-child(n+3) {
     border-top: 2px dotted var(--color-mid-grey);
+  }
+
+  .article-cards.lead-article .article-card.skeleton > a {
+    height: 100px;
+    width: 170px;
   }
 }
