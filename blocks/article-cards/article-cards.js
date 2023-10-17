@@ -199,7 +199,9 @@ export default function decorate(block) {
   // with an actual card when a skeleton's data-json attribute is set
   const observer = new MutationObserver((entries) => {
     entries.forEach((entry) => {
-      if (entry.type === 'attributes' && entry.target.classList.contains('skeleton') && entry.target.dataset.json) {
+      if (entry.type === 'attributes' && (entry.target.classList.contains('skeleton')
+      || entry.target.classList.contains('article-card'))
+      && entry.target.dataset.json) {
         const article = JSON.parse(entry.target.dataset.json);
         const finalCard = createCard(article.path, entry.target.classList.contains('featured-article'), article);
         entry.target.parentNode.replaceChild(finalCard, entry.target);

@@ -1,4 +1,51 @@
-import { readBlockConfig } from '../../scripts/lib-franklin.js';
+import { readBlockConfig, loadBlock } from '../../scripts/lib-franklin.js';
+import { getArticlesByKeyword, buildArticleCardsBlock } from '../../scripts/shared.js';
+
+/**
+ * Loads a list of article records into a template's card placeholders.
+ * @param {HTMLElement} main The document's main element.
+ * @param {string} templateName Name of the template whose cards are being loaded.
+ * @param {Array<QueryIndexRecord>} articles Article records to load into the template's card
+ *  placeholders.
+ */
+function loadTemplateArticleCards(main, templateName, articles) {
+  const cards = main.querySelectorAll(`.article-cards[data-template="${templateName}"] .article-card`);
+
+  // if there are no placeholders or cards, load the articles block again
+  if (cards.length === 0) {
+    let lastElement;
+    const firstSection = main.querySelector('.section');
+    if (!firstSection) {
+      return;
+    }
+    if (firstSection.children.length > 0) {
+      lastElement = firstSection.children.item(0);
+    }
+
+    buildArticleCardsBlock(5, 'category', async (leadCards) => {
+      await loadBlock(leadCards);
+      leadCards.classList.add('lead-article');
+      firstSection.insertBefore(leadCards, lastElement);
+    });
+
+    const newsHeading = document.querySelector('.link-arrow');
+    firstSection.insertBefore(newsHeading, lastElement);
+
+    buildArticleCardsBlock(8, 'category', async (otherCards) => {
+      await loadBlock(otherCards);
+      firstSection.insertBefore(otherCards, lastElement);
+    });
+  }
+
+  [...cards].forEach((card, index) => {
+    if (articles.length > index) {
+      card.dataset.json = JSON.stringify(articles[index]);
+    } else {
+      // placeholder not needed - not enough articles
+      card.remove();
+    }
+  });
+}
 
 function addDragEvents(handle, carousel, isTabsBlock) {
   const RESISTANCE_FACTOR = 5;
@@ -161,13 +208,29 @@ export default function decorate(block) {
       link.className = 'eyebrow-link';
       link.textContent = item.textContent;
 
-      link.addEventListener('click', (event) => {
+      async function updateMainContent(articles) {
+        const main = document.querySelector('main');
+        loadTemplateArticleCards(main, 'category', articles);
+      }
+
+      function handleLinkClick(event) {
         event.preventDefault();
+
+        // Removing the active class from all links and adding to the clicked link
         document.querySelectorAll('.eyebrow-link').forEach((el) => {
           el.classList.remove('active-tab');
         });
         this.classList.add('active-tab');
-      });
+
+        // replace / by -
+        const keyword = this.textContent.trim().replace(/\//g, '-');
+
+        getArticlesByKeyword(keyword).then((articles) => {
+          updateMainContent(articles);
+        });
+      }
+
+      link.addEventListener('click', handleLinkClick);
 
       li.appendChild(link);
       ul.appendChild(li);
@@ -227,17 +290,19 @@ export default function decorate(block) {
   newsSlider.appendChild(carousel);
   addDragEvents(handle, carousel, isTabsBlock);
 
-  const main = document.querySelector('main');
-  const topSection = main.querySelector('.top-section');
-  const newsWrapper = main.querySelector('.news-slider-wrapper');
+  if (!isTabsBlock) {
+    const main = document.querySelector('main');
+    const topSection = main.querySelector('.top-section');
+    const newsWrapper = main.querySelector('.news-slider-wrapper');
 
-  if (newsWrapper) {
-    newsWrapper.parentElement.classList.remove('news-slider-container');
-    topSection.appendChild(newsWrapper);
-    newsWrapper.parentElement.classList.add('news-slider-container');
+    if (newsWrapper) {
+      newsWrapper.parentElement.classList.remove('news-slider-container');
+      topSection.appendChild(newsWrapper);
+      newsWrapper.parentElement.classList.add('news-slider-container');
+    }
+
+    main.prepend(topSection);
   }
-
-  main.prepend(topSection);
 
   // Replace the original block with our decorated one
   block.replaceWith(newsSlider);
