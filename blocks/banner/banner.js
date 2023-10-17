@@ -1,4 +1,5 @@
 import ffetch from '../../scripts/ffetch.js';
+import { readBlockConfig } from '../../scripts/lib-franklin.js';
 
 function shuffle(array) {
   for (let i = array.length - 1; i > 0; i -= 1) {
@@ -8,9 +9,12 @@ function shuffle(array) {
   return array;
 }
 
-async function populateSponsoredResources() {
+async function populateSponsoredResources(block) {
+  const config = readBlockConfig(block);
+  const dataSource = config.datasource;
+
   try {
-    const dataGenerator = ffetch('/data-source/sponsored-resources.json');
+    const dataGenerator = ffetch(dataSource);
     const allFetchedLinks = await dataGenerator.all();
 
     const ul = document.querySelector('.sponsored-resources ul');
@@ -23,6 +27,7 @@ async function populateSponsoredResources() {
       a.href = item.URL;
       a.title = item.Title;
       a.textContent = item.Title;
+      a.target = '_blank';
 
       li.appendChild(a);
       ul.appendChild(li);
@@ -35,7 +40,6 @@ async function populateSponsoredResources() {
     container.appendChild(errorMessage);
   }
 }
-populateSponsoredResources();
 
 export default function decorate(block) {
   if (block.classList.contains('magazine')) {
@@ -136,5 +140,7 @@ export default function decorate(block) {
 
     block.appendChild(h2);
     block.appendChild(ul);
+
+    populateSponsoredResources(block);
   }
 }

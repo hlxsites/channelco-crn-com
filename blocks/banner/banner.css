@@ -22,6 +22,10 @@
   height: 100%;
 }
 
+.right-ad-section .banner.sponsored-resources > div {
+  display: none;
+}
+
 .right-ad-section .banner h2 {
   font-size: 1.500rem;
   margin-top: 1rem;
