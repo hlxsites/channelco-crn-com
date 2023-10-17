@@ -17,7 +17,11 @@ async function populateSponsoredResources(block) {
     const dataGenerator = ffetch(dataSource);
     const allFetchedLinks = await dataGenerator.all();
 
-    const ul = document.querySelector('.sponsored-resources ul');
+    const h2 = document.createElement('h2');
+    h2.id = 'sponsored-resources';
+    h2.innerText = 'SPONSORED RESOURCES';
+
+    const ul = document.createElement('ul');
 
     const randomFiveLinks = shuffle(allFetchedLinks).slice(0, 5);
 
@@ -32,6 +36,8 @@ async function populateSponsoredResources(block) {
       li.appendChild(a);
       ul.appendChild(li);
     });
+    block.textContent = '';
+    block.append(h2, ul);
   } catch (error) {
     const errorMessage = document.createElement('p');
     errorMessage.textContent = 'Unable to load the sponsored resources. Please try again later.';
@@ -132,15 +138,6 @@ export default function decorate(block) {
   }
 
   if (block.classList.contains('sponsored-resources')) {
-    const h2 = document.createElement('h2');
-    h2.id = 'sponsored-resources';
-    h2.innerText = 'SPONSORED RESOURCES';
-
-    const ul = document.createElement('ul');
-
-    block.appendChild(h2);
-    block.appendChild(ul);
-
     populateSponsoredResources(block);
   }
 }
