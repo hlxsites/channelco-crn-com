@@ -12,7 +12,7 @@ import {
 
 import { decorateMain } from './shared.js';
 
-const LCP_BLOCKS = []; // add your LCP blocks to the list
+const LCP_BLOCKS = ['article-cards', 'news-slider']; // add your LCP blocks to the list
 
 const TEMPLATE_LIST = ['category', 'article', 'filter', 'author', 'search-results', 'tag', 'company'];
 
@@ -131,6 +131,37 @@ async function decorateTemplates(main) {
 }
 
 /**
+ * Adds universal sections to the document, including the top and right sections.
+ * @param {HTMLElement} main The document's main element.
+ */
+function buildAutoSections(main) {
+  const topSection = document.createElement('div');
+  topSection.classList.add('top-section', 'auto-section');
+
+  const rightSection = document.createElement('div');
+  rightSection.classList.add('right-section', 'auto-section');
+
+  const bottomSection = document.createElement('div');
+  bottomSection.classList.add('bottom-section', 'auto-section');
+
+  // Create the close icon
+  const closeIcon = document.createElement('img');
+  closeIcon.className = 'close-icon';
+  closeIcon.src = '/styles/icons/close-ribbon.png';
+  closeIcon.alt = 'Close'; // Accessibility
+
+  closeIcon.addEventListener('click', () => {
+    bottomSection.style.display = 'none';
+  });
+
+  bottomSection.appendChild(closeIcon);
+
+  main.prepend(topSection);
+  main.append(rightSection);
+  main.append(bottomSection);
+}
+
+/**
  * Loads everything needed to get to LCP.
  * @param {Element} doc The container element
  */
@@ -139,9 +170,10 @@ async function loadEager(doc) {
   decorateTemplateAndTheme();
   const main = doc.querySelector('main');
   if (main) {
+    buildAutoSections(main);
     decorateMain(main);
-    document.body.classList.add('appear');
     await decorateTemplates(main);
+    document.body.classList.add('appear');
     await waitForLCP(LCP_BLOCKS);
   }
 

@@ -227,6 +227,18 @@ export default function decorate(block) {
   newsSlider.appendChild(carousel);
   addDragEvents(handle, carousel, isTabsBlock);
 
+  const main = document.querySelector('main');
+  const topSection = main.querySelector('.top-section');
+  const newsWrapper = main.querySelector('.news-slider-wrapper');
+
+  if (newsWrapper) {
+    newsWrapper.parentElement.classList.remove('news-slider-container');
+    topSection.appendChild(newsWrapper);
+    newsWrapper.parentElement.classList.add('news-slider-container');
+  }
+
+  main.prepend(topSection);
+
   // Replace the original block with our decorated one
   block.replaceWith(newsSlider);
 

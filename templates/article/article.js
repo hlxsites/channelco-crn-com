@@ -1,5 +1,5 @@
+import { getMetadata } from '../../scripts/lib-franklin.js';
 import {
-  getRecordByPath,
   getCategoryName,
   getCategoryPath,
   getAuthorByName,
@@ -9,7 +9,18 @@ import {
   buildRelatedContent,
   buildSocialShare,
   getRelatedArticles,
+  getLastDefaultSection,
 } from '../../scripts/shared.js';
+
+function getArticleByMetadata() {
+  return {
+    path: window.location.pathname,
+    category: getMetadata('category'),
+    author: getMetadata('author'),
+    publisheddate: getMetadata('publisheddate'),
+    keywords: getMetadata('keywords'),
+  };
+}
 
 /**
  * Processes the DOM as necessary in order to auto block items required
@@ -29,12 +40,20 @@ export function loadEager(main) {
 
   buildSocialShare(picture);
 
+  const article = getArticleByMetadata();
+
+  const categoryPath = getCategoryPath(article.path);
+  const categoryName = getCategoryName(article);
+
   const categoryLink = document.createElement('a');
-  categoryLink.classList.add('link-arrow', 'article-category-link', 'placeholder');
-  categoryLink.innerText = 'Category';
+  categoryLink.classList.add('link-arrow', 'article-category-link');
+  categoryLink.innerText = categoryName;
+  categoryLink.href = categoryPath;
+  categoryLink.title = categoryName;
+  categoryLink.ariaLabel = categoryName;
   heading.parentElement.insertBefore(categoryLink, heading);
 
-  const authorContainer = buildArticleAuthor();
+  const authorContainer = buildArticleAuthor(article);
   heading.parentElement.insertBefore(authorContainer, heading.nextSibling);
 }
 
@@ -45,41 +64,18 @@ export function loadEager(main) {
  */
 // eslint-disable-next-line import/prefer-default-export
 export async function loadLazy(main) {
-  const path = window.location.pathname;
-  const article = await getRecordByPath(path);
-  if (!article) {
-    return;
-  }
+  const article = getArticleByMetadata();
 
-  const categoryPath = getCategoryPath(path);
-  const categoryName = getCategoryName(article);
-
-  const categoryPlaceholder = main.querySelector('.article .article-category-link');
-  if (categoryPlaceholder) {
-    const categoryLink = document.createElement('a');
-    categoryLink.classList.add('link-arrow', 'article-category-link');
-    categoryLink.innerText = categoryName;
-    categoryLink.href = categoryPath;
-    categoryLink.title = categoryName;
-    categoryLink.ariaLabel = categoryName;
-    categoryPlaceholder.replaceWith(categoryLink);
-  }
-
-  const authorPlaceholder = main.querySelector('.article .article-author-container');
-  if (authorPlaceholder) {
-    authorPlaceholder.replaceWith(buildArticleAuthor(article));
-  }
-
-  const contentSection = main.querySelector('.content-section');
-  if (!contentSection) {
+  const lastSection = getLastDefaultSection(main);
+  if (!lastSection) {
     return;
   }
 
   const author = await getAuthorByName(article.author);
-  await buildLearnMore(contentSection, article.keywords);
+  await buildLearnMore(lastSection, article.keywords);
   if (author) {
-    await buildAuthorBlades(contentSection, [author]);
-    const authorLink = contentSection.querySelector(
+    await buildAuthorBlades(lastSection, [author]);
+    const authorLink = lastSection.querySelector(
       '.blade.author .blade-text a',
     );
     if (authorLink) {
@@ -88,5 +84,5 @@ export async function loadLazy(main) {
   }
 
   const related = await getRelatedArticles(article);
-  await buildRelatedContent(contentSection, related);
+  await buildRelatedContent(lastSection, related);
 }
