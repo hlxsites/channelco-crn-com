@@ -52,7 +52,8 @@
   margin-bottom: 0.5rem;
 }
 
-.right-ad-section .banner.sponsored-resources li::before {
+.right-ad-section .banner.sponsored-resources li::before,
+.right-ad-section .banner.sponsored-resources p::before {
   content: url('/styles/icons/stop-fill.svg');
   display: inline-block;
   font-style: normal;
@@ -76,6 +77,16 @@
 }
 
 .right-ad-section .banner.sponsored-resources a {
+  font-family: inherit;
+  font-size: 0.775rem;
+  font-weight: normal;
+  color: #333;
+  line-height: normal;
+  text-align: justify;
+  padding-left: 3px;
+}
+
+.right-ad-section .banner.sponsored-resources p {
   font-family: inherit;
   font-size: 0.775rem;
   font-weight: normal;
