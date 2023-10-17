@@ -4,6 +4,7 @@ import {
   createOptimizedPicture,
   getPathsFromBlock,
   buildArticleAuthor,
+  buildAdBlock,
 } from '../../scripts/shared.js';
 
 /**
@@ -101,9 +102,10 @@ function createPicture(article, isFeatured) {
  * @param {import('../../scripts/shared.js').QueryIndexRecord} [article] If provided, the
  *  card will contain the information from the given article. Otherwise the card will be
  *  a placeholder.
+ * @param {HTMLElement} [ad] If specified, the ad to include at the bottom of the card.
  * @returns {HTMLElement} Card information for an article.
  */
-function createCard(path, isFeatured = false, article = false) {
+function createCard(path, isFeatured = false, article = false, ad = false) {
   const cardDiv = document.createElement('div');
   cardDiv.classList.add('article-card');
 
@@ -134,6 +136,10 @@ function createCard(path, isFeatured = false, article = false) {
   cardDiv.append(articlePicture);
   cardDiv.append(infoDiv);
 
+  if (ad) {
+    cardDiv.append(ad);
+  }
+
   return cardDiv;
 }
 
@@ -142,6 +148,16 @@ function getPath(paths, index) {
     return paths[index];
   }
   return false;
+}
+
+function buildAd(id, type) {
+  const ad = document.createElement('div');
+  ad.classList.add('article-cards-ad');
+  const adBlock = buildAdBlock(id, type);
+  if (adBlock) {
+    ad.append(adBlock);
+  }
+  return ad;
 }
 
 /**
@@ -186,14 +202,20 @@ export default function decorate(block) {
   const addlArticleContainer = document.createElement('div');
   addlArticleContainer.classList.add('sub-article');
 
-  const featured = createCard(getPath(articlePaths, 0), true);
+  const includeAds = block.classList.contains('lead-article');
+  const featured = createCard(getPath(articlePaths, 0), true, false, includeAds ? buildAd('unit-1659132512259', 'Advertisement') : false);
   blockTarget.append(featured);
+
   // add article cards for each article
   for (let i = 1; i < cardCount; i += 1) {
     const cardDiv = createCard(getPath(articlePaths, i));
     addlArticleContainer.append(cardDiv);
   }
   blockTarget.append(addlArticleContainer);
+
+  if (includeAds && cardCount < 6) {
+    blockTarget.append(buildAd('unit-1661973671931', 'Sponsored post'));
+  }
 
   // listens for attribute modifications on child elements, and will replace a placeholder card
   // with an actual card when a skeleton's data-json attribute is set
@@ -203,7 +225,12 @@ export default function decorate(block) {
       || entry.target.classList.contains('article-card'))
       && entry.target.dataset.json) {
         const article = JSON.parse(entry.target.dataset.json);
-        const finalCard = createCard(article.path, entry.target.classList.contains('featured-article'), article);
+        const finalCard = createCard(
+          article.path,
+          entry.target.classList.contains('featured-article'),
+          article,
+          entry.target.querySelector('.article-cards-ad'),
+        );
         entry.target.parentNode.replaceChild(finalCard, entry.target);
       }
     });

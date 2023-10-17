@@ -1,4 +1,9 @@
-import { buildBreadcrumb, getRecordsByPath } from '../../scripts/shared.js';
+import {
+  buildBreadcrumb,
+  getRecordsByPath,
+  addToTopSection,
+  addToRightSection,
+} from '../../scripts/shared.js';
 
 function scrollToTop(event) {
   event.preventDefault();
@@ -77,15 +82,15 @@ export async function loadLazy(main) {
   const contentSection = document.createElement('div');
   contentSection.className = 'content-section';
 
-  const rightAds = main.querySelector('.right-ad-section');
-  if (!rightAds) {
+  const rightSection = main.querySelector('.right-section');
+  if (!rightSection) {
     return;
   }
 
-  [...main.querySelectorAll('main > .section')].forEach((section) => {
+  [...main.querySelectorAll('main > .section:not(.auto-section)')].forEach((section) => {
     contentSection.appendChild(section);
   });
-  main.insertBefore(contentSection, rightAds);
+  main.insertBefore(contentSection, rightSection);
   main.classList.add('grid-layout');
 
   const toTopSection = createToTopSection();
@@ -99,9 +104,6 @@ export async function loadLazy(main) {
  * @param {HTMLElement} main The document's main element.
  */
 export function loadEager(main) {
-  const topSection = document.createElement('div');
-  topSection.classList.add('top-section');
-
   const topAdSection = document.createElement('div');
   topAdSection.className = 'top-ad-section';
   topAdSection.id = 'top-ad-fragment-container';
@@ -116,12 +118,12 @@ export function loadEager(main) {
 
   const breadcrumb = buildBreadcrumb();
 
-  topSection.appendChild(topAdSection);
+  addToTopSection(main, topAdSection);
   if (breadcrumb) {
-    topSection.appendChild(breadcrumb);
+    addToTopSection(main, breadcrumb);
   }
-  main.prepend(topSection);
-  main.append(rightAdSection);
+
+  addToRightSection(main, rightAdSection);
 }
 
 /**
@@ -129,20 +131,14 @@ export function loadEager(main) {
  * delayed phase.
  */
 export function loadDelayed() {
+  const bottomSection = document.querySelector('.bottom-section');
+  if (!bottomSection) {
+    return;
+  }
+
   const bottomAdSection = document.createElement('div');
   bottomAdSection.className = 'bottom-ad-section';
   bottomAdSection.id = 'bottom-ad-fragment-container';
 
-  // Create the close icon
-  const closeIcon = document.createElement('img');
-  closeIcon.className = 'close-icon';
-  closeIcon.src = '/styles/icons/close-ribbon.png';
-  closeIcon.alt = 'Close'; // Accessibility
-
-  closeIcon.addEventListener('click', () => {
-    bottomAdSection.style.display = 'none';
-  });
-
-  bottomAdSection.appendChild(closeIcon);
-  document.body.appendChild(bottomAdSection);
+  bottomSection.appendChild(bottomAdSection);
 }

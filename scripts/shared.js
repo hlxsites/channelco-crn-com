@@ -89,6 +89,53 @@ export function addToTopSection(main, element) {
   topSection.append(element);
 }
 
+/**
+ * Appends an HTML element to the right section of the site.
+ * @param {HTMLElement} main The page's main element.
+ * @param {HTMLElement} element Element to append to the top.
+ */
+export function addToRightSection(main, element) {
+  const rightSection = main.querySelector('.right-section');
+  if (!rightSection) {
+    return;
+  }
+  rightSection.append(element);
+}
+
+/**
+ * Retrieves all the default sections, which will contain content created
+ * by a document author.
+ * @param {HTMLElement} main The page's main element.
+ * @returns {Array<HTMLElement>} The page's default sections.
+ */
+export function getDefaultSections(main) {
+  return [...main.querySelectorAll('.section:not(.auto-section)')];
+}
+
+/**
+ * Retrieves the first default section on the page, if there is
+ * one.
+ * @param {HTMLElement} main The page's main element.
+ * @returns {HTMLElement|undefined} The first default section, or undefined if none.
+ */
+export function getFirstDefaultSection(main) {
+  return main.querySelector('.section:not(.auto-section)');
+}
+
+/**
+ * Retrieves the last default section on the page, if there is
+ * one.
+ * @param {HTMLElement} main The page's main element.
+ * @returns {HTMLElement|undefined} The last default section, or undefined if none.
+ */
+export function getLastDefaultSection(main) {
+  const sections = getDefaultSections(main);
+  if (sections.length) {
+    return sections[sections.length - 1];
+  }
+  return undefined;
+}
+
 export function buildNewsSlider(main) {
   const elements = getMetadata('keywords');
   if (!elements || !elements.length) {
@@ -677,6 +724,31 @@ export function getRecordsFromBlock(block) {
 }
 
 /**
+ * Checks whether a given value appears to be a timestamp, and if so converts it
+ * into a formatted date string. Otherwise the method will return the original
+ * value as-is.
+ * @param {string} dateValue Potential date value to format.
+ * @returns {string} Formatted date, or the original value.
+ */
+export function formatDate(dateValue) {
+  if (/^[0-9]+$/g.test(dateValue)) {
+    const publishDate = new Date(parseInt(dateValue, 10) * 1000);
+    const dateStr = publishDate.toLocaleDateString('en-us', {
+      month: 'long',
+      day: '2-digit',
+      year: 'numeric',
+    });
+    const timeStr = publishDate.toLocaleTimeString('en-us', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZoneName: 'short',
+    });
+    return `${dateStr}, ${timeStr}`;
+  }
+  return dateValue;
+}
+
+/**
  * Creates an HTML element that contains an article author's name, a link to the
  * author's profile page, and the publish date of the article. If an article
  * is not provided, the method will create placeholders.
@@ -703,7 +775,7 @@ export function buildArticleAuthor(article) {
       <a href="/authors/${authorId}" class="link-arrow" aria-label="By ${article.author}"><span class="uncolored-link">By</span> ${article.author}</a>
     `;
 
-    date.innerText = article.publisheddate;
+    date.innerText = formatDate(article.publisheddate);
   } else {
     author.classList.add('placeholder');
     date.classList.add('placeholder');
@@ -871,14 +943,18 @@ export async function buildRelatedContent(target, articles) {
  * Dynamically creates a social share block, then appends the new block after
  * a given element.
  * @param {HTMLElement} insertAfter Element after which the block will be inserted.
- * @returns {Promise} Resolves when the operation is complete.
  */
-export async function buildSocialShare(insertAfter) {
+export function buildSocialShare(insertAfter) {
   const insertBefore = insertAfter.nextSibling;
+  if (!insertBefore) {
+    return;
+  }
+  if (!insertAfter.parentElement) {
+    return;
+  }
   const socialShare = buildBlock('social-share', { elems: [] });
   insertAfter.parentElement.insertBefore(socialShare, insertBefore);
   decorateBlock(socialShare);
-  return loadBlock(socialShare);
 }
 
 function buildKeywordLookup(keywords) {
@@ -1082,4 +1158,49 @@ export function loadTemplateArticleCards(main, templateName, articles) {
       card.remove();
     }
   });
+}
+
+/**
+ * Builds an ad block with the given ID and type.
+ * @param {string} unitId ID of the ad to include in the block.
+ * @param {string} type The type of ad to create.
+ * @param {boolean} [fixedHeight] If true, the ad will have a fixed height
+ *  associated with it.
+ * @returns {HTMLElement} Newly built ad block. Will be falsy if the ad type
+ *  is unknown.
+ */
+export function buildAdBlock(unitId, type, fixedHeight = false) {
+  // Determine the text and class based on the type
+  let adText;
+  let adClass;
+  let height = '';
+  if (type === 'Advertisement') {
+    adText = 'Advertisement';
+    adClass = 'right-ad';
+    if (fixedHeight) {
+      height = ' fixed-height';
+    }
+  } else if (type === 'Sponsored post') {
+    adText = 'Sponsored post';
+    adClass = 'right-sponsored';
+  } else {
+    // eslint-disable-next-line no-console
+    console.error('Unknown type in the block');
+    return undefined;
+  }
+
+  // Build the ad using the extracted unit-id and determined text and class
+  const rightAdHTML = `
+    <!-- AD IMU  STARTS  -->
+
+    <div class="${adClass}${height}">
+      <span class="ad-title">${adText}</span> <br />
+      <div id="${unitId}" class="tmsads"></div>
+    </div>
+
+    <br clear="all">
+  `;
+
+  const range = document.createRange();
+  return range.createContextualFragment(rightAdHTML);
 }

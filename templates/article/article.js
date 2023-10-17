@@ -9,6 +9,7 @@ import {
   buildRelatedContent,
   buildSocialShare,
   getRelatedArticles,
+  getLastDefaultSection,
 } from '../../scripts/shared.js';
 
 function getArticleByMetadata() {
@@ -65,16 +66,16 @@ export function loadEager(main) {
 export async function loadLazy(main) {
   const article = getArticleByMetadata();
 
-  const contentSection = main.querySelector('.content-section');
-  if (!contentSection) {
+  const lastSection = getLastDefaultSection(main);
+  if (!lastSection) {
     return;
   }
 
   const author = await getAuthorByName(article.author);
-  await buildLearnMore(contentSection, article.keywords);
+  await buildLearnMore(lastSection, article.keywords);
   if (author) {
-    await buildAuthorBlades(contentSection, [author]);
-    const authorLink = contentSection.querySelector(
+    await buildAuthorBlades(lastSection, [author]);
+    const authorLink = lastSection.querySelector(
       '.blade.author .blade-text a',
     );
     if (authorLink) {
@@ -83,5 +84,5 @@ export async function loadLazy(main) {
   }
 
   const related = await getRelatedArticles(article);
-  await buildRelatedContent(contentSection, related);
+  await buildRelatedContent(lastSection, related);
 }
