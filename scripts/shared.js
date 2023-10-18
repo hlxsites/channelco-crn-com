@@ -1148,8 +1148,7 @@ export function buildArticleCardsBlock(count, templateName, addBlockToDom) {
  *  placeholders.
  */
 export function loadTemplateArticleCards(main, templateName, articles) {
-  const placeholderCards = main.querySelectorAll((`.article-cards[data-template="${templateName}"] .article-card.skeleton`)
-  || (`.article-cards[data-template="${templateName}"] .article-card`));
+  const placeholderCards = main.querySelectorAll((`.article-cards[data-template="${templateName}"] .article-card.skeleton`));
   [...placeholderCards].forEach((card, index) => {
     if (articles.length > index) {
       card.dataset.json = JSON.stringify(articles[index]);

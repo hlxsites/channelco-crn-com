@@ -162,10 +162,6 @@ export default function decorate(block) {
       link.className = 'eyebrow-link';
       link.textContent = item.textContent;
 
-      async function updateMainContent(articles, main) {
-        loadTemplateArticleCards(main, 'category', articles);
-      }
-
       function handleLinkClick(event) {
         event.preventDefault();
 
@@ -184,7 +180,7 @@ export default function decorate(block) {
         main.querySelector('.category-sub-articles').dataset.cardCount = 8;
 
         getArticlesByKeyword(keyword).then((articles) => {
-          updateMainContent(articles, main);
+          loadTemplateArticleCards(main, 'category', articles);
         });
       }
 
