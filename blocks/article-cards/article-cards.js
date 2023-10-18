@@ -150,7 +150,11 @@ function getPath(paths, index) {
   return false;
 }
 
-function buildAd(id, type) {
+function buildAd(target, id, type) {
+  const existingAd = target.querySelector(`#${id}`);
+  if (existingAd) {
+    return existingAd.parentElement.parentElement;
+  }
   const ad = document.createElement('div');
   ad.classList.add('article-cards-ad');
   const adBlock = buildAdBlock(id, type);
@@ -158,6 +162,33 @@ function buildAd(id, type) {
     ad.append(adBlock);
   }
   return ad;
+}
+
+function buildCards(block, cardCount, articlePaths = []) {
+  const blockTarget = block.children.item(0).children.item(0);
+  if (!blockTarget) {
+    return;
+  }
+
+  const cardDiv = document.createElement('div');
+  const addlArticleContainer = document.createElement('div');
+  addlArticleContainer.classList.add('sub-article');
+
+  const includeAds = block.classList.contains('lead-article');
+  const featured = createCard(getPath(articlePaths, 0), true, false, includeAds ? buildAd(blockTarget, 'unit-1659132512259', 'Advertisement') : false);
+  cardDiv.append(featured);
+
+  // add article cards for each article
+  for (let i = 1; i < cardCount; i += 1) {
+    const card = createCard(getPath(articlePaths, i));
+    addlArticleContainer.append(card);
+  }
+  cardDiv.append(addlArticleContainer);
+
+  if (includeAds && cardCount < 6) {
+    cardDiv.append(buildAd(blockTarget, 'unit-1661973671931', 'Sponsored post'));
+  }
+  blockTarget.replaceWith(cardDiv);
 }
 
 /**
@@ -182,11 +213,6 @@ function buildAd(id, type) {
  * @param {HTMLElement} block The block's element on the page.
  */
 export default function decorate(block) {
-  const blockTarget = block.children.item(0).children.item(0);
-  if (!blockTarget) {
-    return;
-  }
-
   let cardCount = block.dataset.cardCount || 0;
   // retrieve article information for all specified article urls
   const articlePaths = getPathsFromBlock(block);
@@ -199,31 +225,13 @@ export default function decorate(block) {
     return;
   }
 
-  const addlArticleContainer = document.createElement('div');
-  addlArticleContainer.classList.add('sub-article');
-
-  const includeAds = block.classList.contains('lead-article');
-  const featured = createCard(getPath(articlePaths, 0), true, false, includeAds ? buildAd('unit-1659132512259', 'Advertisement') : false);
-  blockTarget.append(featured);
-
-  // add article cards for each article
-  for (let i = 1; i < cardCount; i += 1) {
-    const cardDiv = createCard(getPath(articlePaths, i));
-    addlArticleContainer.append(cardDiv);
-  }
-  blockTarget.append(addlArticleContainer);
-
-  if (includeAds && cardCount < 6) {
-    blockTarget.append(buildAd('unit-1661973671931', 'Sponsored post'));
-  }
+  buildCards(block, cardCount, articlePaths);
 
   // listens for attribute modifications on child elements, and will replace a placeholder card
   // with an actual card when a skeleton's data-json attribute is set
   const observer = new MutationObserver((entries) => {
     entries.forEach((entry) => {
-      if (entry.type === 'attributes' && (entry.target.classList.contains('skeleton')
-      || entry.target.classList.contains('article-card'))
-      && entry.target.dataset.json) {
+      if (entry.type === 'attributes' && entry.target.classList.contains('skeleton') && entry.target.dataset.json && entry.attributeName === 'data-json') {
         const article = JSON.parse(entry.target.dataset.json);
         const finalCard = createCard(
           article.path,
@@ -232,8 +240,10 @@ export default function decorate(block) {
           entry.target.querySelector('.article-cards-ad'),
         );
         entry.target.parentNode.replaceChild(finalCard, entry.target);
+      } else if (entry.type === 'attributes' && entry.attributeName === 'data-card-count' && entry.target.dataset.cardCount) {
+        buildCards(block, entry.target.dataset.cardCount);
       }
     });
   });
-  observer.observe(blockTarget, { attributes: true, subtree: true });
+  observer.observe(block, { attributes: true, subtree: true });
 }

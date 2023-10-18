@@ -1,51 +1,5 @@
-import { readBlockConfig, loadBlock } from '../../scripts/lib-franklin.js';
-import { getArticlesByKeyword, buildArticleCardsBlock } from '../../scripts/shared.js';
-
-/**
- * Loads a list of article records into a template's card placeholders.
- * @param {HTMLElement} main The document's main element.
- * @param {string} templateName Name of the template whose cards are being loaded.
- * @param {Array<QueryIndexRecord>} articles Article records to load into the template's card
- *  placeholders.
- */
-function loadTemplateArticleCards(main, templateName, articles) {
-  const cards = main.querySelectorAll(`.article-cards[data-template="${templateName}"] .article-card`);
-
-  // if there are no placeholders or cards, load the articles block again
-  if (cards.length === 0) {
-    let lastElement;
-    const firstSection = main.querySelector('.section');
-    if (!firstSection) {
-      return;
-    }
-    if (firstSection.children.length > 0) {
-      lastElement = firstSection.children.item(0);
-    }
-
-    buildArticleCardsBlock(5, 'category', async (leadCards) => {
-      await loadBlock(leadCards);
-      leadCards.classList.add('lead-article');
-      firstSection.insertBefore(leadCards, lastElement);
-    });
-
-    const newsHeading = document.querySelector('.link-arrow');
-    firstSection.insertBefore(newsHeading, lastElement);
-
-    buildArticleCardsBlock(8, 'category', async (otherCards) => {
-      await loadBlock(otherCards);
-      firstSection.insertBefore(otherCards, lastElement);
-    });
-  }
-
-  [...cards].forEach((card, index) => {
-    if (articles.length > index) {
-      card.dataset.json = JSON.stringify(articles[index]);
-    } else {
-      // placeholder not needed - not enough articles
-      card.remove();
-    }
-  });
-}
+import { readBlockConfig } from '../../scripts/lib-franklin.js';
+import { getArticlesByKeyword, loadTemplateArticleCards } from '../../scripts/shared.js';
 
 function addDragEvents(handle, carousel, isTabsBlock) {
   const RESISTANCE_FACTOR = 5;
@@ -208,8 +162,7 @@ export default function decorate(block) {
       link.className = 'eyebrow-link';
       link.textContent = item.textContent;
 
-      async function updateMainContent(articles) {
-        const main = document.querySelector('main');
+      async function updateMainContent(articles, main) {
         loadTemplateArticleCards(main, 'category', articles);
       }
 
@@ -225,8 +178,13 @@ export default function decorate(block) {
         // replace / by -
         const keyword = this.textContent.trim().replace(/\//g, '-');
 
+        const main = document.querySelector('main');
+
+        main.querySelector('.category-main-articles').dataset.cardCount = 5;
+        main.querySelector('.category-sub-articles').dataset.cardCount = 8;
+
         getArticlesByKeyword(keyword).then((articles) => {
-          updateMainContent(articles);
+          updateMainContent(articles, main);
         });
       }
 
