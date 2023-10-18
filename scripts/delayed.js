@@ -116,6 +116,15 @@ function throttle(func, delay) {
   }, delay);
 }
 
+function getOffsetTop(elem) {
+  let offsetTop = 0;
+  while (elem) {
+    offsetTop += elem.offsetTop;
+    elem = elem.offsetParent;
+  }
+  return offsetTop;
+}
+
 function makeSticky() {
   const adWrappers = document.querySelectorAll('.ad-wrapper');
   const lastAd = adWrappers[adWrappers.length - 1];
@@ -123,41 +132,38 @@ function makeSticky() {
   const bannerWrappers = document.querySelectorAll('.banner-wrapper');
   const lastBanner = bannerWrappers[bannerWrappers.length - 1];
 
-  // Calculate the initial position of the elements
-  const lastAdOffsetTop = lastAd.offsetTop + 295;
+  const lastAdOffsetTop = getOffsetTop(lastAd) + 1230;
 
   let isSticky = false;
 
   function handleScroll() {
-    requestAnimationFrame(() => {
-      const { scrollY } = window;
-      const screenWidth = window.innerWidth;
-      const mobileScreenWidthThreshold = 768;
+    const { scrollY } = window;
+    const screenWidth = window.innerWidth;
+    const mobileScreenWidthThreshold = 768;
 
-      const shouldStick = scrollY >= lastAdOffsetTop && screenWidth > mobileScreenWidthThreshold;
+    const shouldStick = scrollY >= lastAdOffsetTop && screenWidth > mobileScreenWidthThreshold;
 
-      if (shouldStick !== isSticky) {
-        isSticky = shouldStick;
+    if (shouldStick !== isSticky) {
+      isSticky = shouldStick;
 
-        if (isSticky) {
-          lastAd.style.position = 'fixed';
-          lastAd.style.top = '0';
-          lastAd.style.width = '330px';
+      if (isSticky) {
+        lastAd.style.position = 'fixed';
+        lastAd.style.top = '0';
+        lastAd.style.width = '330px';
 
-          lastBanner.style.position = 'fixed';
-          lastBanner.style.top = '300px';
-          lastBanner.style.width = '330px';
-        } else {
-          lastAd.style.position = 'static';
-          lastAd.style.top = 'auto';
-          lastAd.style.width = 'auto';
+        lastBanner.style.position = 'fixed';
+        lastBanner.style.top = '300px';
+        lastBanner.style.width = '330px';
+      } else {
+        lastAd.style.position = 'static';
+        lastAd.style.top = 'auto';
+        lastAd.style.width = 'auto';
 
-          lastBanner.style.position = 'static';
-          lastBanner.style.top = 'auto';
-          lastBanner.style.width = 'auto';
-        }
+        lastBanner.style.position = 'static';
+        lastBanner.style.top = 'auto';
+        lastBanner.style.width = 'auto';
       }
-    });
+    }
   }
 
   // Attach the throttled scroll event listener

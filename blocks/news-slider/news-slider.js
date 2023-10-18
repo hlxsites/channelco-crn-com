@@ -254,7 +254,6 @@ export default function decorate(block) {
       topSection.appendChild(newsWrapper);
       newsWrapper.parentElement.classList.add('news-slider-container');
     }
-
     main.prepend(topSection);
   }
 
