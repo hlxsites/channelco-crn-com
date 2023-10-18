@@ -116,8 +116,9 @@ function throttle(func, delay) {
   }, delay);
 }
 
-function getOffsetTop(elem) {
+function getOffsetTop(originalElem) {
   let offsetTop = 0;
+  let elem = originalElem;
   while (elem) {
     offsetTop += elem.offsetTop;
     elem = elem.offsetParent;
