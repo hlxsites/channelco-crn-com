@@ -606,13 +606,46 @@ async function queryMatchingArticles(
 }
 
 /**
+ * Queries the site's index and returns articles whose specified metadata value
+ * matches a given filter value.
+ * @param {string} metadataName Name of the article metadata to match.
+ * @param {string} value Value to match with.
+ * @param {number} pageNum Current Page Number.
+ * @param {function} [compareFn] Used to compare the two values. The first parameter will be
+ *  the record's metadata value, and the second will be a lower-case version of the match
+ *  value. Default function will convert the record's metadata value to lower case and strictly
+ *  compare it with the match value.
+ * @returns {Promise<QueryIndexRecord>} Article's record information.
+ */
+async function queryMatchingArticlesByCategory(
+  metadataName,
+  value,
+  pageNum,
+  compareFn = lowerCaseCompare,
+) {
+  const offset = (pageNum - 1) * 15;
+  const matchValue = String(value).toLowerCase();
+  const entries = ffetch('/query-index.json')
+    .chunks(CHUNK_SIZE)
+    .sheet('article')
+    .filter((record) => compareFn(record[metadataName], matchValue))
+    .slice(offset, offset + 15);
+
+  const articles = [];
+  // eslint-disable-next-line no-restricted-syntax
+  for await (const entry of entries) {
+    articles.push(entry);
+  }
+  return articles;
+}
+/**
  * Retrieves all articles in a given category.
  * @param {string} categoryName Category whose articles should be retrieved.
  * @returns {Promise<Array<QueryIndexRecord>>} Resolves with an array of matching
  *  articles.
  */
-export async function getArticlesByCategory(categoryName) {
-  return queryMatchingArticles('category', categoryName, 13);
+export async function getArticlesByCategory(categoryName, pageNum) {
+  return queryMatchingArticlesByCategory('category', categoryName, pageNum);
 }
 
 /**
@@ -1148,7 +1181,7 @@ export function buildArticleCardsBlock(count, templateName, addBlockToDom) {
  *  placeholders.
  */
 export function loadTemplateArticleCards(main, templateName, articles) {
-  const placeholderCards = main.querySelectorAll(`.article-cards[data-template="${templateName}"] .article-card.skeleton`);
+  const placeholderCards = main.querySelectorAll((`.article-cards[data-template="${templateName}"] .article-card.skeleton`));
   [...placeholderCards].forEach((card, index) => {
     if (articles.length > index) {
       card.dataset.json = JSON.stringify(articles[index]);
@@ -1202,4 +1235,48 @@ export function buildAdBlock(unitId, type, fixedHeight = false) {
 
   const range = document.createRange();
   return range.createContextualFragment(rightAdHTML);
+}
+
+/**
+ * Build previous next buttons
+ */
+
+export function prevNextBtn(articleCount) {
+  const usp = new URLSearchParams(window.location.search);
+  const pageIndex = Number(usp.get('page') || 1);
+  usp.set('page', pageIndex - 1);
+  const prevParams = usp.toString();
+  usp.set('page', pageIndex + 1);
+  const nextParams = usp.toString();
+  const divContainer = document.createElement('div');
+  divContainer.classList.add('prev-next-container');
+  const prevDiv = document.createElement('div');
+  prevDiv.classList.add('previous');
+  prevDiv.setAttribute('id', 'previous-button');
+  const prevBtn = document.createElement('a');
+  prevBtn.textContent = 'Back';
+  prevBtn.href = `${window.location.pathname}?${prevParams}`;
+  prevBtn.setAttribute('id', 'previous');
+  prevBtn.classList.add('btn-on-white');
+  prevBtn.classList.add('white');
+  prevDiv.append(prevBtn);
+  if (pageIndex === 1) {
+    prevDiv.classList.add('disabled');
+  }
+  const nextDiv = document.createElement('div');
+  nextDiv.classList.add('load-more');
+  nextDiv.setAttribute('id', 'next-button');
+  const nextBtn = document.createElement('a');
+  nextBtn.textContent = 'Next';
+  nextBtn.href = `${window.location.pathname}?${nextParams}`;
+  nextBtn.setAttribute('id', 'next');
+  nextBtn.classList.add('btn-on-white');
+  nextBtn.classList.add('white');
+  nextDiv.append(nextBtn);
+  if (articleCount < 13) {
+    nextDiv.classList.add('disabled');
+  }
+  divContainer.append(prevDiv);
+  divContainer.append(nextDiv);
+  return divContainer;
 }

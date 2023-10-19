@@ -1,9 +1,4 @@
 import {
-  buildBlock,
-  decorateBlock,
-  loadBlock,
-} from '../../scripts/lib-franklin.js';
-import {
   getArticlesByCategory,
   buildArticleCardsBlock,
   buildNewsSlider,
@@ -12,7 +7,11 @@ import {
   getTitle,
   getFirstDefaultSection,
   getLastDefaultSection,
+  prevNextBtn,
 } from '../../scripts/shared.js';
+
+const usp = new URLSearchParams(window.location.search);
+const pageIndex = Number(usp.get('page') || 1);
 
 /**
  * Creates the news sub-heading on the page.
@@ -73,17 +72,25 @@ export function loadEager(main) {
     lastElement = firstSection.children.item(0);
   }
 
-  buildArticleCardsBlock(5, 'category', (leadCards) => {
-    leadCards.classList.add('lead-article');
-    firstSection.insertBefore(leadCards, lastElement);
-  });
-
+  if (pageIndex === 1) {
+    buildArticleCardsBlock(5, 'category', (leadCards) => {
+      leadCards.classList.add('lead-article');
+      firstSection.insertBefore(leadCards, lastElement);
+    });
+  }
   const newsHeading = createNewsHeading(`${title} News`);
   firstSection.insertBefore(newsHeading, lastElement);
-
-  buildArticleCardsBlock(8, 'category', (cards) => {
-    firstSection.insertBefore(cards, lastElement);
-  });
+  if (pageIndex === 1) {
+    buildArticleCardsBlock(8, 'category', (cards) => {
+      cards.classList.add('category-sub-articles');
+      firstSection.insertBefore(cards, lastElement);
+    });
+  } else {
+    buildArticleCardsBlock(15, 'category', (cards) => {
+      cards.classList.add('category-sub-articles');
+      firstSection.insertBefore(cards, lastElement);
+    });
+  }
 }
 
 /**
@@ -97,12 +104,9 @@ export async function loadLazy(main) {
     return;
   }
 
-  const articles = await getArticlesByCategory(getTitle());
+  const articles = await getArticlesByCategory(getTitle(), pageIndex);
 
   loadTemplateArticleCards(main, 'category', articles);
-
-  const categoryNavigation = buildBlock('category-navigation', { elems: [] });
+  const categoryNavigation = prevNextBtn(articles.length);
   lastSection.append(categoryNavigation);
-  decorateBlock(categoryNavigation);
-  await loadBlock(categoryNavigation);
 }
