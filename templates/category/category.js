@@ -74,7 +74,7 @@ export function loadEager(main) {
   }
 
   buildArticleCardsBlock(5, 'category', (leadCards) => {
-    leadCards.classList.add('lead-article');
+    leadCards.classList.add('lead-article', 'category-main-articles');
     firstSection.insertBefore(leadCards, lastElement);
   });
 
@@ -82,6 +82,7 @@ export function loadEager(main) {
   firstSection.insertBefore(newsHeading, lastElement);
 
   buildArticleCardsBlock(8, 'category', (cards) => {
+    cards.classList.add('category-sub-articles');
     firstSection.insertBefore(cards, lastElement);
   });
 }
