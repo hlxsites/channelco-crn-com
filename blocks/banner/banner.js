@@ -1,7 +1,55 @@
+import ffetch from '../../scripts/ffetch.js';
+import { readBlockConfig } from '../../scripts/lib-franklin.js';
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+async function populateSponsoredResources(block) {
+  const config = readBlockConfig(block);
+  const dataSource = config.datasource;
+
+  try {
+    const dataGenerator = ffetch(dataSource);
+    const allFetchedLinks = await dataGenerator.all();
+
+    const h2 = document.createElement('h2');
+    h2.id = 'sponsored-resources';
+    h2.innerText = 'SPONSORED RESOURCES';
+
+    const ul = document.createElement('ul');
+
+    const randomFiveLinks = shuffle(allFetchedLinks).slice(0, 5);
+
+    randomFiveLinks.forEach((item) => {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.href = item.URL;
+      a.title = item.Title;
+      a.textContent = item.Title;
+      a.target = '_blank';
+
+      li.appendChild(a);
+      ul.appendChild(li);
+    });
+    block.textContent = '';
+    block.append(h2, ul);
+  } catch (error) {
+    const errorMessage = document.createElement('p');
+    errorMessage.textContent = 'Unable to load the sponsored resources. Please try again later.';
+    errorMessage.className = 'error-message';
+    const container = document.querySelector('.sponsored-resources');
+    container.appendChild(errorMessage);
+  }
+}
+
 export default function decorate(block) {
   if (block.classList.contains('magazine')) {
     const h2 = block.querySelector('h2');
-
     const contentWrapper = document.createElement('div');
     contentWrapper.classList.add('content-wrapper');
 
@@ -87,5 +135,9 @@ export default function decorate(block) {
 
     block.appendChild(h2);
     block.appendChild(contentWrapper);
+  }
+
+  if (block.classList.contains('sponsored-resources')) {
+    populateSponsoredResources(block);
   }
 }

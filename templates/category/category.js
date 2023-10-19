@@ -71,6 +71,7 @@ export function loadEager(main) {
   if (firstSection.children.length > 0) {
     lastElement = firstSection.children.item(0);
   }
+
   if (pageIndex === 1) {
     buildArticleCardsBlock(5, 'category', (leadCards) => {
       leadCards.classList.add('lead-article');

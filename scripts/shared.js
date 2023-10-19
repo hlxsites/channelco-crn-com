@@ -726,6 +726,31 @@ export function getRecordsFromBlock(block) {
 }
 
 /**
+ * Checks whether a given value appears to be a timestamp, and if so converts it
+ * into a formatted date string. Otherwise the method will return the original
+ * value as-is.
+ * @param {string} dateValue Potential date value to format.
+ * @returns {string} Formatted date, or the original value.
+ */
+export function formatDate(dateValue) {
+  if (/^[0-9]+$/g.test(dateValue)) {
+    const publishDate = new Date(parseInt(dateValue, 10) * 1000);
+    const dateStr = publishDate.toLocaleDateString('en-us', {
+      month: 'long',
+      day: '2-digit',
+      year: 'numeric',
+    });
+    const timeStr = publishDate.toLocaleTimeString('en-us', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZoneName: 'short',
+    });
+    return `${dateStr}, ${timeStr}`;
+  }
+  return dateValue;
+}
+
+/**
  * Creates an HTML element that contains an article author's name, a link to the
  * author's profile page, and the publish date of the article. If an article
  * is not provided, the method will create placeholders.
@@ -752,7 +777,7 @@ export function buildArticleAuthor(article) {
       <a href="/authors/${authorId}" class="link-arrow" aria-label="By ${article.author}"><span class="uncolored-link">By</span> ${article.author}</a>
     `;
 
-    date.innerText = article.publisheddate;
+    date.innerText = formatDate(article.publisheddate);
   } else {
     author.classList.add('placeholder');
     date.classList.add('placeholder');
@@ -1125,7 +1150,7 @@ export function buildArticleCardsBlock(count, templateName, addBlockToDom) {
  *  placeholders.
  */
 export function loadTemplateArticleCards(main, templateName, articles) {
-  const placeholderCards = main.querySelectorAll(`.article-cards[data-template="${templateName}"] .article-card.skeleton`);
+  const placeholderCards = main.querySelectorAll((`.article-cards[data-template="${templateName}"] .article-card.skeleton`));
   [...placeholderCards].forEach((card, index) => {
     if (articles.length > index) {
       card.dataset.json = JSON.stringify(articles[index]);
