@@ -588,14 +588,16 @@ function commaSeparatedListContains(list, value) {
 async function queryMatchingArticles(
   metadataName,
   value,
-  limit = 10,
+  pageNum,
   compareFn = lowerCaseCompare,
 ) {
+  const offset = (pageNum - 1) * 12;
   const matchValue = String(value).toLowerCase();
-  const entries = queryIndex(
-    (record) => compareFn(record[metadataName], matchValue),
-    limit,
-  ).sheet('article');
+  const entries = ffetch('/query-index.json')
+    .chunks(CHUNK_SIZE)
+    .sheet('article')
+    .filter((record) => compareFn(record[metadataName], matchValue))
+    .slice(offset, offset + 15);
 
   const articles = [];
   // eslint-disable-next-line no-restricted-syntax
@@ -611,8 +613,8 @@ async function queryMatchingArticles(
  * @returns {Promise<Array<QueryIndexRecord>>} Resolves with an array of matching
  *  articles.
  */
-export async function getArticlesByCategory(categoryName) {
-  return queryMatchingArticles('category', categoryName, 13);
+export async function getArticlesByCategory(categoryName, pageNum) {
+  return queryMatchingArticles('category', categoryName, pageNum);
 }
 
 /**
@@ -1177,4 +1179,48 @@ export function buildAdBlock(unitId, type, fixedHeight = false) {
 
   const range = document.createRange();
   return range.createContextualFragment(rightAdHTML);
+}
+
+/**
+ * Build previous next buttons
+ */
+
+export function prevNextBtn(articleCount) {
+  const usp = new URLSearchParams(window.location.search);
+  const pageIndex = Number(usp.get('page') || 1);
+  usp.set('page', pageIndex - 1);
+  const prevParams = usp.toString();
+  usp.set('page', pageIndex + 1);
+  const nextParams = usp.toString();
+  const divContainer = document.createElement('div');
+  divContainer.classList.add('prev-next-container');
+  const prevDiv = document.createElement('div');
+  prevDiv.classList.add('previous');
+  prevDiv.setAttribute('id', 'previous-button');
+  const prevBtn = document.createElement('a');
+  prevBtn.textContent = 'Back';
+  prevBtn.href = `${window.location.pathname}?${prevParams}`;
+  prevBtn.setAttribute('id', 'previous');
+  prevBtn.classList.add('btn-on-white');
+  prevBtn.classList.add('white');
+  prevDiv.append(prevBtn);
+  if (pageIndex === 1) {
+    prevDiv.classList.add('disabled');
+  }
+  const nextDiv = document.createElement('div');
+  nextDiv.classList.add('load-more');
+  nextDiv.setAttribute('id', 'next-button');
+  const nextBtn = document.createElement('a');
+  nextBtn.textContent = 'Next';
+  nextBtn.href = `${window.location.pathname}?${nextParams}`;
+  nextBtn.setAttribute('id', 'next');
+  nextBtn.classList.add('btn-on-white');
+  nextBtn.classList.add('white');
+  nextDiv.append(nextBtn);
+  if (articleCount < 13) {
+    nextDiv.classList.add('disabled');
+  }
+  divContainer.append(prevDiv);
+  divContainer.append(nextDiv);
+  return divContainer;
 }

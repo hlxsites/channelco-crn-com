@@ -1,9 +1,4 @@
 import {
-  buildBlock,
-  decorateBlock,
-  loadBlock,
-} from '../../scripts/lib-franklin.js';
-import {
   getArticlesByCategory,
   buildArticleCardsBlock,
   buildNewsSlider,
@@ -12,7 +7,11 @@ import {
   getTitle,
   getFirstDefaultSection,
   getLastDefaultSection,
+  prevNextBtn,
 } from '../../scripts/shared.js';
+
+const usp = new URLSearchParams(window.location.search);
+const pageIndex = Number(usp.get('page') || 1);
 
 /**
  * Creates the news sub-heading on the page.
@@ -72,58 +71,18 @@ export function loadEager(main) {
   if (firstSection.children.length > 0) {
     lastElement = firstSection.children.item(0);
   }
-
-  buildArticleCardsBlock(5, 'category', (leadCards) => {
-    leadCards.classList.add('lead-article');
-    firstSection.insertBefore(leadCards, lastElement);
-  });
-
+  if (pageIndex === 1) {
+    buildArticleCardsBlock(5, 'category', (leadCards) => {
+      leadCards.classList.add('lead-article');
+      firstSection.insertBefore(leadCards, lastElement);
+    });
+  }
   const newsHeading = createNewsHeading(`${title} News`);
   firstSection.insertBefore(newsHeading, lastElement);
 
-  buildArticleCardsBlock(8, 'category', (cards) => {
+  buildArticleCardsBlock(13, 'category', (cards) => {
     firstSection.insertBefore(cards, lastElement);
   });
-}
-
-function buildCategoryNavigation(main){
-  const categoryNav = document.createElement('div');
-  categoryNav.classList.add('category-nav');
-  if(startIndex > 5) {
-    const prevDiv = document.createElement('div');
-    prevDiv.classList.add('previous');
-    prevDiv.id = 'previous-button';
-    const prevBtn = document.createElement('a');
-    prevBtn.classList.add('btn-on-white');
-    prevBtn.classList.add('white');
-    prevBtn.id = 'previous'
-    prevBtn.textContent = 'Prev';
-    prevDiv.appendChild(prevBtn);
-    categoryNav.append(prevDiv);
-    prevBtn.addEventListener('click', () =>{
-      startIndex = startIndex - 15;
-      endIndex = endIndex - 15;
-      loadArticle(main);
-    });
-  }
-  if(endIndex < totalArtciles) {
-    const nextDiv = document.createElement('div');
-    nextDiv.classList.add('load-more');
-    nextDiv.id = 'load-more-button';
-    const nextBtn = document.createElement('a');
-    nextBtn.classList.add('btn-on-white');
-    nextBtn.classList.add('white');
-    nextBtn.id = 'load-more'
-    nextBtn.textContent = 'Next';
-    nextDiv.appendChild(nextBtn);
-    categoryNav.append(nextDiv);
-    nextBtn.addEventListener('click', ()=>{
-      startIndex = startIndex + 15;
-      endIndex = endIndex + 15;
-      loadArticle(main);
-    });
-  }  
-  return categoryNav;    
 }
 
 /**
@@ -137,12 +96,9 @@ export async function loadLazy(main) {
     return;
   }
 
-  const articles = await getArticlesByCategory(getTitle());
+  const articles = await getArticlesByCategory(getTitle(), pageIndex);
 
   loadTemplateArticleCards(main, 'category', articles);
-
-  const categoryNavigation = buildBlock('category-navigation', { elems: [] });
+  const categoryNavigation = prevNextBtn(articles.length);
   lastSection.append(categoryNavigation);
-  decorateBlock(categoryNavigation);
-  await loadBlock(categoryNavigation);
 }
