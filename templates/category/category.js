@@ -79,10 +79,17 @@ export function loadEager(main) {
   }
   const newsHeading = createNewsHeading(`${title} News`);
   firstSection.insertBefore(newsHeading, lastElement);
-
-  buildArticleCardsBlock(13, 'category', (cards) => {
-    firstSection.insertBefore(cards, lastElement);
-  });
+  if (pageIndex === 1) {
+    buildArticleCardsBlock(8, 'category', (cards) => {
+      cards.classList.add('category-sub-articles');
+      firstSection.insertBefore(cards, lastElement);
+    });
+  } else {
+    buildArticleCardsBlock(15, 'category', (cards) => {
+      cards.classList.add('category-sub-articles');
+      firstSection.insertBefore(cards, lastElement);
+    });
+  }
 }
 
 /**
