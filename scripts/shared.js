@@ -588,10 +588,42 @@ function commaSeparatedListContains(list, value) {
 async function queryMatchingArticles(
   metadataName,
   value,
+  limit = 10,
+  compareFn = lowerCaseCompare,
+) {
+  const matchValue = String(value).toLowerCase();
+  const entries = queryIndex(
+    (record) => compareFn(record[metadataName], matchValue),
+    limit,
+  ).sheet('article');
+
+  const articles = [];
+  // eslint-disable-next-line no-restricted-syntax
+  for await (const entry of entries) {
+    articles.push(entry);
+  }
+  return articles;
+}
+
+/**
+ * Queries the site's index and returns articles whose specified metadata value
+ * matches a given filter value.
+ * @param {string} metadataName Name of the article metadata to match.
+ * @param {string} value Value to match with.
+ * @param {number} pageNum Current Page Number.
+ * @param {function} [compareFn] Used to compare the two values. The first parameter will be
+ *  the record's metadata value, and the second will be a lower-case version of the match
+ *  value. Default function will convert the record's metadata value to lower case and strictly
+ *  compare it with the match value.
+ * @returns {Promise<QueryIndexRecord>} Article's record information.
+ */
+async function queryMatchingArticlesByCategory(
+  metadataName,
+  value,
   pageNum,
   compareFn = lowerCaseCompare,
 ) {
-  const offset = (pageNum - 1) * 12;
+  const offset = (pageNum - 1) * 15;
   const matchValue = String(value).toLowerCase();
   const entries = ffetch('/query-index.json')
     .chunks(CHUNK_SIZE)
@@ -606,7 +638,6 @@ async function queryMatchingArticles(
   }
   return articles;
 }
-
 /**
  * Retrieves all articles in a given category.
  * @param {string} categoryName Category whose articles should be retrieved.
@@ -614,7 +645,7 @@ async function queryMatchingArticles(
  *  articles.
  */
 export async function getArticlesByCategory(categoryName, pageNum) {
-  return queryMatchingArticles('category', categoryName, pageNum);
+  return queryMatchingArticlesByCategory('category', categoryName, pageNum);
 }
 
 /**
