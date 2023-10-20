@@ -139,9 +139,7 @@ export async function loadLazy(main) {
   if (searchTerm) {
     const searchCompare = searchTerm.toLowerCase();
     const words = searchCompare.split(' ').filter((value) => !!value);
-    const entries = queryIndex((record) => recordContainsWords(record, words),
-      500,
-    )
+    const entries = queryIndex((record) => recordContainsWords(record, words), 500)
       .sheet('article');
 
     // eslint-disable-next-line no-restricted-syntax
