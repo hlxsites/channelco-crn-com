@@ -902,7 +902,7 @@ export async function buildLearnMore(target, keywords) {
   items.forEach((keyword) => {
     const li = document.createElement('li');
     li.innerHTML = `
-      <a href="/tag/${encodeURIComponent(keyword)}/" title="${keyword}" aria-label="${keyword}">
+      <a href="/search?query=${encodeURIComponent(keyword)}" title="${keyword}" aria-label="${keyword}">
         ${keyword}
       </a>
     `;
