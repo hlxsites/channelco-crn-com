@@ -38,6 +38,36 @@ function getSearchTerm() {
 }
 
 /**
+ * Determines whether a given string is related to a list of words.
+ * @param {string} toSearch Value to check.
+ * @param {Array<string>} words Words to match.
+ * @returns {boolean} True if the value relates to the words.
+ */
+function containsWords(toSearch, words) {
+  const value = String(toSearch);
+  for (let i = 0; i < words.length; i += 1) {
+    if (value.includes(words[i])) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Determines whether a record from the index is related to a list of words.
+ * @param {import('../../scripts/shared.js').QueryIndexRecord} record Index
+ *  record to check.
+ * @param {Array<string>} words Words to match.
+ * @returns {boolean} True if the record relates to the words.
+ */
+function recordContainsWords(record, words) {
+  if (containsWords(record.title, words)) {
+    return true;
+  }
+  return containsWords(record.description, words);
+}
+
+/**
  * Modifies the DOM as needed for search results
  * @param {HTMLElement} main The page's main element.
  */
@@ -108,9 +138,8 @@ export async function loadLazy(main) {
   const results = [];
   if (searchTerm) {
     const searchCompare = searchTerm.toLowerCase();
-    const entries = queryIndex(
-      (record) => (String(record.title).toLowerCase().includes(searchCompare)
-      || String(record.description).toLowerCase().includes(searchCompare)),
+    const words = searchCompare.split(' ').filter((value) => !!value);
+    const entries = queryIndex((record) => recordContainsWords(record, words),
       500,
     )
       .sheet('article');
