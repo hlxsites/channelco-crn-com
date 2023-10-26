@@ -634,7 +634,7 @@ async function queryMatchingArticlesByCategory(
     filter = (record) => compareFn(record[metadataName], matchValue);
   }
   const entries = ffetch('/query-index.json')
-    .chunks(5000)
+    .chunks(CHUNK_SIZE)
     .sheet('article')
     .filter(filter)
     .slice(offset, offset + 16);
