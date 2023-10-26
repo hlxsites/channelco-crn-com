@@ -8,5 +8,23 @@ export default async function decorate(block) {
   }
   iframe.src = link;
   iframe.setAttribute('frameborder', 0);
-  block.replaceChildren(iframe);
+
+  const options = {
+    root: null,
+    rootMargin: '20%',
+    threshold: 1.0,
+  };
+
+  // add event listener for intersection observer when block is in view port
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        block.replaceChildren(iframe);
+        observer.unobserve(block);
+      }
+    });
+  }, options);
+
+  // observe the block
+  observer.observe(block);
 }
