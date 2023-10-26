@@ -1,4 +1,10 @@
-import { getMetadata } from '../../scripts/lib-franklin.js';
+import {
+  getMetadata,
+  buildBlock,
+  decorateBlock,
+  loadBlock,
+} from '../../scripts/lib-franklin.js';
+
 import {
   getCategoryName,
   getCategoryPath,
@@ -10,6 +16,7 @@ import {
   buildSocialShare,
   getRelatedArticles,
   getLastDefaultSection,
+  createArticle,
 } from '../../scripts/shared.js';
 
 function getArticleByMetadata() {
@@ -22,6 +29,9 @@ function getArticleByMetadata() {
   };
 }
 
+const usp = new URLSearchParams(window.location.search);
+const pageIndex = Number(usp.get('page') || 1);
+
 /**
  * Processes the DOM as necessary in order to auto block items required
  * for all articles.
@@ -29,17 +39,27 @@ function getArticleByMetadata() {
  */
 // eslint-disable-next-line import/prefer-default-export
 export function loadEager(main) {
+  const slideshow = getMetadata('slideshow');
   const heading = main.querySelector('h1');
+  let articleCount = 1;
   if (!heading) {
     return;
   }
-  const picture = main.querySelector('picture');
-  if (!picture) {
-    return;
+  if (slideshow === 'true') {
+    const pictures = main.querySelectorAll('picture');
+    pictures.forEach((picture, index) => {
+      if (index + 1 === pageIndex) {
+        buildSocialShare(picture);
+      }
+      articleCount += 1;
+    });
+  } else {
+    const picture = main.querySelector('picture');
+    if (!picture) {
+      return;
+    }
+    buildSocialShare(picture);
   }
-
-  buildSocialShare(picture);
-
   const article = getArticleByMetadata();
 
   const categoryPath = getCategoryPath(article.path);
@@ -55,6 +75,10 @@ export function loadEager(main) {
 
   const authorContainer = buildArticleAuthor(article);
   heading.parentElement.insertBefore(authorContainer, heading.nextSibling);
+  if (slideshow === 'true') {
+    createArticle(main);
+    main.dataset.articleCount = articleCount - 1;
+  }
 }
 
 /**
@@ -70,7 +94,17 @@ export async function loadLazy(main) {
   if (!lastSection) {
     return;
   }
-
+  if (getMetadata('slideshow') === 'true') {
+    const paginationTop = buildBlock('pagination', { elems: [] });
+    const paginationBottom = buildBlock('pagination', { elems: [] });
+    const pFirstOfType = main.querySelector('p:first-of-type');
+    pFirstOfType.parentElement.insertBefore(paginationTop, pFirstOfType.nextSibling);
+    lastSection.append(paginationBottom);
+    decorateBlock(paginationBottom);
+    decorateBlock(paginationTop);
+    await loadBlock(paginationTop);
+    await loadBlock(paginationBottom);
+  }
   const author = await getAuthorByName(article.author);
   await buildLearnMore(lastSection, article.keywords);
   if (author) {
@@ -82,7 +116,6 @@ export async function loadLazy(main) {
       authorLink.classList.add('link-arrow');
     }
   }
-
   const related = await getRelatedArticles(article);
   await buildRelatedContent(lastSection, related);
 }

@@ -1327,3 +1327,18 @@ export function prevNextBtn() {
   divContainer.append(nextDiv);
   return divContainer;
 }
+
+/** Create Article */
+export function createArticle(main) {
+  const usp = new URLSearchParams(window.location.search);
+  const pageNum = Number(usp.get('page') || 1);
+  main.querySelectorAll('div.section > .default-content-wrapper').forEach((section, index) => {
+    if (index > 0) {
+      if (index === pageNum) {
+        section.style.display = 'block';
+      } else {
+        section.style.display = 'none';
+      }
+    }
+  });
+}
