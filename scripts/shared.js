@@ -16,6 +16,7 @@ const DEFAULT_CATEGORY_NAME = 'News';
 const EMAIL_REGEX = /\S+[a-z0-9]@[a-z0-9.]+/img;
 const CHUNK_SIZE = 500;
 const CHUNK_LIMIT = 3;
+let pageIndex = 1;
 
 function createBreadcrumbItem(href, label) {
   const li = document.createElement('li');
@@ -606,13 +607,52 @@ async function queryMatchingArticles(
 }
 
 /**
+ * Queries the site's index and returns articles whose specified metadata value
+ * matches a given filter value.
+ * @param {string} metadataName Name of the article metadata to match.
+ * @param {string} value Value to match with.
+ * @param {number} pageNum Current Page Number.
+ * @param {function} [compareFn] Used to compare the two values. The first parameter will be
+ *  the record's metadata value, and the second will be a lower-case version of the match
+ *  value. Default function will convert the record's metadata value to lower case and strictly
+ *  compare it with the match value.
+ * @returns {Promise<QueryIndexRecord>} Article's record information.
+ */
+async function queryMatchingArticlesByCategory(
+  metadataName,
+  value,
+  pageNum,
+  compareFn = lowerCaseCompare,
+) {
+  const offset = (pageNum - 1) * 15;
+  const matchValue = String(value).toLowerCase();
+  let filter;
+  if (metadataName === 'keywords') {
+    filter = (record) => compareFn(record[metadataName], matchValue)
+      && (record.category === getTitle());
+  } else {
+    filter = (record) => compareFn(record[metadataName], matchValue);
+  }
+  const entries = ffetch('/query-index.json')
+    .chunks(CHUNK_SIZE)
+    .sheet('article')
+    .filter(filter)
+    .slice(offset, offset + 16);
+  const articles = [];
+  // eslint-disable-next-line no-restricted-syntax
+  for await (const entry of entries) {
+    articles.push(entry);
+  }
+  return articles;
+}
+/**
  * Retrieves all articles in a given category.
  * @param {string} categoryName Category whose articles should be retrieved.
  * @returns {Promise<Array<QueryIndexRecord>>} Resolves with an array of matching
  *  articles.
  */
-export async function getArticlesByCategory(categoryName) {
-  return queryMatchingArticles('category', categoryName, 13);
+export async function getArticlesByCategory(categoryName, pageNum, compareFn = lowerCaseCompare, metadataName = 'category') {
+  return queryMatchingArticlesByCategory(metadataName, categoryName, pageNum, compareFn);
 }
 
 /**
@@ -1202,4 +1242,88 @@ export function buildAdBlock(unitId, type, fixedHeight = false) {
 
   const range = document.createRange();
   return range.createContextualFragment(rightAdHTML);
+}
+
+function showHideNextBtn(nextBtn, length, count) {
+  if (length < 16 && count > 1) {
+    nextBtn.parentElement.classList.add('disabled');
+  } else {
+    nextBtn.parentElement.classList.remove('disabled');
+  }
+}
+
+function handleLinkClick(count, prevBtn, nextBtn) {
+  const main = document.querySelector('main');
+  const mainArticle = main.querySelector('.category-main-articles');
+  const activeTab = main.querySelector('.active-tab');
+  const keyword = activeTab ? activeTab.textContent.trim().replace(/\//g, '-') : null;
+  if (count === 1) {
+    prevBtn.parentElement.classList.add('disabled');
+    main.querySelector('.category-main-articles').dataset.cardCount = 5;
+    main.querySelector('.category-sub-articles').dataset.cardCount = 8;
+    mainArticle.style.display = 'block';
+  } else {
+    prevBtn.parentElement.classList.remove('disabled');
+    mainArticle.dataset.cardCount = 0;
+    mainArticle.style.display = 'none';
+    main.querySelector('.category-sub-articles').dataset.cardCount = 15;
+  }
+  if (keyword) {
+    getArticlesByCategory(keyword, count, commaSeparatedListContains, 'keywords').then((articles) => {
+      loadTemplateArticleCards(main, 'category', articles);
+      showHideNextBtn(nextBtn, articles.length, count);
+    });
+  } else {
+    getArticlesByCategory(getTitle(), count).then((articles) => {
+      loadTemplateArticleCards(main, 'category', articles);
+      showHideNextBtn(nextBtn, articles.length, count);
+    });
+  }
+  window.scrollTo({
+    top: 0,
+    left: 0,
+    behavior: 'smooth',
+  });
+}
+
+/**
+ * Build previous next buttons
+ */
+
+export function prevNextBtn() {
+  const divContainer = document.createElement('div');
+  divContainer.classList.add('prev-next-container');
+  const prevDiv = document.createElement('div');
+  prevDiv.classList.add('previous');
+  prevDiv.setAttribute('id', 'previous-button');
+  const prevBtn = document.createElement('a');
+  prevBtn.textContent = 'Back';
+  prevBtn.setAttribute('id', 'previous');
+  prevBtn.classList.add('btn-on-white');
+  prevBtn.classList.add('white');
+  prevDiv.append(prevBtn);
+  if (pageIndex === 1) {
+    prevDiv.classList.add('disabled');
+  }
+  const nextDiv = document.createElement('div');
+  nextDiv.classList.add('load-more');
+  nextDiv.setAttribute('id', 'next-button');
+  const nextBtn = document.createElement('a');
+  nextBtn.textContent = 'Next';
+  nextBtn.setAttribute('id', 'next');
+  nextBtn.classList.add('btn-on-white');
+  nextBtn.classList.add('white');
+  nextDiv.append(nextBtn);
+  prevBtn.addEventListener('click', () => {
+    pageIndex -= 1;
+    handleLinkClick(pageIndex, prevBtn, nextBtn);
+  });
+  nextBtn.addEventListener('click', () => {
+    pageIndex += 1;
+    nextDiv.classList.add('disabled');
+    handleLinkClick(pageIndex, prevBtn, nextBtn);
+  });
+  divContainer.append(prevDiv);
+  divContainer.append(nextDiv);
+  return divContainer;
 }
