@@ -8,7 +8,6 @@ import {
 import {
   createOptimizedPicture,
   getArticlesByAuthor,
-  comparePublishDate,
   buildArticleCardsBlock,
   loadTemplateArticleCards,
 } from '../../scripts/shared.js';
@@ -25,7 +24,7 @@ function addIcon(beforeElement, iconName) {
  * @param {HTMLElement} main Main element of the page.
  */
 // eslint-disable-next-line import/prefer-default-export
-export async function loadEager(main) {
+export function loadEager(main) {
   const defaultContent = main.querySelector('.default-content-wrapper');
   if (!defaultContent) {
     return;
@@ -98,7 +97,6 @@ export async function loadLazy(main) {
   }
   const authorName = getMetadata('author');
   const articles = await getArticlesByAuthor(authorName);
-  articles.sort(comparePublishDate);
 
   loadTemplateArticleCards(main, 'author', articles);
 

@@ -9,10 +9,14 @@ import {
   loadBlocks,
   getMetadata,
 } from './lib-franklin.js';
+import ffetch from './ffetch.js';
 
 const DEFAULT_CATEGORY_PATH = '/news';
 const DEFAULT_CATEGORY_NAME = 'News';
 const EMAIL_REGEX = /\S+[a-z0-9]@[a-z0-9.]+/img;
+const CHUNK_SIZE = 500;
+const CHUNK_LIMIT = 3;
+let pageIndex = 1;
 
 function createBreadcrumbItem(href, label) {
   const li = document.createElement('li');
@@ -84,6 +88,53 @@ export function addToTopSection(main, element) {
     return;
   }
   topSection.append(element);
+}
+
+/**
+ * Appends an HTML element to the right section of the site.
+ * @param {HTMLElement} main The page's main element.
+ * @param {HTMLElement} element Element to append to the top.
+ */
+export function addToRightSection(main, element) {
+  const rightSection = main.querySelector('.right-section');
+  if (!rightSection) {
+    return;
+  }
+  rightSection.append(element);
+}
+
+/**
+ * Retrieves all the default sections, which will contain content created
+ * by a document author.
+ * @param {HTMLElement} main The page's main element.
+ * @returns {Array<HTMLElement>} The page's default sections.
+ */
+export function getDefaultSections(main) {
+  return [...main.querySelectorAll('.section:not(.auto-section)')];
+}
+
+/**
+ * Retrieves the first default section on the page, if there is
+ * one.
+ * @param {HTMLElement} main The page's main element.
+ * @returns {HTMLElement|undefined} The first default section, or undefined if none.
+ */
+export function getFirstDefaultSection(main) {
+  return main.querySelector('.section:not(.auto-section)');
+}
+
+/**
+ * Retrieves the last default section on the page, if there is
+ * one.
+ * @param {HTMLElement} main The page's main element.
+ * @returns {HTMLElement|undefined} The last default section, or undefined if none.
+ */
+export function getLastDefaultSection(main) {
+  const sections = getDefaultSections(main);
+  if (sections.length) {
+    return sections[sections.length - 1];
+  }
+  return undefined;
 }
 
 export function buildNewsSlider(main) {
@@ -350,10 +401,26 @@ export function getCategoryName(record) {
  * @property {string} authordescription Bio information for the record's author.
  * @property {string} publisheddate Full, human-readable date when the record was published.
  * @property {string} keywords Comma-separated list of keywords associated with the index record.
- * @property {string} company-names Comma-separated list of companies to which the index record
+ * @property {string} companynames Comma-separated list of companies to which the index record
  *  applies.
- * @property {string} company-webpages Comma-separated list of websites for the index's companies.
+ * @property {string} companywebpages Comma-separated list of websites for the index's companies.
  * @property {string} lastModified Unix timestamp of the last time the index record was modified.
+ */
+
+/**
+ * @typedef PageMetadata
+ * @property {string} [path] Full path of the page.
+ * @property {string} [author] Name of the author associated with the page.
+ * @property {string} [category] Name of the category associated with the page.
+ * @property {string} [companynames] Comma-separated list of companies to which
+ *  the page applies.
+ * @property {string} [companywebpages] Comma-separated list of websites for the
+ *  page's companies.
+ * @property {string} [description] Summary description of the page.
+ * @property {string} [keywords] Comma-separated list of keywords associated with the page.
+ * @property {string} [publisheddate] Full, human-readable date when the page was published.
+ * @property {string} [title] Title of the page.
+ * @property {string} [image] Image for the page.
  */
 
 /**
@@ -370,40 +437,99 @@ export function isArticle(record) {
   );
 }
 
-let cachedIndex;
 /**
  * Queries the site's index and only includes those records that match a given filter.
  * @param {function} filter Filter through which each record will be sent. The function will
  *  receive a single argument: the current record's raw data. The function should return true
  *  to include the record in the final result, or false to exclude it from the result.
- * @returns {Promise<Array<QueryIndexRecord>>} Resolves with an array of information for all
- *  matching records.
+ * @param {number} [limit] The maximum number of records to retrieve. Default: 10.
+ * @returns {import('./ffetch.js').default} Resolves an ffetch object configured with parameters
+ *  ready for querying.
  */
-export async function queryIndex(filter) {
-  let index = cachedIndex;
-  if (!index) {
-    // will need to be updated to use ffetch for performance.
-    const res = await fetch('/query-index.json');
-    if (res && res.ok) {
-      try {
-        index = await res.json();
-        // storing the query index in memory as a speed performance optimization.
-        // may need to revisit this if the query index gets very large.
-        cachedIndex = index;
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.log('Unable to parse query index json', e);
+export function queryIndex(filter, limit = 10) {
+  return ffetch('/query-index.json')
+    .chunks(CHUNK_SIZE)
+    // "safety net" to ensure we aren't inadvertently traversing the entire index. individual
+    // calls can override this, or we can adjust the limit as needed
+    .chunkLimit(CHUNK_LIMIT)
+    .filter(filter)
+    .limit(limit);
+}
+
+/**
+ * Retrieves the title of the current page.
+ * @returns {string} Page title.
+ */
+export function getTitle() {
+  return getMetadata('og:title');
+}
+
+/**
+ * Retrieves the list of company names of the current page.
+ * @returns {string} Comma-separated list of names.
+ */
+export function getCompanyNames() {
+  return getMetadata('companynames');
+}
+
+/**
+ * Retrieves the list of keywords of the current page.
+ * @returns {string} Comma-separated list of words.
+ */
+export function getKeywords() {
+  return getMetadata('keywords');
+}
+
+/**
+ * forward looking *.metadata.json experiment
+ * fetches metadata.json of page
+ * @param {path} path to *.metadata.json
+ * @returns {PageMetadata} containing sanitized meta data
+ */
+export async function getMetadataJson(path) {
+  let resp;
+  try {
+    resp = await fetch(path);
+    if (resp && resp.ok) {
+      const text = await resp.text();
+      const headStr = text.split('<head>')[1].split('</head>')[0];
+      const head = document.createElement('head');
+      head.innerHTML = headStr;
+      const metaTags = head.querySelectorAll(':scope > meta');
+      const meta = {};
+      metaTags.forEach((metaTag) => {
+        const name = metaTag.getAttribute('name') || metaTag.getAttribute('property');
+        const value = metaTag.getAttribute('content');
+        if (meta[name]) {
+          meta[name] += `, ${value}`;
+        } else {
+          meta[name] = value;
+        }
+      });
+
+      if (meta['og:image']) {
+        meta.image = meta['og:image'];
       }
+      if (meta['og:url']) {
+        meta.path = new URL(meta['og:url']).pathname;
+      }
+      if (meta['og:title']) {
+        meta.title = meta['og:title'];
+      }
+
+      return meta;
     }
+  } catch {
+    // fail
   }
-  const { data = [] } = index || {};
-  return data.filter(filter);
+
+  return null;
 }
 
 /**
  * Retrieves all records whose path matches one of a given list of path values.
  * @param {Array<string>} paths List of all record paths to retrieve from the site's index.
- * @returns {Promise<Array<QueryIndexRecord>>} Resolves with an array of information for all
+ * @returns {Promise<Array<PageMetadata>>} Resolves with an array of information for all
  *  matching records.
  */
 export async function getRecordsByPath(paths) {
@@ -411,19 +537,122 @@ export async function getRecordsByPath(paths) {
   paths.forEach((path) => {
     pathLookup[path] = true;
   });
-  return queryIndex((record) => !!pathLookup[record.path]);
+  const promises = Object.keys(pathLookup).map((path) => {
+    const pathUrl = `${window.location.protocol}//${window.location.host}${path}`;
+    return getMetadataJson(pathUrl);
+  });
+  const results = await Promise.all(promises);
+  return results.filter((value) => !!value);
 }
 
+/**
+ * Converts a given value to lower case, then strictly compares it with another value.
+ * @param {string} value Value to convert to lower case.
+ * @param {string} matchValue Value to match against (as-is).
+ * @returns {boolean} True if the values match, false otherwise.
+ */
+function lowerCaseCompare(value, matchValue) {
+  return String(value).toLowerCase() === matchValue;
+}
+
+/**
+ * Converts a given list of comma-separated values to lower case, then determines whether a
+ * given value is in the list.
+ * @param {string} list Comma-separated list to convert to lower case and check.
+ * @param {string} value Value to look for (as-is).
+ * @returns {boolean} True if the given value is in the comma-separated
+ *  list, false otherwise.
+ */
+function commaSeparatedListContains(list, value) {
+  if (!list || !value) {
+    return false;
+  }
+  const listStr = String(list);
+
+  return listStr.split(',')
+    .map((item) => item.trim().toLowerCase())
+    .includes(value);
+}
+
+/**
+ * Queries the site's index and returns articles whose specified metadata value
+ * matches a given filter value.
+ * @param {string} metadataName Name of the article metadata to match.
+ * @param {string} value Value to match with.
+ * @param {number} [limit=10] Maximum number of articles to include.
+ * @param {function} [compareFn] Used to compare the two values. The first parameter will be
+ *  the record's metadata value, and the second will be a lower-case version of the match
+ *  value. Default function will convert the record's metadata value to lower case and strictly
+ *  compare it with the match value.
+ * @returns {Promise<QueryIndexRecord>} Article's record information.
+ */
+async function queryMatchingArticles(
+  metadataName,
+  value,
+  limit = 10,
+  compareFn = lowerCaseCompare,
+) {
+  const matchValue = String(value).toLowerCase();
+  const entries = queryIndex(
+    (record) => compareFn(record[metadataName], matchValue),
+    limit,
+  ).sheet('article');
+
+  const articles = [];
+  // eslint-disable-next-line no-restricted-syntax
+  for await (const entry of entries) {
+    articles.push(entry);
+  }
+  return articles;
+}
+
+/**
+ * Queries the site's index and returns articles whose specified metadata value
+ * matches a given filter value.
+ * @param {string} metadataName Name of the article metadata to match.
+ * @param {string} value Value to match with.
+ * @param {number} pageNum Current Page Number.
+ * @param {function} [compareFn] Used to compare the two values. The first parameter will be
+ *  the record's metadata value, and the second will be a lower-case version of the match
+ *  value. Default function will convert the record's metadata value to lower case and strictly
+ *  compare it with the match value.
+ * @returns {Promise<QueryIndexRecord>} Article's record information.
+ */
+async function queryMatchingArticlesByCategory(
+  metadataName,
+  value,
+  pageNum,
+  compareFn = lowerCaseCompare,
+) {
+  const offset = (pageNum - 1) * 15;
+  const matchValue = String(value).toLowerCase();
+  let filter;
+  if (metadataName === 'keywords') {
+    filter = (record) => compareFn(record[metadataName], matchValue)
+      && (record.category === getTitle());
+  } else {
+    filter = (record) => compareFn(record[metadataName], matchValue);
+  }
+  const entries = ffetch('/query-index.json')
+    .chunks(CHUNK_SIZE)
+    .sheet('article')
+    .filter(filter)
+    .slice(offset, offset + 16);
+  const articles = [];
+  // eslint-disable-next-line no-restricted-syntax
+  for await (const entry of entries) {
+    articles.push(entry);
+  }
+  return articles;
+}
 /**
  * Retrieves all articles in a given category.
  * @param {string} categoryName Category whose articles should be retrieved.
  * @returns {Promise<Array<QueryIndexRecord>>} Resolves with an array of matching
  *  articles.
  */
-export async function getArticlesByCategory(categoryName) {
-  return queryIndex(
-    (record) => record.category === categoryName && isArticle(record),
-  );
+export async function getArticlesByCategory(categoryName, pageNum, compareFn = lowerCaseCompare, metadataName = 'category') {
+  return queryMatchingArticlesByCategory(metadataName, categoryName, pageNum, compareFn);
 }
 
 /**
@@ -433,15 +662,33 @@ export async function getArticlesByCategory(categoryName) {
  *  articles.
  */
 export async function getArticlesByAuthor(authorName) {
-  return queryIndex(
-    (record) => record.author === authorName && isArticle(record),
-  );
+  return queryMatchingArticles('author', authorName, 15);
+}
+
+/**
+ * Retrieves all articles related to a given company.
+ * @param {string} companyName Company whose articles should be retrieved.
+ * @returns {Promise<Array<QueryIndexRecord>>} Resolves with an array of matching
+ *  articles.
+ */
+export async function getArticlesByCompany(companyName) {
+  return queryMatchingArticles('companynames', companyName, 14, commaSeparatedListContains);
+}
+
+/**
+ * Retrieves all articles related to a given keyword.
+ * @param {string} keyword Keyword whose articles should be retrieved.
+ * @returns {Promise<Array<QueryIndexRecord>>} Resolves with an array of matching
+ *  articles.
+ */
+export async function getArticlesByKeyword(keyword) {
+  return queryMatchingArticles('keywords', keyword, 10, commaSeparatedListContains);
 }
 
 /**
  * Retrieves the record whose path matches a given value.
  * @param {string} path Path to retrieve from the site's index.
- * @returns {Promise<QueryIndexRecord>} Resolves with the information for the matching
+ * @returns {Promise<PageMetadata>} Resolves with the information for the matching
  *  record. Will be falsy if a matching record was not found.
  */
 export async function getRecordByPath(path) {
@@ -458,13 +705,11 @@ export async function getRecordByPath(path) {
  * @returns {Promise<QueryIndexRecord>} Resolves author information.
  */
 export async function getAuthorByName(authorName) {
-  const records = await queryIndex(
-    (record) => record.path.startsWith('/authors/') && record.author === authorName,
-  );
-  if (!records.length) {
-    return undefined;
-  }
-  return records[0];
+  const authorValue = String(authorName).toLowerCase();
+  return ffetch('/query-index.json')
+    .sheet('authors')
+    .filter((record) => (String(record.author).toLowerCase()) === authorValue)
+    .first();
 }
 
 /**
@@ -519,6 +764,31 @@ export function getRecordsFromBlock(block) {
 }
 
 /**
+ * Checks whether a given value appears to be a timestamp, and if so converts it
+ * into a formatted date string. Otherwise the method will return the original
+ * value as-is.
+ * @param {string} dateValue Potential date value to format.
+ * @returns {string} Formatted date, or the original value.
+ */
+export function formatDate(dateValue) {
+  if (/^[0-9]+$/g.test(dateValue)) {
+    const publishDate = new Date(parseInt(dateValue, 10) * 1000);
+    const dateStr = publishDate.toLocaleDateString('en-us', {
+      month: 'long',
+      day: '2-digit',
+      year: 'numeric',
+    });
+    const timeStr = publishDate.toLocaleTimeString('en-us', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZoneName: 'short',
+    });
+    return `${dateStr}, ${timeStr}`;
+  }
+  return dateValue;
+}
+
+/**
  * Creates an HTML element that contains an article author's name, a link to the
  * author's profile page, and the publish date of the article. If an article
  * is not provided, the method will create placeholders.
@@ -545,7 +815,7 @@ export function buildArticleAuthor(article) {
       <a href="/authors/${authorId}" class="link-arrow" aria-label="By ${article.author}"><span class="uncolored-link">By</span> ${article.author}</a>
     `;
 
-    date.innerText = article.publisheddate;
+    date.innerText = formatDate(article.publisheddate);
   } else {
     author.classList.add('placeholder');
     date.classList.add('placeholder');
@@ -672,7 +942,7 @@ export async function buildLearnMore(target, keywords) {
   items.forEach((keyword) => {
     const li = document.createElement('li');
     li.innerHTML = `
-      <a href="/tag/${encodeURIComponent(keyword)}/" title="${keyword}" aria-label="${keyword}">
+      <a href="/search?query=${encodeURIComponent(keyword)}" title="${keyword}" aria-label="${keyword}">
         ${keyword}
       </a>
     `;
@@ -713,14 +983,18 @@ export async function buildRelatedContent(target, articles) {
  * Dynamically creates a social share block, then appends the new block after
  * a given element.
  * @param {HTMLElement} insertAfter Element after which the block will be inserted.
- * @returns {Promise} Resolves when the operation is complete.
  */
-export async function buildSocialShare(insertAfter) {
+export function buildSocialShare(insertAfter) {
   const insertBefore = insertAfter.nextSibling;
+  if (!insertBefore) {
+    return;
+  }
+  if (!insertAfter.parentElement) {
+    return;
+  }
   const socialShare = buildBlock('social-share', { elems: [] });
   insertAfter.parentElement.insertBefore(socialShare, insertBefore);
   decorateBlock(socialShare);
-  return loadBlock(socialShare);
 }
 
 function buildKeywordLookup(keywords) {
@@ -769,21 +1043,22 @@ function calculateScore(keywordLookup, record) {
  */
 async function buildRelevanceScores(keywordLookup) {
   const relevanceScores = [];
-  await queryIndex((record) => {
-    if (!record.keywords || !isArticle(record)) {
-      return false;
-    }
+  // only read a single chunk, limiting the relevant articles to that dataset
+  const entries = queryIndex(() => true, CHUNK_SIZE)
+    .sheet('article');
+
+  // eslint-disable-next-line no-restricted-syntax
+  for await (const entry of entries) {
     // calculate relevance by determining how many of the given keywords each
     // article has
-    const relevance = calculateScore(keywordLookup, record);
+    const relevance = calculateScore(keywordLookup, entry);
     if (relevance > 0) {
       relevanceScores.push({
-        record,
+        record: entry,
         relevance,
       });
     }
-    return false;
-  });
+  }
   return relevanceScores;
 }
 
@@ -874,11 +1149,6 @@ function sortByMostRelevant(relevanceScores) {
  * @returns {Promise<Array<QueryIndexRecord>>} Resolves with the most related articles.
  */
 export async function getRelatedArticles(article, relatedCount = 5) {
-  // this method will almost certainly need to be optimized as the number of articles
-  // grows. As is, it will:
-  // 1. Potentially read a very large number of articles into memory.
-  // 2. Query the full index.
-  // 3. Sort a very large number of articles.
   const lookup = buildKeywordLookup(article.keywords);
   const related = await buildRelevanceScores(lookup);
   sortByMostRelevant(related);
@@ -918,7 +1188,7 @@ export function buildArticleCardsBlock(count, templateName, addBlockToDom) {
  *  placeholders.
  */
 export function loadTemplateArticleCards(main, templateName, articles) {
-  const placeholderCards = main.querySelectorAll(`.article-cards[data-template="${templateName}"] .article-card.skeleton`);
+  const placeholderCards = main.querySelectorAll((`.article-cards[data-template="${templateName}"] .article-card.skeleton`));
   [...placeholderCards].forEach((card, index) => {
     if (articles.length > index) {
       card.dataset.json = JSON.stringify(articles[index]);
@@ -927,4 +1197,133 @@ export function loadTemplateArticleCards(main, templateName, articles) {
       card.remove();
     }
   });
+}
+
+/**
+ * Builds an ad block with the given ID and type.
+ * @param {string} unitId ID of the ad to include in the block.
+ * @param {string} type The type of ad to create.
+ * @param {boolean} [fixedHeight] If true, the ad will have a fixed height
+ *  associated with it.
+ * @returns {HTMLElement} Newly built ad block. Will be falsy if the ad type
+ *  is unknown.
+ */
+export function buildAdBlock(unitId, type, fixedHeight = false) {
+  // Determine the text and class based on the type
+  let adText;
+  let adClass;
+  let height = '';
+  if (type === 'Advertisement') {
+    adText = 'Advertisement';
+    adClass = 'right-ad';
+    if (fixedHeight) {
+      height = ' fixed-height';
+    }
+  } else if (type === 'Sponsored post') {
+    adText = 'Sponsored post';
+    adClass = 'right-sponsored';
+  } else {
+    // eslint-disable-next-line no-console
+    console.error('Unknown type in the block');
+    return undefined;
+  }
+
+  // Build the ad using the extracted unit-id and determined text and class
+  const rightAdHTML = `
+    <!-- AD IMU  STARTS  -->
+
+    <div class="${adClass}${height}">
+      <span class="ad-title">${adText}</span> <br />
+      <div id="${unitId}" class="tmsads"></div>
+    </div>
+
+    <br clear="all">
+  `;
+
+  const range = document.createRange();
+  return range.createContextualFragment(rightAdHTML);
+}
+
+function showHideNextBtn(nextBtn, length, count) {
+  if (length < 16 && count > 1) {
+    nextBtn.parentElement.classList.add('disabled');
+  } else {
+    nextBtn.parentElement.classList.remove('disabled');
+  }
+}
+
+function handleLinkClick(count, prevBtn, nextBtn) {
+  const main = document.querySelector('main');
+  const mainArticle = main.querySelector('.category-main-articles');
+  const activeTab = main.querySelector('.active-tab');
+  const keyword = activeTab ? activeTab.textContent.trim().replace(/\//g, '-') : null;
+  if (count === 1) {
+    prevBtn.parentElement.classList.add('disabled');
+    main.querySelector('.category-main-articles').dataset.cardCount = 5;
+    main.querySelector('.category-sub-articles').dataset.cardCount = 8;
+    mainArticle.style.display = 'block';
+  } else {
+    prevBtn.parentElement.classList.remove('disabled');
+    mainArticle.dataset.cardCount = 0;
+    mainArticle.style.display = 'none';
+    main.querySelector('.category-sub-articles').dataset.cardCount = 15;
+  }
+  if (keyword) {
+    getArticlesByCategory(keyword, count, commaSeparatedListContains, 'keywords').then((articles) => {
+      loadTemplateArticleCards(main, 'category', articles);
+      showHideNextBtn(nextBtn, articles.length, count);
+    });
+  } else {
+    getArticlesByCategory(getTitle(), count).then((articles) => {
+      loadTemplateArticleCards(main, 'category', articles);
+      showHideNextBtn(nextBtn, articles.length, count);
+    });
+  }
+  window.scrollTo({
+    top: 0,
+    left: 0,
+    behavior: 'smooth',
+  });
+}
+
+/**
+ * Build previous next buttons
+ */
+
+export function prevNextBtn() {
+  const divContainer = document.createElement('div');
+  divContainer.classList.add('prev-next-container');
+  const prevDiv = document.createElement('div');
+  prevDiv.classList.add('previous');
+  prevDiv.setAttribute('id', 'previous-button');
+  const prevBtn = document.createElement('a');
+  prevBtn.textContent = 'Back';
+  prevBtn.setAttribute('id', 'previous');
+  prevBtn.classList.add('btn-on-white');
+  prevBtn.classList.add('white');
+  prevDiv.append(prevBtn);
+  if (pageIndex === 1) {
+    prevDiv.classList.add('disabled');
+  }
+  const nextDiv = document.createElement('div');
+  nextDiv.classList.add('load-more');
+  nextDiv.setAttribute('id', 'next-button');
+  const nextBtn = document.createElement('a');
+  nextBtn.textContent = 'Next';
+  nextBtn.setAttribute('id', 'next');
+  nextBtn.classList.add('btn-on-white');
+  nextBtn.classList.add('white');
+  nextDiv.append(nextBtn);
+  prevBtn.addEventListener('click', () => {
+    pageIndex -= 1;
+    handleLinkClick(pageIndex, prevBtn, nextBtn);
+  });
+  nextBtn.addEventListener('click', () => {
+    pageIndex += 1;
+    nextDiv.classList.add('disabled');
+    handleLinkClick(pageIndex, prevBtn, nextBtn);
+  });
+  divContainer.append(prevDiv);
+  divContainer.append(nextDiv);
+  return divContainer;
 }

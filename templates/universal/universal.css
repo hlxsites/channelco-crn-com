@@ -15,7 +15,7 @@ main {
   margin-bottom: 1rem;
 }
 
-.top-ad-section {
+main .top-section.auto-section .top-ad-section {
   padding-bottom: 20px;
   border-top: 2px solid #000000;
   border-bottom: 2px solid #000000;
@@ -41,14 +41,14 @@ main {
   position: relative;
 }
 
-main .breadcrumb {
+main .top-section.auto-section .breadcrumb {
   margin: 0 calc(-1 * var(--padding-spacer-x));
   padding: 0.25rem 0;
   display: flex;
   flex-direction: column;
 }
 
-main .breadcrumb-list {
+main .top-section.auto-section .breadcrumb-list {
   padding: 0.25rem 30px;
   text-transform: uppercase;
   color: var(--clr-grey);
@@ -62,11 +62,11 @@ main .breadcrumb-list {
   margin: 0;
 }
 
-main .breadcrumb-list li {
+main .top-section.auto-section .breadcrumb-list li {
   display: inline;
 }
 
-main .breadcrumb-list a {
+main .top-section.auto-section .breadcrumb-list a {
   color: var(--clr-grey);
   width: 100%;
 }
@@ -89,7 +89,7 @@ main .breadcrumb-list a {
   cursor: pointer;
 }
 
-.bottom-ad-section {
+main .bottom-section.auto-section {
   position: fixed;
   bottom: 0;
   left: 0;
@@ -97,20 +97,6 @@ main .breadcrumb-list a {
   min-height: 100px;
   z-index: 500;
   background-color: rgba(230, 230, 230, 0.7);
-  text-align: center;
-}
-
-.banner-container > .ad-wrapper:last-of-type {
-  position: -webkit-sticky;
-  position: sticky;
-  top: 0;
-  text-align: center;
-}
-
-.banner-container > .banner-wrapper:last-of-type {
-  position: -webkit-sticky;
-  position: sticky;
-  top: 0;
   text-align: center;
 }
 
@@ -140,8 +126,12 @@ main .back-top-top-section-header {
   height: 626px;
 }
 
-main .content-section .section:first-child {
+main .section:not(.auto-section):first-child {
   margin-top: 0;
+}
+
+main .right-ad-section {
+  height: 100%;
 }
 
 @keyframes loading {
@@ -154,7 +144,7 @@ main .content-section .section:first-child {
 }
 
 @media (min-width: 576px) {
-  .top-ad-section {
+  main .top-section.auto-section .top-ad-section {
     min-height: 125px;
   }
 
@@ -164,7 +154,7 @@ main .content-section .section:first-child {
 }
 
 @media (min-width: 768px) {
-  .bottom-ad-section {
+  main .bottom-section.auto-section {
     width: 100%;
     min-height: 75px;
     margin-left: -50%;
@@ -174,18 +164,19 @@ main .content-section .section:first-child {
 
 @media (min-width: 992px) {
   /* avoids CLS before the right ad section moves into place */
-  main > .section {
-    margin-right: 330px;
+  main > .section:not(.auto-section) {
+    margin-right: calc(var(--padding-spacer-x) + 330px);
     padding-right: var(--padding-spacer-x);
   }
 
   /* avoids CLS before the right ad section moves into place */
-  main .right-ad-section {
+  main .right-section {
     display: none;
   }
 
   /* shows the right ad section once it moves into place */
-  main.grid-layout .right-ad-section {
+  main.grid-layout .right-section {
+    position: relative;
     display: block;
   }
 
@@ -217,14 +208,14 @@ main .content-section .section:first-child {
     grid-area: to-top;
   }
 
-  main .right-ad-section {
+  main .right-section {
     grid-area: ads;
     min-height: 700px;
   }
 }
 
 @media (min-width: 1140px) {
-  .bottom-ad-section {
+  main .bottom-section.auto-section {
     max-width: 1140px;
     margin-left: -570px;
   }

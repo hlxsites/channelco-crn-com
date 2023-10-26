@@ -5,9 +5,9 @@ import {
 } from '../../scripts/lib-franklin.js';
 import {
   queryIndex,
-  isArticle,
   buildArticleCardsBlock,
   loadTemplateArticleCards,
+  getFirstDefaultSection,
 } from '../../scripts/shared.js';
 
 const MAX_LIMIT = 50;
@@ -38,6 +38,36 @@ function getSearchTerm() {
 }
 
 /**
+ * Determines whether a given string is related to a list of words.
+ * @param {string} toSearch Value to check.
+ * @param {Array<string>} words Words to match.
+ * @returns {boolean} True if the value relates to the words.
+ */
+function containsWords(toSearch, words) {
+  const value = String(toSearch);
+  for (let i = 0; i < words.length; i += 1) {
+    if (value.includes(words[i])) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Determines whether a record from the index is related to a list of words.
+ * @param {import('../../scripts/shared.js').QueryIndexRecord} record Index
+ *  record to check.
+ * @param {Array<string>} words Words to match.
+ * @returns {boolean} True if the record relates to the words.
+ */
+function recordContainsWords(record, words) {
+  if (containsWords(record.title, words)) {
+    return true;
+  }
+  return containsWords(record.description, words);
+}
+
+/**
  * Modifies the DOM as needed for search results
  * @param {HTMLElement} main The page's main element.
  */
@@ -50,7 +80,7 @@ export function loadEager(main) {
     limit = MAX_LIMIT;
   }
 
-  const section = main.querySelector('.section');
+  const section = getFirstDefaultSection(main);
   if (!section) {
     return;
   }
@@ -96,7 +126,7 @@ export function loadEager(main) {
 // eslint-disable-next-line import/prefer-default-export
 export async function loadLazy(main) {
   const searchTerm = getSearchTerm();
-  const section = main.querySelector('.section');
+  const section = getFirstDefaultSection(main);
   if (!section) {
     return;
   }
@@ -105,19 +135,25 @@ export async function loadLazy(main) {
     return;
   }
 
-  let results = [];
+  const results = [];
   if (searchTerm) {
-    results = await queryIndex((record) => isArticle(record)
-      && (String(record.title).toLowerCase().includes(searchTerm)
-      || String(record.description).toLowerCase().includes(searchTerm)));
+    const searchCompare = searchTerm.toLowerCase();
+    const words = searchCompare.split(' ').filter((value) => !!value);
+    const entries = queryIndex((record) => recordContainsWords(record, words), 500)
+      .sheet('article');
+
+    // eslint-disable-next-line no-restricted-syntax
+    for await (const entry of entries) {
+      results.push(entry);
+    }
   }
 
-  resultCountLabel.innerText = `${results.length} results for `;
+  resultCountLabel.innerText = `${results.length === 500 ? '500+' : results.length} results for `;
   const termLabel = createSearchTermElement(searchTerm);
   termLabel.classList.add('quoted');
   resultCountLabel.append(termLabel);
 
-  loadTemplateArticleCards(main, 'search-results', results);
+  loadTemplateArticleCards(main, 'search-results', results.slice(0, 50));
 
   const nav = buildBlock('category-navigation', { elems: [] });
   section.append(nav);

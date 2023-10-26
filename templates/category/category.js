@@ -1,17 +1,17 @@
 import {
-  buildBlock,
-  decorateBlock,
-  loadBlock,
-} from '../../scripts/lib-franklin.js';
-import {
   getArticlesByCategory,
-  getRecordByPath,
-  comparePublishDate,
   buildArticleCardsBlock,
   buildNewsSlider,
   loadTemplateArticleCards,
   addToTopSection,
+  getTitle,
+  getFirstDefaultSection,
+  getLastDefaultSection,
+  prevNextBtn,
 } from '../../scripts/shared.js';
+
+const usp = new URLSearchParams(window.location.search);
+const pageIndex = Number(usp.get('page') || 1);
 
 /**
  * Creates the news sub-heading on the page.
@@ -59,11 +59,12 @@ function createHeading(text, ...classes) {
  */
 // eslint-disable-next-line import/prefer-default-export
 export function loadEager(main) {
-  addToTopSection(main, createHeading('Category', 'placeholder'));
+  const title = getTitle();
+  addToTopSection(main, createHeading(title));
   buildNewsSlider(main);
 
   let lastElement;
-  const firstSection = main.querySelector('.section');
+  const firstSection = getFirstDefaultSection(main);
   if (!firstSection) {
     return;
   }
@@ -71,17 +72,25 @@ export function loadEager(main) {
     lastElement = firstSection.children.item(0);
   }
 
-  buildArticleCardsBlock(5, 'category', (leadCards) => {
-    leadCards.classList.add('lead-article');
-    firstSection.insertBefore(leadCards, lastElement);
-  });
-
-  const newsHeading = createNewsHeading('Category News', 'placeholder');
+  if (pageIndex === 1) {
+    buildArticleCardsBlock(5, 'category', (leadCards) => {
+      leadCards.classList.add('lead-article', 'category-main-articles');
+      firstSection.insertBefore(leadCards, lastElement);
+    });
+  }
+  const newsHeading = createNewsHeading(`${title} News`);
   firstSection.insertBefore(newsHeading, lastElement);
-
-  buildArticleCardsBlock(8, 'category', (cards) => {
-    firstSection.insertBefore(cards, lastElement);
-  });
+  if (pageIndex === 1) {
+    buildArticleCardsBlock(8, 'category', (cards) => {
+      cards.classList.add('category-sub-articles');
+      firstSection.insertBefore(cards, lastElement);
+    });
+  } else {
+    buildArticleCardsBlock(15, 'category', (cards) => {
+      cards.classList.add('category-sub-articles');
+      firstSection.insertBefore(cards, lastElement);
+    });
+  }
 }
 
 /**
@@ -90,32 +99,13 @@ export function loadEager(main) {
  */
 // eslint-disable-next-line import/prefer-default-export
 export async function loadLazy(main) {
-  const category = await getRecordByPath(window.location.pathname);
-  if (!category) {
+  const lastSection = getLastDefaultSection(main);
+  if (!lastSection) {
     return;
   }
-  const contentSection = main.querySelector('.content-section');
-  if (!contentSection) {
-    return;
-  }
-
-  const heading = main.querySelector('.category h1');
-  if (heading) {
-    heading.replaceWith(createHeading(category.title));
-  }
-
-  const newsHeading = main.querySelector('.category .news-heading');
-  if (newsHeading) {
-    newsHeading.replaceWith(createNewsHeading(`${category.title} News`));
-  }
-
-  const articles = await getArticlesByCategory(category.title);
-  articles.sort(comparePublishDate);
+  const articles = await getArticlesByCategory(getTitle(), pageIndex);
 
   loadTemplateArticleCards(main, 'category', articles);
-
-  const categoryNavigation = buildBlock('category-navigation', { elems: [] });
-  contentSection.append(categoryNavigation);
-  decorateBlock(categoryNavigation);
-  await loadBlock(categoryNavigation);
+  const categoryNavigation = prevNextBtn();
+  lastSection.append(categoryNavigation);
 }

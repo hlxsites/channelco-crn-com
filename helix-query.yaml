@@ -1,0 +1,50 @@
+version: 1
+auto-generated: true
+indices:
+  default:
+    include:
+      - /**
+    target: /query-index.json
+    properties:
+      lastModified:
+        select: none
+        value: parseTimestamp(headers["last-modified"], "ddd, DD MMM YYYY hh:mm:ss GMT")
+      title:
+        select: head > meta[property="og:title"]
+        value: attribute(el, "content")
+      description:
+        select: head > meta[name="description"]
+        value: attribute(el, "content")
+      image:
+        select: head > meta[property="og:image"]
+        value: match(attribute(el, "content"), "https:\/\/[^/]+(/.*)")
+      category:
+        select: head > meta[name="category"]
+        value: attribute(el, "content")
+      template:
+        select: head > meta[name="template"]
+        value: attribute(el, "content")
+      author:
+        select: head > meta[name="author"]
+        value: attribute(el, "content")
+      authorimage:
+        select: head > meta[name="authorimage"]
+        value: attribute(el, "content")
+      authortitle:
+        select: head > meta[name="authortitle"]
+        value: attribute(el, "content")
+      authordescription:
+        select: head > meta[name="authordescription"]
+        value: attribute(el, "content")
+      publisheddate:
+        select: head > meta[name="publisheddate"]
+        value: parseTimestamp(attribute(el, "content"), "MMMM DD, YYYY, hh:mm a z")
+      keywords:
+        select: head > meta[name="keywords"]
+        value: attribute(el, "content")
+      companynames:
+        select: head > meta[name="companynames"]
+        value: attribute(el, "content")
+      companywebpages:
+        select: head > meta[name="companywebpages"]
+        value: attribute(el, "content")

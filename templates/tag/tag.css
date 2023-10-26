@@ -1,0 +1,13 @@
+.tag main h1 {
+  color: var(--link-color);
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.tag main .article-card-title a {
+  color: var(--text-color);
+}
+
+.tag main .article-cards .article-card {
+  border-bottom: 2px dotted var(--color-mid-grey);
+}

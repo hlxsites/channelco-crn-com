@@ -106,6 +106,71 @@ function loadBottomAd() {
   }
 }
 
+let throttleTimer;
+function throttle(func, delay) {
+  if (throttleTimer) return;
+
+  throttleTimer = setTimeout(() => {
+    func();
+    throttleTimer = null;
+  }, delay);
+}
+
+function getOffsetTop(originalElem) {
+  let offsetTop = 0;
+  let elem = originalElem;
+  while (elem) {
+    offsetTop += elem.offsetTop;
+    elem = elem.offsetParent;
+  }
+  return offsetTop;
+}
+
+function makeSticky() {
+  const adWrappers = document.querySelectorAll('.ad-wrapper');
+  const lastAd = adWrappers[adWrappers.length - 1];
+
+  const bannerWrappers = document.querySelectorAll('.banner-wrapper');
+  const lastBanner = bannerWrappers[bannerWrappers.length - 1];
+
+  const lastAdOffsetTop = getOffsetTop(lastAd) + 1230;
+
+  let isSticky = false;
+
+  function handleScroll() {
+    const { scrollY } = window;
+    const screenWidth = window.innerWidth;
+    const mobileScreenWidthThreshold = 768;
+
+    const shouldStick = scrollY >= lastAdOffsetTop && screenWidth > mobileScreenWidthThreshold;
+
+    if (shouldStick !== isSticky) {
+      isSticky = shouldStick;
+
+      if (isSticky) {
+        lastAd.style.position = 'fixed';
+        lastAd.style.top = '0';
+        lastAd.style.width = '330px';
+
+        lastBanner.style.position = 'fixed';
+        lastBanner.style.top = '300px';
+        lastBanner.style.width = '330px';
+      } else {
+        lastAd.style.position = 'static';
+        lastAd.style.top = 'auto';
+        lastAd.style.width = 'auto';
+
+        lastBanner.style.position = 'static';
+        lastBanner.style.top = 'auto';
+        lastBanner.style.width = 'auto';
+      }
+    }
+  }
+
+  // Attach the throttled scroll event listener
+  window.addEventListener('scroll', () => throttle(handleScroll, 200));
+}
+
 function loadDelayedAds(main) {
   try {
     addMartechStack();
@@ -132,6 +197,7 @@ async function loadShareThis() {
 }
 
 await loadRightAdFragment();
+makeSticky();
 loadDelayedAds(document.querySelector('main'));
 loadShareThis();
 loadScript('/scripts/google-translate-init.js', { defer: true });
