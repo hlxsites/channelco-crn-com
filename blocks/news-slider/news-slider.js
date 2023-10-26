@@ -177,6 +177,7 @@ export default function decorate(block) {
         const main = document.querySelector('main');
 
         main.querySelector('.category-main-articles').dataset.cardCount = 5;
+        main.querySelector('.category-main-articles').style.display = 'block';
         main.querySelector('.category-sub-articles').dataset.cardCount = 8;
 
         getArticlesByKeyword(keyword).then((articles) => {

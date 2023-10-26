@@ -74,7 +74,7 @@ export function loadEager(main) {
 
   if (pageIndex === 1) {
     buildArticleCardsBlock(5, 'category', (leadCards) => {
-      leadCards.classList.add('lead-article');
+      leadCards.classList.add('lead-article', 'category-main-articles');
       firstSection.insertBefore(leadCards, lastElement);
     });
   }
@@ -103,10 +103,9 @@ export async function loadLazy(main) {
   if (!lastSection) {
     return;
   }
-
   const articles = await getArticlesByCategory(getTitle(), pageIndex);
 
   loadTemplateArticleCards(main, 'category', articles);
-  const categoryNavigation = prevNextBtn(articles.length);
+  const categoryNavigation = prevNextBtn();
   lastSection.append(categoryNavigation);
 }
