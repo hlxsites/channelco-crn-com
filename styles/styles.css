@@ -32,6 +32,7 @@
   --heading-font-family: arial, verdana, "sans serif";
   --body-font-family: arial, verdana, "sans serif";
   --fixed-font-family: "Roboto Mono", menlo, consolas, "Liberation Mono", monospace;
+  --article-heading-family : 'Arial Black', arial, sans-serif;
 
   /* body sizes */
   --body-font-size-l: 1.125rem;
