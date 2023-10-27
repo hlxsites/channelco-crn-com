@@ -133,16 +133,17 @@ function makeSticky() {
   const bannerWrappers = document.querySelectorAll('.banner-wrapper');
   const lastBanner = bannerWrappers[bannerWrappers.length - 1];
 
-  const lastAdOffsetTop = getOffsetTop(lastAd) + 1230;
+  const screenWidth = window.innerWidth;
+  const mobileScreenWidthThreshold = 768;
+  let buffer = 1167.5;
+
+  const lastAdOffsetTop = getOffsetTop(lastAd) + buffer;
 
   let isSticky = false;
 
   function handleScroll() {
     const { scrollY } = window;
-    const screenWidth = window.innerWidth;
-    const mobileScreenWidthThreshold = 768;
-
-    const shouldStick = scrollY >= lastAdOffsetTop && screenWidth > mobileScreenWidthThreshold;
+    const shouldStick = scrollY >= lastAdOffsetTop && screenWidth >= mobileScreenWidthThreshold;
 
     if (shouldStick !== isSticky) {
       isSticky = shouldStick;
@@ -153,7 +154,7 @@ function makeSticky() {
         lastAd.style.width = '330px';
 
         lastBanner.style.position = 'fixed';
-        lastBanner.style.top = '300px';
+        lastBanner.style.top = '305px';
         lastBanner.style.width = '330px';
       } else {
         lastAd.style.position = 'static';
@@ -170,6 +171,7 @@ function makeSticky() {
   // Attach the throttled scroll event listener
   window.addEventListener('scroll', () => throttle(handleScroll, 200));
 }
+
 
 function loadDelayedAds(main) {
   try {
