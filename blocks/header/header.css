@@ -345,7 +345,7 @@ header nav .nav-search-container {
     margin-left: 4px;
   }
 
-  .close-button button span > svg {
+  .close-button button span > img {
     border: 1px solid black;
     border-radius: 50%;
   }
