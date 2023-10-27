@@ -1,4 +1,5 @@
 import { readBlockConfig } from '../../scripts/lib-franklin.js';
+import { getArticlesByKeyword, loadTemplateArticleCards } from '../../scripts/shared.js';
 
 function addDragEvents(handle, carousel, isTabsBlock) {
   const RESISTANCE_FACTOR = 5;
@@ -161,13 +162,30 @@ export default function decorate(block) {
       link.className = 'eyebrow-link';
       link.textContent = item.textContent;
 
-      link.addEventListener('click', (event) => {
+      function handleLinkClick(event) {
         event.preventDefault();
+
+        // Removing the active class from all links and adding to the clicked link
         document.querySelectorAll('.eyebrow-link').forEach((el) => {
           el.classList.remove('active-tab');
         });
         this.classList.add('active-tab');
-      });
+
+        // replace / by -
+        const keyword = this.textContent.trim().replace(/\//g, '-');
+
+        const main = document.querySelector('main');
+
+        main.querySelector('.category-main-articles').dataset.cardCount = 5;
+        main.querySelector('.category-main-articles').style.display = 'block';
+        main.querySelector('.category-sub-articles').dataset.cardCount = 8;
+
+        getArticlesByKeyword(keyword).then((articles) => {
+          loadTemplateArticleCards(main, 'category', articles);
+        });
+      }
+
+      link.addEventListener('click', handleLinkClick);
 
       li.appendChild(link);
       ul.appendChild(li);
@@ -227,17 +245,18 @@ export default function decorate(block) {
   newsSlider.appendChild(carousel);
   addDragEvents(handle, carousel, isTabsBlock);
 
-  const main = document.querySelector('main');
-  const topSection = main.querySelector('.top-section');
-  const newsWrapper = main.querySelector('.news-slider-wrapper');
+  if (!isTabsBlock) {
+    const main = document.querySelector('main');
+    const topSection = main.querySelector('.top-section');
+    const newsWrapper = main.querySelector('.news-slider-wrapper');
 
-  if (newsWrapper) {
-    newsWrapper.parentElement.classList.remove('news-slider-container');
-    topSection.appendChild(newsWrapper);
-    newsWrapper.parentElement.classList.add('news-slider-container');
+    if (newsWrapper) {
+      newsWrapper.parentElement.classList.remove('news-slider-container');
+      topSection.appendChild(newsWrapper);
+      newsWrapper.parentElement.classList.add('news-slider-container');
+    }
+    main.prepend(topSection);
   }
-
-  main.prepend(topSection);
 
   // Replace the original block with our decorated one
   block.replaceWith(newsSlider);
