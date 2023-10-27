@@ -8,17 +8,19 @@ const isDesktop = window.matchMedia('(min-width: 900px)');
 function closeSearch() {
   document.querySelector('nav .nav-search').classList.remove('active');
 }
+
 function closeMenu() {
-  document.querySelectorAll('nav .menu-items div').forEach((el) => {
-    el.setAttribute('aria-expanded', 'false');
+  ['.menu-items div', '.desktop', '.desktop-menu', '.mobile', '.mobile-menu', '.mobile-menu li'].forEach((selector) => {
+    document.querySelectorAll(selector).forEach((el) => {
+      if (el.hasAttribute('aria-expanded')) {
+        el.setAttribute('aria-expanded', 'false');
+      } if (el.hasAttribute('expanded')) {
+        el.setAttribute('expanded', 'false');
+      } if (selector === '.mobile') {
+        el.style.height = '0px';
+      }
+    });
   });
-  document.querySelectorAll('main #menu-container div').forEach((el) => {
-    el.setAttribute('aria-expanded', 'false');
-  });
-  const menuContainer = document.querySelector('main #menu-container');
-  if (menuContainer) {
-    menuContainer.setAttribute('aria-expanded', 'false');
-  }
 }
 
 function closeOnEscape(e) {
@@ -41,25 +43,8 @@ function closeOnEscape(e) {
     if (search && search.classList.contains('active')) {
       closeSearch();
     }
-    const menuItems = document.querySelectorAll('nav [aria-expanded="true"]');
-    if (menuItems.length > 0) {
-      closeMenu();
-    }
+    closeMenu();
   }
-}
-function openOnKeydown(e) {
-  const focused = document.activeElement;
-  const isNavDrop = focused.className === 'nav-drop';
-  if (isNavDrop && (e.code === 'Enter' || e.code === 'Space')) {
-    const dropExpanded = focused.getAttribute('aria-expanded') === 'true';
-    // eslint-disable-next-line no-use-before-define
-    toggleAllNavSections(focused.closest('.nav-sections'));
-    focused.setAttribute('aria-expanded', dropExpanded ? 'false' : 'true');
-  }
-}
-
-function focusNavSection() {
-  document.activeElement.addEventListener('keydown', openOnKeydown);
 }
 
 /**
@@ -121,28 +106,11 @@ function decorateSearch(nav) {
 function toggleMenu(nav, navSections, forceExpanded = null) {
   const expanded = forceExpanded !== null ? !forceExpanded : nav.getAttribute('aria-expanded') === 'true';
   const button = nav.querySelector('.nav-hamburger button');
-  document.body.style.overflowY = (expanded || isDesktop.matches) ? '' : 'hidden';
+  // document.body.style.overflowY = (expanded || isDesktop.matches) ? '' : 'hidden';
   nav.setAttribute('aria-expanded', expanded ? 'false' : 'true');
   toggleAllNavSections(navSections, expanded || isDesktop.matches ? 'false' : 'true');
   button.setAttribute('aria-label', expanded ? 'Open navigation' : 'Close navigation');
 
-  // enable nav dropdown keyboard accessibility
-  const navDrops = navSections.querySelectorAll('.nav-drop');
-  if (isDesktop.matches) {
-    navDrops.forEach((drop) => {
-      if (!drop.hasAttribute('tabindex')) {
-        drop.setAttribute('role', 'button');
-        drop.setAttribute('tabindex', 0);
-        drop.addEventListener('focus', focusNavSection);
-      }
-    });
-  } else {
-    navDrops.forEach((drop) => {
-      drop.removeAttribute('role');
-      drop.removeAttribute('tabindex');
-      drop.removeEventListener('focus', focusNavSection);
-    });
-  }
   // enable menu collapse on escape keypress
   if ((expanded && !isDesktop.matches) || isDesktop.matches) {
     window.addEventListener('keydown', closeOnEscape);
@@ -182,15 +150,16 @@ export default async function decorate(block) {
 
     const menuContainer = document.createElement('div');
     menuContainer.id = 'menu-container';
+    menuContainer.classList.add('desktop');
     menuContainer.setAttribute('aria-expanded', 'false');
 
     if (navSections) {
       navSections.querySelectorAll(':scope > .navigation > div:nth-child(odd) > div').forEach((menuItem, index) => {
         menuItems.append(menuItem);
-        menuItem.setAttribute('aria-expanded', 'false');
+        menuItem.setAttribute('expanded', 'false');
 
         menuItem.addEventListener('click', () => {
-          const currentState = menuItem.getAttribute('aria-expanded') === 'true';
+          const currentState = menuItem.getAttribute('expanded') === 'true';
           const newState = !currentState;
 
           Array.from(menuItems.children).forEach((el) => {
@@ -221,7 +190,7 @@ export default async function decorate(block) {
 
       navSections.querySelectorAll(':scope > .navigation > div:nth-child(even)').forEach((menuContent, index) => {
         menuContainer.appendChild(menuContent);
-        menuContent.classList.add('menu-section');
+        // menuContent.classList.add('menu-section');
         menuContent.classList.add('desktop-menu');
         menuContent.setAttribute('aria-expanded', 'false');
 
@@ -265,13 +234,91 @@ export default async function decorate(block) {
     block.append(navWrapper);
     navSections.append(menuItems);
 
-    // nav container
+    // mobile nav container
+
+    const setHeight = (element) => {
+      if (element.classList.contains('mobile') || element.closest('.mobile')) {
+        const mobileContainer = document.querySelector('.mobile');
+        if (mobileContainer.getAttribute('aria-expanded') === 'true') {
+          const contentHeight = mobileContainer.firstElementChild.offsetHeight;
+          mobileContainer.style.height = `${contentHeight}px`;
+        } else {
+          mobileContainer.style.height = '0px';
+        }
+      }
+    };
+
+    const toggleMobile = (mobileMenu) => {
+      const ariaCurrentState = mobileMenu.getAttribute('aria-expanded');
+      const ariaNewState = ariaCurrentState === 'true' ? 'false' : 'true';
+      mobileMenu.setAttribute('aria-expanded', ariaNewState);
+
+      if (mobileMenu.hasAttribute('expanded')) {
+        const expandedCurrentState = mobileMenu.getAttribute('expanded');
+        const expandedNewState = expandedCurrentState === 'true' ? 'false' : 'true';
+        mobileMenu.setAttribute('expanded', expandedNewState);
+      }
+      setHeight(mobileMenu);
+    };
+
     const main = document.querySelector('main');
     const parentElement = main.parentNode;
     const menuEl = document.createElement('div');
     menuEl.classList.add('nav-container');
-    parentElement.insertBefore(menuEl, main);
+    const mobile = document.createElement('div');
+    mobile.classList.add('mobile');
+    mobile.style.height = '0px';
+    mobile.setAttribute('aria-expanded', 'false');
 
-    menuEl.append(menuContainer);
+    const clone = menuItems.cloneNode(true);
+    mobile.appendChild(clone);
+
+    hamburger.addEventListener('click', () => {
+      toggleMobile(mobile);
+    });
+
+    const menuItemsDivs = mobile.querySelectorAll('.menu-items > div');
+    menuItemsDivs.forEach((divItem) => {
+      divItem.addEventListener('click', () => {
+        toggleMobile(divItem);
+        const items = divItem.querySelector('.mobile-menu');
+        if (items) {
+          toggleMobile(items);
+        }
+      });
+    });
+
+    mobile.querySelectorAll('.mobile-menu ul').forEach((ul) => {
+      if (ul.querySelector('code')) {
+        ul.remove();
+      }
+    });
+
+    const items = mobile.querySelectorAll('.mobile-menu');
+    items.forEach((item) => {
+      item.addEventListener('click', (event) => {
+        const closestLi = event.target.closest('li');
+        if (closestLi && closestLi.hasAttribute('expanded')) {
+          event.stopPropagation();
+          toggleMobile(closestLi);
+        }
+      });
+    });
+
+    const closeBtn = document.createElement('div');
+    closeBtn.innerHTML = `
+          <button>Close
+            <span class="circle">
+            <img src=icons/x.svg>
+          </svg>
+            </span>
+          </button>
+          `;
+    closeBtn.classList.add('close-button');
+    closeBtn.querySelector('button').onclick = closeMenu;
+
+    menuContainer.prepend(closeBtn);
+    parentElement.insertBefore(menuEl, main);
+    menuEl.append(menuContainer, mobile);
   }
 }

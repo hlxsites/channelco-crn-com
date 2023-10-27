@@ -54,7 +54,7 @@
   --heading-font-size-xs: 0.625rem;
 
   /* nav height */
-  --nav-height: 100px;
+  --nav-height: 120px;
 
   /* crn variables */
   --padding-spacer-x: 1.5rem;
@@ -91,6 +91,7 @@ body {
   height: 100%;
   width: 100%;
   max-width: 1140px;
+  margin-top: 33px;
 }
 
 body.appear {
