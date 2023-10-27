@@ -1,0 +1,65 @@
+.filter-list .filters {
+  display: flex;
+  flex-direction: column;
+  background-color: #cbcbcb;
+  padding: 20px;
+  border: 1px solid gray;
+  margin-bottom: 0.6em;
+}
+
+.filter-list .filters .dropdown {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-list .filters .dropdown select {
+  word-wrap: normal;
+  margin: 0;
+  height: 40px;
+}
+
+.filter-list .table {
+  font-size: small;
+  max-width: 760px;
+  border: 1px solid #707070;
+  border-radius: 15px;
+  padding: 20px;
+}
+
+.filter-list .table table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.filter-list .table .load-more {
+  width: 100%;
+  text-align: center;
+  padding-top: 20px;
+}
+
+.filter-list .table .load-more button {
+  color: var(--clr-red);
+  border-style: none;
+  background-color: var(--clr-white);
+}
+
+.filter-list thead {
+  text-align: left;
+}
+
+.filter-list th {
+  padding: 0.5em;
+}
+
+.filter-list td {
+  padding: 0.5em;
+  border: 1px solid #cbcbcd;
+}
+
+.filter-list tr.row1 {
+  background-color: #f7f7f7;
+}
+
+.filter-list tr.row2 {
+  background-color: #e7e7e7;
+}
