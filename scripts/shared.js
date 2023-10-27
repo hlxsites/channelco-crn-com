@@ -1274,8 +1274,8 @@ export function getFilterInfoLocation(dataSource) {
 export function isURL(str) {
   const urlPattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w- ./?%&=]*)?$/;
   return urlPattern.test(str);
-} 
- 
+}
+
 function showHideNextBtn(nextBtn, length, count) {
   if (length < 16 && count > 1) {
     nextBtn.parentElement.classList.add('disabled');
