@@ -242,6 +242,32 @@ const createAdBlock = (adBlock, main, document) => {
   });
 };
 
+/** create Marketo block */
+const createMarketo = (main, document) => {
+  const table = main.querySelector('.GListMap > table');
+
+  if (table) {
+    main.querySelectorAll('.GListMap > table p').forEach((paragraph) => {
+      main.append(paragraph);
+    // paragraph.remove();
+    });
+    table.remove();
+  }
+  const marketoForm = main.querySelector('.GListMap > form');
+  if (marketoForm) {
+    const formId = marketoForm.id;
+    const id = formId.match(/\d+/);
+    let extractedNumber;
+    if (id) {
+      extractedNumber = id[0];
+    }
+    const cells = [['Marketo']];
+    cells.push(['id', extractedNumber]);
+    const marketoTable = WebImporter.DOMUtils.createTable(cells, document);
+    main.append(marketoTable);
+  }
+};
+
 const removeLearnMore = (main, document) => {
   main.querySelectorAll('.card').forEach((card) => {
     const learnMore = card.querySelector('.learn-more-md');
@@ -315,14 +341,15 @@ export default {
     // use helper method to remove header, footer, etc.
     const templateType = document.querySelector('[name="templateType"]');
     template = templateType;
-    if (templateType.content === 'article' || templateType.content === 'slideshow') {
-      createAuthorBio(main, document);
+    if (templateType.content === 'article' || templateType.content === 'slideshow' || templateType.content === 'channelcast') {
+      // createAuthorBio(main, document);
       const adBlock = document.getElementById('imu1forarticles');
       if (adBlock) {
         createAdBlock(adBlock, main, document);
       }
-      createMetadata(main, document);
       removeLearnMore(main, document);
+      createMarketo(main, document);
+      createMetadata(main, document);
       let { pathname } = new URL(url);
       if (!pathname.includes('.html') && pathname.indexOf('htm') < pathname.length - 3) {
         pathname = pathname.replace('.htm', '');
