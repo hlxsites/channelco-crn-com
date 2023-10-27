@@ -29,6 +29,7 @@ const map = {
   },
 };
 
+// eslint-disable-next-line no-unused-vars
 function createFilterBlock(main, url, document, form) {
   const urlArr = url.split('/');
   const reportCode = urlArr[urlArr.length - 1].match(/^[^\d]*/)[0];
@@ -94,7 +95,7 @@ export default {
 
     return main;
   },
-  // eslint-disable-next-line no-unused-vars
+  // eslint-disable-next-line no-unused-vars, object-curly-newline
   generateDocumentPath: ({ document, url, html, params }) => WebImporter.FileUtils.sanitizePath(
     new URL(url).pathname.replace(/\.htm$/, ''),
   ),

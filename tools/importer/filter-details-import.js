@@ -57,7 +57,7 @@ export default {
 
     return main;
   },
-  // eslint-disable-next-line no-unused-vars
+  // eslint-disable-next-line no-unused-vars, object-curly-newline
   generateDocumentPath: ({ document, url, html, params }) => WebImporter.FileUtils.sanitizePath(
     new URL(url).pathname.replace(/\.htm$/, ''),
   ),

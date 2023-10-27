@@ -17,7 +17,7 @@
   vertical-align: top;
   margin-top: 1.5em;
   text-transform: uppercase;
-  background: linear-gradient(180deg, rgba(185,185,185,1) 0%, rgba(255,255,255,1) 100%);
+  background: linear-gradient(180deg, rgb(185 185 185) 0%, rgb(255 255 255) 100%);
 }
 
 .filter-details .details .prompt {
@@ -30,12 +30,12 @@
   padding-top: 5px;
   padding-bottom: 10px;
   margin-bottom: 10px;
-  background: linear-gradient(90deg, rgba(185,185,185,1) 0%, rgba(255,255,255,1) 100%);
+  background: linear-gradient(90deg, rgb(185 185 185) 0%, rgb(255 255 255) 100%);
 }
 
 .filter-details .details .answer {
   vertical-align: top;
-  background-color: #ffffff;
+  background-color: #fff;
   line-height: 100%;
   text-align: left;
   padding-top: 0.25em;
