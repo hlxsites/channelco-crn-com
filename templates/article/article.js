@@ -1,4 +1,10 @@
-import { getMetadata } from '../../scripts/lib-franklin.js';
+import {
+  getMetadata,
+  buildBlock,
+  decorateBlock,
+  loadBlock,
+} from '../../scripts/lib-franklin.js';
+
 import {
   getCategoryName,
   getCategoryPath,
@@ -10,6 +16,7 @@ import {
   buildSocialShare,
   getRelatedArticles,
   getLastDefaultSection,
+  createArticle,
 } from '../../scripts/shared.js';
 
 function getArticleByMetadata() {
@@ -29,22 +36,21 @@ function getArticleByMetadata() {
  */
 // eslint-disable-next-line import/prefer-default-export
 export function loadEager(main) {
+  const slideshow = getMetadata('slideshow');
   const heading = main.querySelector('h1');
   if (!heading) {
     return;
   }
-  const picture = main.querySelector('picture');
-  if (!picture) {
-    return;
+  if (slideshow !== 'true') {
+    const picture = main.querySelector('picture');
+    if (!picture) {
+      return;
+    }
+    buildSocialShare(picture);
   }
-
-  buildSocialShare(picture);
-
   const article = getArticleByMetadata();
-
   const categoryPath = getCategoryPath(article.path);
   const categoryName = getCategoryName(article);
-
   const categoryLink = document.createElement('a');
   categoryLink.classList.add('link-arrow', 'article-category-link');
   categoryLink.innerText = categoryName;
@@ -55,6 +61,14 @@ export function loadEager(main) {
 
   const authorContainer = buildArticleAuthor(article);
   heading.parentElement.insertBefore(authorContainer, heading.nextSibling);
+  if (slideshow === 'true') {
+    const count = createArticle(main);
+    if (count > 1) {
+      main.dataset.articleCount = count - 1;
+    } else {
+      main.dataset.articleCount = count;
+    }
+  }
 }
 
 /**
@@ -65,14 +79,24 @@ export function loadEager(main) {
 // eslint-disable-next-line import/prefer-default-export
 export async function loadLazy(main) {
   const article = getArticleByMetadata();
-
   const lastSection = getLastDefaultSection(main);
   if (!lastSection) {
     return;
   }
-
-  const author = await getAuthorByName(article.author);
+  if (getMetadata('slideshow') === 'true') {
+    const paginationTop = buildBlock('pagination', { elems: [] });
+    const paginationBottom = buildBlock('pagination', { elems: [] });
+    const paginationPlaceholder = main.querySelector('.pagination-placeholder');
+    paginationPlaceholder.parentElement
+      .insertBefore(paginationTop, paginationPlaceholder.nextSibling);
+    lastSection.append(paginationBottom);
+    decorateBlock(paginationBottom);
+    decorateBlock(paginationTop);
+    await loadBlock(paginationTop);
+    await loadBlock(paginationBottom);
+  }
   await buildLearnMore(lastSection, article.keywords);
+  const author = await getAuthorByName(article.author);
   if (author) {
     await buildAuthorBlades(lastSection, [author]);
     const authorLink = lastSection.querySelector(
@@ -82,7 +106,6 @@ export async function loadLazy(main) {
       authorLink.classList.add('link-arrow');
     }
   }
-
   const related = await getRelatedArticles(article);
   await buildRelatedContent(lastSection, related);
 }

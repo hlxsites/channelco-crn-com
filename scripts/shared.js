@@ -1359,3 +1359,31 @@ export function prevNextBtn() {
   divContainer.append(nextDiv);
   return divContainer;
 }
+
+/** Create Article */
+export function createArticle(main) {
+  const usp = new URLSearchParams(window.location.search);
+  const pageNum = Number(usp.get('page') || 1);
+  let count = 0;
+  const paginationPlaceholder = document.createElement('div');
+  paginationPlaceholder.classList.add('pagination-placeholder');
+  main.querySelectorAll('div.section > .default-content-wrapper').forEach((section, index) => {
+    if (index > 0) {
+      if (index === pageNum) {
+        section.style.display = 'block';
+        section.parentElement.insertBefore(paginationPlaceholder, section);
+        const picture = section.querySelector('picture');
+        const pFirstOfType = section.querySelector('p:first-of-type');
+        if (picture) {
+          buildSocialShare(picture);
+        } else {
+          buildSocialShare(pFirstOfType);
+        }
+      } else {
+        section.style.display = 'none';
+      }
+    }
+    count += 1;
+  });
+  return count;
+}
