@@ -2,21 +2,31 @@
 
 /* header and nav layout */
 header {
+  position: relative;
   height: 120px;
+}
+
+header::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: black;
 }
 
 header .nav-wrapper {
   background-color: var(--background-color);
   width: 100%;
   z-index: 2;
-  border-top: 2px solid red;
 }
 
 header nav {
   display: flex;
   justify-content: space-between;
   box-sizing: border-box;
-  border-top: 2px solid black;
+  border-top: 2px solid red;
   border-bottom: 2px solid red;
   align-items: center;
   max-width: 1264px;
@@ -102,7 +112,7 @@ header nav[aria-expanded='true'] .nav-hamburger-icon::after {
   top: 9px;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 993px) {
   header nav .nav-hamburger {
     display: none;
     visibility: hidden;
@@ -220,7 +230,7 @@ header nav .nav-search-container {
   margin: 1rem auto;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 993px) {
   .nav-container > .mobile {
     display: none;
   }
@@ -369,7 +379,7 @@ header nav .nav-search-container {
   }
 }
 
-@media (max-width: 899px) {
+@media (max-width: 992px) {
   .nav-sections {
     display: none;
   }
@@ -446,7 +456,7 @@ header nav .nav-search-container {
  .mobile .menu-items {
     font-size: var(--body-font-size-m);
     color: var(--clr-grey);
-    padding: 10px 0 10px 60px;
+    padding: 3px 0 10px 30px;
 }
 
 .mobile .menu-items div {
@@ -456,8 +466,12 @@ header nav .nav-search-container {
     overflow: hidden;
 }
 
- .mobile .menu-items div:hover {
-    color: black;
+.mobile .menu-items div:hover{
+  color: black;
+}
+
+.mobile .menu-items div[aria-expanded='true'] {
+  color: black;
 }
 
 .mobile-menu {
@@ -501,6 +515,9 @@ header nav .nav-search-container {
     font-weight: normal;
     color: black;
     padding: 4px 60px 4px 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .mobile-menu ul li ul li:hover {
