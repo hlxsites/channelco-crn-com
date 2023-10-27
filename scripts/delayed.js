@@ -135,7 +135,7 @@ function makeSticky() {
 
   const screenWidth = window.innerWidth;
   const mobileScreenWidthThreshold = 768;
-  let buffer = 1167.5;
+  const buffer = 1167.5;
 
   const lastAdOffsetTop = getOffsetTop(lastAd) + buffer;
 
@@ -171,7 +171,6 @@ function makeSticky() {
   // Attach the throttled scroll event listener
   window.addEventListener('scroll', () => throttle(handleScroll, 200));
 }
-
 
 function loadDelayedAds(main) {
   try {
