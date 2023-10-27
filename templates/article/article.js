@@ -29,9 +29,6 @@ function getArticleByMetadata() {
   };
 }
 
-const usp = new URLSearchParams(window.location.search);
-const pageIndex = Number(usp.get('page') || 1);
-
 /**
  * Processes the DOM as necessary in order to auto block items required
  * for all articles.
@@ -41,19 +38,10 @@ const pageIndex = Number(usp.get('page') || 1);
 export function loadEager(main) {
   const slideshow = getMetadata('slideshow');
   const heading = main.querySelector('h1');
-  let articleCount = 1;
   if (!heading) {
     return;
   }
-  if (slideshow === 'true') {
-    const pictures = main.querySelectorAll('picture');
-    pictures.forEach((picture, index) => {
-      if (index + 1 === pageIndex) {
-        buildSocialShare(picture);
-      }
-      articleCount += 1;
-    });
-  } else {
+  if (slideshow !== 'true') {
     const picture = main.querySelector('picture');
     if (!picture) {
       return;
@@ -61,10 +49,8 @@ export function loadEager(main) {
     buildSocialShare(picture);
   }
   const article = getArticleByMetadata();
-
   const categoryPath = getCategoryPath(article.path);
   const categoryName = getCategoryName(article);
-
   const categoryLink = document.createElement('a');
   categoryLink.classList.add('link-arrow', 'article-category-link');
   categoryLink.innerText = categoryName;
@@ -76,8 +62,12 @@ export function loadEager(main) {
   const authorContainer = buildArticleAuthor(article);
   heading.parentElement.insertBefore(authorContainer, heading.nextSibling);
   if (slideshow === 'true') {
-    createArticle(main);
-    main.dataset.articleCount = articleCount - 1;
+    const count = createArticle(main);
+    if (count > 1) {
+      main.dataset.articleCount = count - 1;
+    } else {
+      main.dataset.articleCount = count;
+    }
   }
 }
 
@@ -89,7 +79,6 @@ export function loadEager(main) {
 // eslint-disable-next-line import/prefer-default-export
 export async function loadLazy(main) {
   const article = getArticleByMetadata();
-
   const lastSection = getLastDefaultSection(main);
   if (!lastSection) {
     return;
@@ -97,16 +86,17 @@ export async function loadLazy(main) {
   if (getMetadata('slideshow') === 'true') {
     const paginationTop = buildBlock('pagination', { elems: [] });
     const paginationBottom = buildBlock('pagination', { elems: [] });
-    const pFirstOfType = main.querySelector('p:first-of-type');
-    pFirstOfType.parentElement.insertBefore(paginationTop, pFirstOfType.nextSibling);
+    const paginationPlaceholder = main.querySelector('.pagination-placeholder');
+    paginationPlaceholder.parentElement
+      .insertBefore(paginationTop, paginationPlaceholder.nextSibling);
     lastSection.append(paginationBottom);
     decorateBlock(paginationBottom);
     decorateBlock(paginationTop);
     await loadBlock(paginationTop);
     await loadBlock(paginationBottom);
   }
-  const author = await getAuthorByName(article.author);
   await buildLearnMore(lastSection, article.keywords);
+  const author = await getAuthorByName(article.author);
   if (author) {
     await buildAuthorBlades(lastSection, [author]);
     const authorLink = lastSection.querySelector(

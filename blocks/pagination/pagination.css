@@ -29,7 +29,7 @@
     font-size: var(--heading-font-size-l);
     color: var(--clr-red);
     text-decoration: none;
-    text-transform: uppercase;
+    text-transform: uppercase;    
   }
   
   .page-link {
