@@ -91,11 +91,14 @@ async function onDropdownChange(block, dropdown, spreadsheet, year, filters, key
 }
 
 export default async function decorate(block) {
-  const config = readBlockConfig(block);
-  const dataSource = config['data-source'];
-  const { year } = config;
+  const currentUrlArray = window.location.href.split('/');
+  currentUrlArray[currentUrlArray.length - 1] = `${currentUrlArray[currentUrlArray.length - 1]}-details`;
+  const detailsUrl = currentUrlArray.join('/');
+  const [dataSource, year] = currentUrlArray[currentUrlArray.length - 1].split('-');
   const spreadsheet = `/data-source/${dataSource}/${dataSource}-data.json`;
   const dataMapSheet = `/data-source/${dataSource}/data-mapping.json`;
+
+  const config = readBlockConfig(block);
   const filterFields = config['filter-fields'].split(',');
   const tableFields = config['table-fields'].split(',');
 
@@ -104,10 +107,6 @@ export default async function decorate(block) {
   promises.push(ffetch(dataMapSheet).sheet(year).all());
 
   const [data, dataMap] = await Promise.all(promises);
-
-  const currentUrlArray = window.location.href.split('/');
-  currentUrlArray[currentUrlArray.length - 1] = `${currentUrlArray[currentUrlArray.length - 1]}-details`;
-  const detailsUrl = currentUrlArray.join('/');
 
   // Clear block contents
   block.innerHTML = '';
