@@ -91,13 +91,16 @@ main .top-section.auto-section .breadcrumb-list a {
 
 main .bottom-section.auto-section {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  min-height: 100px;
-  z-index: 500;
-  background-color: rgba(230, 230, 230, 0.7);
   text-align: center;
+  left: 0;
+  bottom: 0;
+  min-height: 50px;
+  width: 380px;
+  min-width: 380px;
+  z-index: 500;
+  left: 50%;
+  background-color: rgba(230, 230, 230, 0.7);
+  margin-left: -190px;
 }
 
 main .back-to-top {
@@ -157,12 +160,11 @@ main .right-ad-section {
   main .bottom-section.auto-section {
     width: 100%;
     min-height: 75px;
-    margin-left: -50%;
-    left: 50%;
+    left: 0;
   }
 }
 
-@media (min-width: 992px) {
+@media (min-width: 768px) {
   /* avoids CLS before the right ad section moves into place */
   main > .section:not(.auto-section) {
     margin-right: calc(var(--padding-spacer-x) + 330px);
@@ -218,5 +220,6 @@ main .right-ad-section {
   main .bottom-section.auto-section {
     max-width: 1140px;
     margin-left: -570px;
+    left: 50%;
   }
 }

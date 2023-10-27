@@ -11,10 +11,7 @@ export default async function decorate(block) {
 
   // fetch footer content
   const footerPath = cfg.footer || '/footer';
-  const resp = await fetch(
-    `${footerPath}.plain.html`,
-    window.location.pathname.endsWith('/footer') ? { cache: 'reload' } : {},
-  );
+  const resp = await fetch(`${footerPath}.plain.html`, window.location.pathname.endsWith('/footer') ? { cache: 'reload' } : {});
 
   if (resp.ok) {
     const html = await resp.text();
@@ -23,59 +20,78 @@ export default async function decorate(block) {
     const footer = document.createElement('div');
     footer.innerHTML = html;
 
+    // Creating footer-nav div
+    const footerNav = document.createElement('div');
+    footerNav.className = 'footer-nav';
+
+    // Creating first footer-row with footer-main as child
+    const footerRow1 = document.createElement('div');
+    footerRow1.className = 'footer-row';
+    const footerMain = footer.querySelector('.footer-main');
+    footerRow1.appendChild(footerMain.cloneNode(true));
+    footerMain.remove();
+
+    // Creating second footer-row with footer-sublinks, spacer, and footer-social as children
+    const footerRow2 = document.createElement('div');
+    footerRow2.className = 'footer-row';
+    const footerSublinks = footer.querySelector('.footer-sublinks');
+    const footerSocial = footer.querySelector('.footer-social');
+    const spacer = document.createElement('div');
+    spacer.className = 'spacer';
+
+    // handle icons
+    const paragraphs = footerSocial.querySelectorAll('p');
+
+    // Wrap the first p tag in follow-crn
+    const followCrn = document.createElement('div');
+    followCrn.className = 'follow-crn';
+    followCrn.appendChild(paragraphs[0].cloneNode(true));
+    paragraphs[0].remove();
+
+    // Wrap the rest of the p tags in social-icons
+    const socialIcons = document.createElement('div');
+    socialIcons.className = 'social-icons';
+    paragraphs.forEach((p, index) => {
+      if (index > 0) {
+        socialIcons.appendChild(p.cloneNode(true));
+        p.remove();
+      }
+    });
+
+    // Append the new divs back to footer-social
+    footerSocial.appendChild(followCrn);
+    footerSocial.appendChild(socialIcons);
+
+    footerRow2.appendChild(spacer);
+    footerRow2.appendChild(footerSublinks.cloneNode(true));
+    footerRow2.appendChild(footerSocial.cloneNode(true));
+    footerSublinks.remove();
+    footerSocial.remove();
+
+    // Appending rows to footer-nav
+    footerNav.appendChild(footerRow1);
+    footerNav.appendChild(footerRow2);
+
+    footer.appendChild(footerNav);
+
     decorateIcons(footer);
     decorateLinkedPictures(footer);
     block.append(footer);
 
-    // create two footer rows
-    const row1 = document.createElement('div');
-    row1.classList.add('footer-row');
-    const row2 = document.createElement('div');
-    row2.classList.add('footer-row');
+    // Select the first div inside .footer.block
+    const topLevelDiv = block.querySelector('div');
 
-    const footerMain = document.querySelector('.footer-main');
-    const footerSublinks = document.querySelector('.footer-sublinks');
-    const footerSocials = document.querySelector('.footer-social');
-    const spacer = document.createElement('div');
-    spacer.classList.add('spacer');
+    if (topLevelDiv) {
+      // Get all the child nodes of the inner div
+      const children = Array.from(topLevelDiv.childNodes);
 
-    row1.appendChild(footerMain);
-    row2.appendChild(spacer);
-    row2.appendChild(footerSublinks);
-    row2.appendChild(footerSocials);
+      // Insert each child node directly inside .footer.block before the topLevelDiv
+      children.forEach((child) => {
+        block.insertBefore(child, topLevelDiv);
+      });
 
-    // wrap footer rows in container
-    const footerNavContainer = document.createElement('div');
-    const footerContainer = document.querySelector('.footer');
-    footerNavContainer.className = 'footer-nav';
-
-    footerNavContainer.appendChild(row1);
-    footerNavContainer.appendChild(row2);
-    footerContainer.appendChild(footerNavContainer);
-
-    // wrap social icons in own container
-    const socialIcons = document.querySelector('.footer-social > div > div');
-    socialIcons.className = 'social-icons';
-    const followCRN = document.querySelector('.footer-social > div');
-    followCRN.className = 'follow-crn';
-
-    const p = socialIcons.querySelector('p');
-    followCRN.appendChild(p);
-
-    footerSocials.appendChild(socialIcons);
+      // Remove the topLevelDiv
+      block.removeChild(topLevelDiv);
+    }
   }
-
-  block
-    .querySelector('.footer-brand a')
-    .setAttribute('aria-label', 'Navigate to homepage');
-  block.querySelectorAll('.footer-social a').forEach((a) => {
-    a.setAttribute('target', '_blank');
-    a.setAttribute('rel', 'noopener noreferrer');
-    a.setAttribute(
-      'aria-label',
-      `Open our ${a.firstElementChild.classList[1].substring(
-        5,
-      )} page in a new tab.`,
-    );
-  });
 }

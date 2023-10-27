@@ -104,26 +104,28 @@ export async function loadLazy(main) {
  * @param {HTMLElement} main The document's main element.
  */
 export function loadEager(main) {
-  const topAdSection = document.createElement('div');
-  topAdSection.className = 'top-ad-section';
-  topAdSection.id = 'top-ad-fragment-container';
+  if (!window.location.pathname.endsWith('/footer')) {
+    const topAdSection = document.createElement('div');
+    topAdSection.className = 'top-ad-section';
+    topAdSection.id = 'top-ad-fragment-container';
 
-  const rightAdSection = document.createElement('div');
-  rightAdSection.className = 'right-ad-section';
-  rightAdSection.id = 'right-ad-fragment-container';
+    const rightAdSection = document.createElement('div');
+    rightAdSection.className = 'right-ad-section';
+    rightAdSection.id = 'right-ad-fragment-container';
 
-  const loadingDiv = document.createElement('div');
-  loadingDiv.className = 'loading-animation';
-  rightAdSection.appendChild(loadingDiv);
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'loading-animation';
+    rightAdSection.appendChild(loadingDiv);
 
-  const breadcrumb = buildBreadcrumb();
+    const breadcrumb = buildBreadcrumb();
 
-  addToTopSection(main, topAdSection);
-  if (breadcrumb) {
-    addToTopSection(main, breadcrumb);
+    addToTopSection(main, topAdSection);
+    if (breadcrumb) {
+      addToTopSection(main, breadcrumb);
+    }
+
+    addToRightSection(main, rightAdSection);
   }
-
-  addToRightSection(main, rightAdSection);
 }
 
 /**
