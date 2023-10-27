@@ -1244,6 +1244,38 @@ export function buildAdBlock(unitId, type, fixedHeight = false) {
   return range.createContextualFragment(rightAdHTML);
 }
 
+/**
+ * Determines whether a given value is in a list of comma-separated values.
+ * @param {string} dataMap Data map from data-source
+ * @param {string} value Value to look for
+ * @returns {string} Mapped string if found, value if not
+ */
+export function dataMapLookup(dataMap, value) {
+  const foundValue = dataMap.find((item) => item.key === value);
+  return foundValue ? foundValue.value : value;
+}
+
+/**
+ * Converts filter source code to location of data and mapping
+ * @param {string} dataSource report code for data source (eg. ppg, ceo)
+ * @returns {Array<string>} Returns data and data map location
+ */
+export function getFilterInfoLocation(dataSource) {
+  const dataSheet = `/data-source/${dataSource}/${dataSource}-data.json`;
+  const dataMapSheet = `/data-source/${dataSource}/data-mapping.json`;
+  return [dataSheet, dataMapSheet];
+}
+
+/**
+ * Checks if a string is a URL
+ * @param {string} str String to check
+ * @returns {Array<string>} Returns true if URL
+ */
+export function isURL(str) {
+  const urlPattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w- ./?%&=]*)?$/;
+  return urlPattern.test(str);
+}
+
 function showHideNextBtn(nextBtn, length, count) {
   if (length < 16 && count > 1) {
     nextBtn.parentElement.classList.add('disabled');

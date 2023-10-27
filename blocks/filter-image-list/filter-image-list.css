@@ -1,0 +1,58 @@
+.filter-image-list .filters {
+  display: flex;
+  flex-direction: column;
+  background-color: #cbcbcb;
+  padding: 20px;
+  border: 1px solid gray;
+  margin-bottom: 0.6em;
+}
+
+.filter-image-list .filters .dropdown {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-image-list .filters .dropdown select {
+  word-wrap: normal;
+  margin: 0;
+  height: 40px;
+}
+
+.filter-image-list .card {
+  border: 1px solid #0087c7;
+  border-radius: 4px;
+  display: inline-block;
+  height: 175px;
+  margin: 1px;
+  font-size: medium;
+  padding: 0.3em;
+  vertical-align: top;
+  width: 106px;
+  line-height: 110%;
+  overflow: hidden;
+}
+
+.filter-image-list .card1 {
+  background-color: #dbe7f3;
+}
+
+.filter-image-list .card2 {
+  background-color: #eee;
+}
+
+.filter-image-list .card > a {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.filter-image-list .load-more {
+  width: 100%;
+  text-align: center;
+  padding-top: 20px;
+}
+
+.filter-image-list .load-more button {
+  color: var(--clr-red);
+  border-style: none;
+  background-color: var(--clr-white);
+}
