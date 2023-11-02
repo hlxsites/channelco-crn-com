@@ -342,7 +342,7 @@ export default {
     const templateType = document.querySelector('[name="templateType"]');
     template = templateType;
     if (templateType.content === 'article' || templateType.content === 'slideshow' || templateType.content === 'channelcast') {
-      // createAuthorBio(main, document);
+      createAuthorBio(main, document);
       const adBlock = document.getElementById('imu1forarticles');
       if (adBlock) {
         createAdBlock(adBlock, main, document);
