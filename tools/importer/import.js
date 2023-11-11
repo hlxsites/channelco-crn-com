@@ -1,3 +1,4 @@
+/* eslint-disable prefer-destructuring */
 /*
  * Copyright 2023 Adobe. All rights reserved.
  * This file is licensed to you under the Apache License, Version 2.0 (the "License");
@@ -49,7 +50,7 @@ const createMetadata = (main, document) => {
   if (category != null) {
     const categoryValue = captializeFirstLetter(category.textContent);
     if (
-      categoryValue.trim() != 'Channel News'
+      categoryValue.trim() !== 'Channel News'
       && categoryValue.includes('News')
     ) {
       meta.category = categoryValue.replace('News', '');
@@ -59,10 +60,11 @@ const createMetadata = (main, document) => {
     category.parentNode.remove();
   }
 
-  const pubishDate = document.querySelector(
-    '[property="article:published_time"]',
-  );
+  let pubishDate = document.querySelector('[property="article:published_time"]');
   if (pubishDate) {
+    meta.PublishedDate = pubishDate.content;
+  } else {
+    pubishDate = document.querySelector('time').textContent;
     meta.PublishedDate = pubishDate.content;
   }
 
@@ -153,12 +155,12 @@ const createFetchMetadata = (main, document) => {
     }
     meta.Template = 'Category';
   }
-  const pubishDate = document.querySelector(
-    '[property="article:published_time"]',
-  );
-  if (pubishDate) {
-    meta.PublishedDate = pubishDate.content;
+
+  const publishDateElement = document.querySelector('[property="article:published_time"]') || document.querySelector('h5 > time');
+  if (publishDateElement) {
+    meta.PublishedDate = publishDateElement.textContent;
   }
+
   const CompanyNames = document.querySelector('[name="CompanyNames"]');
   if (CompanyNames.content) {
     meta.companynames = CompanyNames.content;
@@ -181,7 +183,7 @@ const createFetchMetadata = (main, document) => {
 };
 
 /** create Columns Banner block */
-const createBreadCrumbs = (main, document) => {
+/* const createBreadCrumbs = (main, document) => {
   const selector = '.breadcrumb';
   main.querySelectorAll(selector).forEach((breadcrumb) => {
     const bannerContent = '';
@@ -191,20 +193,20 @@ const createBreadCrumbs = (main, document) => {
     breadcrumb.innerHTML = '';
     breadcrumb.append(table);
   });
-};
+}; */
 
 /** create Columns features block */
-const pagination = (main, document) => {
+/* const pagination = (main, document) => {
   const selector = '.pagination';
   main.querySelectorAll(selector).forEach((pagNav) => {
     const cells = [['pagination'], ['']];
     const table = WebImporter.DOMUtils.createTable(cells, document);
     pagNav.append(table);
   });
-};
+}; */
 
 /** create AuthorBio block */
-const createAuthorBio = (main, document) => {
+/* const createAuthorBio = (main, document) => {
   main.querySelectorAll('.card.mb-3').forEach((authorbio) => {
     if (authorbio.querySelector('.author-bio-blurb')) {
       authorbio.remove();
@@ -221,7 +223,7 @@ const createAuthorBio = (main, document) => {
   } else {
     authorNameMD.parentNode.remove();
   }
-};
+}; */
 
 const createAdBlock = (adBlock, main, document) => {
   adBlock.querySelectorAll('.int-ads').forEach((ad) => {
@@ -341,8 +343,8 @@ export default {
     // use helper method to remove header, footer, etc.
     const templateType = document.querySelector('[name="templateType"]');
     template = templateType;
-    if (templateType.content === 'article' || templateType.content === 'slideshow' || templateType.content === 'channelcast') {
-      createAuthorBio(main, document);
+    if (templateType.content === 'article' || templateType.content === 'slideshow' || templateType.content === 'channelcast' || templateType.content === 'contributions') {
+      // createAuthorBio(main, document);
       const adBlock = document.getElementById('imu1forarticles');
       if (adBlock) {
         createAdBlock(adBlock, main, document);
@@ -395,7 +397,9 @@ export default {
       '.ribbon',
       '.back-to-top',
       '.GLadv-728',
-      '.author-pic-round',
+      '.author-pic-round-sm',
+      '.author-bio-blurb',
+      '.author-name-md',
     ]);
     // create the metadata block and append it to the main element
 
