@@ -55,9 +55,13 @@ const createMetadata = (main, document) => {
     ) {
       meta.category = categoryValue.replace('News', '');
     } else {
-      meta.category = categoryValue;
+      meta.category = categoryValue.trim();
     }
-    category.parentNode.remove();
+    if (categoryValue.trim() !== 'Events') {
+     category.parentNode.remove();
+    } else {
+      category.remove();
+    }
   }
 
   let pubishDate = document.querySelector('[property="article:published_time"]');
