@@ -324,6 +324,23 @@ const insertBrightCoveBlock = (main, document, templateType) => {
   }
 };
 
+const handleAHref = (main, document) => {
+  const allATags = main.getElementsByTagName('a');
+  const mainURL = 'https://main--crn--thechannelcompany.hlx.page';
+  for (const a of allATags) {
+    if (a.href.includes('http://localhost:3001')) {
+      a.href = a.href.replace('http://localhost:3001', mainURL);
+      a.href = a.href.replace(/\.html$/, '').replace(/\/$/, '');
+      a.href = a.href.replace(/\.htm$/, '').replace(/\/$/, '');
+    } else if (a.href.includes('https://localhost:3001')) {
+      a.href = a.href.replace('https://localhost:3001', mainURL);
+      a.href = a.href.replace(/\.html$/, '').replace(/\/$/, '');
+      a.href = a.href.replace(/\.htm$/, '').replace(/\/$/, '');
+    }    
+  }
+};
+
+
 export default {
   /**
    * Apply DOM operations to the provided document and return
@@ -347,7 +364,8 @@ export default {
     // use helper method to remove header, footer, etc.
     const templateType = document.querySelector('[name="templateType"]');
     template = templateType;
-    if (templateType.content === 'article' || templateType.content === 'slideshow' || templateType.content === 'channelcast' || templateType.content === 'contributions') {
+    handleAHref(main, document);
+    if (templateType.content === 'article' || templateType.content === 'slideshow' || templateType.content === 'channelcast' || templateType.content === 'contributions' || templateType.content === 'crn360') {
       // createAuthorBio(main, document);
       const adBlock = document.getElementById('imu1forarticles');
       if (adBlock) {
@@ -364,12 +382,11 @@ export default {
       const pageName = splitURL[splitURL.length - 1].split('.');
       if (isNaN(pageName[0]) && isPagination && !pageName[0].includes('index')) {
         slidehsowPageURL = new URL(url).pathname.replace('.htm', '').replace(/\/$/, '');
-        slidehsowPageURL += '/index';
-      } else if (pageName[1] && pageName[1].includes('html')) {
-        '';
-        slidehsowPageURL = new URL(url).pathname.replace('.html', '').replace(/\/$/, '');
+        slidehsowPageURL = 'fordeletion/'+slidehsowPageURL;   
+      } else if (pageName[1] && pageName[1].includes('html')) {        
+        slidehsowPageURL = new URL(url).pathname.replace('.html', '').replace(/\/$/, '');        
       } else {
-        slidehsowPageURL = new URL(url).pathname.replace('.htm', '').replace(/\/$/, '');
+        slidehsowPageURL = new URL(url).pathname.replace('.htm', '').replace(/\/$/, '');        
       }
     } else if (templateType.content === 'company') {
       createFetchMetadata(main, document);
@@ -384,7 +401,8 @@ export default {
     } else if (templateType.content === 'flatpage') {
       insertBrightCoveBlock(main, document, templateType.content);
       createFetchMetadata(main, document);
-    }
+    }  
+
     WebImporter.DOMUtils.remove(main, [
       'nav',
       'footer',
@@ -427,9 +445,15 @@ export default {
     params,
   }) => {
     if (!isPagination) {
-      return WebImporter.FileUtils.sanitizePath(
-        new URL(url).pathname.replace(/\.htm$/, '').replace(/\/$/, ''),
-      );
+      if (url.includes('html')) {
+        return WebImporter.FileUtils.sanitizePath(
+          new URL(url).pathname.replace(/\.html$/, '').replace(/\/$/, ''),
+        );
+      } else {
+        return WebImporter.FileUtils.sanitizePath(
+          new URL(url).pathname.replace(/\.htm$/, '').replace(/\/$/, ''),
+        );
+      }
     }
     return WebImporter.FileUtils.sanitizePath(
       slidehsowPageURL,
